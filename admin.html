@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Pointe Circle — Content Editor (No Coding Needed)</title>
+<style>
+  :root {
+    --rose:      #e8a0b4;
+    --rose-dark: #c9607c;
+    --blush:     #f7dde6;
+    --cream:     #fdf6f0;
+    --gold:      #c89d6e;
+    --muted:     #9c7b74;
+    --white:     #ffffff;
+    --green:     #4a8a5e;
+    --green-bg:  #e8f5ec;
+    --red:       #c14848;
+    --red-bg:    #fbe9e9;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--cream);
+    color: #3a2c2c;
+    line-height: 1.5;
+    padding-bottom: 80px;
+  }
+  header.admin-header {
+    background: var(--rose-dark);
+    color: var(--white);
+    padding: 22px 18px 20px;
+    text-align: center;
+  }
+  header.admin-header h1 { margin: 0 0 4px; font-size: 1.5rem; }
+  header.admin-header p { margin: 0; opacity: .9; font-size: .95rem; }
+  main { max-width: 900px; margin: 0 auto; padding: 18px 16px 40px; }
+
+  .panel {
+    background: var(--white);
+    border: 1px solid var(--blush);
+    border-radius: 12px;
+    padding: 18px 20px;
+    margin-bottom: 18px;
+  }
+  .panel h2 { margin: 0 0 8px; font-size: 1.1rem; color: var(--rose-dark); }
+  .panel p.hint { margin: 0 0 14px; color: var(--muted); font-size: .9rem; }
+
+  .btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--rose-dark); color: #fff; border: none;
+    padding: 10px 16px; border-radius: 8px; font-size: .92rem;
+    font-weight: 600; cursor: pointer; margin: 4px 6px 4px 0;
+  }
+  .btn:hover { background: #b5506a; }
+  .btn.secondary { background: var(--blush); color: var(--rose-dark); }
+  .btn.secondary:hover { background: #f0c9d6; }
+  .btn.danger { background: var(--red-bg); color: var(--red); }
+  .btn:disabled { opacity: .5; cursor: not-allowed; }
+  .upload-input-btn { display: inline-block; position: relative; overflow: hidden; }
+  .upload-input-btn input[type="file"] {
+    position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
+  }
+
+  #connect-status, #save-status {
+    margin-top: 10px; padding: 10px 12px; border-radius: 8px;
+    font-size: .88rem; background: var(--blush); color: #6b4a52; display: none;
+  }
+  #connect-status.show, #save-status.show { display: block; }
+  #connect-status.success, #save-status.success { background: var(--green-bg); color: var(--green); }
+  #connect-status.error, #save-status.error { background: var(--red-bg); color: var(--red); }
+
+  #not-connected-msg {
+    text-align: center; color: var(--muted); font-style: italic;
+    padding: 30px 10px;
+  }
+
+  details.admin-section {
+    background: var(--white);
+    border: 1px solid var(--blush);
+    border-radius: 12px;
+    margin-bottom: 14px;
+    padding: 4px 18px 16px;
+  }
+  details.admin-section summary {
+    font-size: 1.05rem; font-weight: 700; color: var(--rose-dark);
+    cursor: pointer; padding: 14px 0; list-style: none;
+  }
+  details.admin-section summary::-webkit-details-marker { display: none; }
+  details.admin-section summary:before { content: "▸ "; }
+  details.admin-section[open] summary:before { content: "▾ "; }
+
+  .empty-msg { color: var(--muted); font-style: italic; font-size: .9rem; }
+
+  .admin-card {
+    background: var(--cream);
+    border: 1px solid var(--blush);
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-bottom: 12px;
+  }
+  .admin-card-row { display: flex; gap: 14px; align-items: flex-start; }
+  .admin-card-fields { flex: 1; display: flex; flex-direction: column; gap: 8px; }
+  .admin-card-fields.full { display: flex; flex-direction: column; gap: 10px; }
+  .field-row { display: flex; gap: 10px; flex-wrap: wrap; }
+  .field-row label { flex: 1; min-width: 180px; }
+
+  label { display: block; font-size: .8rem; color: var(--muted); font-weight: 600; }
+  input[type="text"], input[type="url"], input[type="date"], textarea, select {
+    width: 100%; margin-top: 3px; padding: 8px 10px; border: 1px solid var(--blush);
+    border-radius: 6px; font-family: inherit; font-size: .92rem; color: #3a2c2c;
+    background: #fff;
+  }
+  textarea { min-height: 56px; resize: vertical; }
+  input:focus, textarea:focus, select:focus { outline: none; border-color: var(--rose-dark); }
+
+  .photo-upload-box { text-align: center; flex-shrink: 0; width: 90px; }
+  .photo-preview, .photo-placeholder {
+    width: 80px; height: 80px; border-radius: 50%; object-fit: cover;
+    background: var(--blush); display: flex; align-items: center; justify-content: center;
+    font-size: 1.8rem; margin: 0 auto 6px;
+  }
+  .small-upload-btn {
+    display: inline-block; font-size: .72rem; color: var(--rose-dark);
+    background: var(--blush); padding: 5px 8px; border-radius: 6px; cursor: pointer;
+    position: relative; overflow: hidden;
+  }
+  .small-upload-btn input[type="file"] {
+    position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
+  }
+  .upload-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 2px; }
+
+  .remove-btn {
+    background: var(--red-bg); color: var(--red); border: none; border-radius: 6px;
+    padding: 6px 10px; font-size: .8rem; cursor: pointer; flex-shrink: 0; height: fit-content;
+    margin-top: 4px;
+  }
+  .remove-btn:hover { background: #f6d6d6; }
+
+  .file-chip {
+    font-size: .8rem; color: var(--muted); background: var(--white);
+    border: 1px dashed var(--blush); border-radius: 6px; padding: 4px 8px;
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .file-chip.empty { font-style: italic; }
+  .file-chip button {
+    background: none; border: none; color: var(--red); cursor: pointer; font-size: .85rem;
+  }
+  .file-chip a { color: var(--rose-dark); text-decoration: underline; }
+
+  .thumb-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+  .thumb { position: relative; width: 70px; height: 56px; }
+  .thumb img { width: 100%; height: 100%; object-fit: cover; border-radius: 6px; border: 1px solid var(--blush); }
+  .thumb.pending img { border: 2px solid var(--gold); }
+  .thumb button {
+    position: absolute; top: -6px; right: -6px; width: 20px; height: 20px;
+    border-radius: 50%; background: var(--red); color: #fff; border: none;
+    font-size: .7rem; cursor: pointer; line-height: 1;
+  }
+
+  .add-btn { margin-top: 6px; }
+
+  footer.save-bar {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    background: #fff; border-top: 2px solid var(--blush);
+    padding: 10px 16px; text-align: center; z-index: 50;
+    box-shadow: 0 -2px 10px rgba(0,0,0,.06);
+  }
+</style>
+</head>
+<body>
+
+<header class="admin-header">
+  <h1>🩰 The Pointe Circle — Content Editor</h1>
+  <p>Update event details, photos, videos, flyers, sign-up links, leadership &amp; members — no coding required.</p>
+</header>
+
+<main>
+
+  <div class="panel">
+    <h2>Step 1 — Load your website's content</h2>
+    <p class="hint">
+      Connect this tool to your website folder so it can read your current content and save changes back automatically.
+      If your browser doesn't support that (Safari / Firefox), upload <code>content.js</code> instead and download an
+      update package when you're done.
+    </p>
+    <button class="btn" id="connectBtn" onclick="connectFolder()">📁 Connect to Website Folder</button>
+    <label class="btn secondary upload-input-btn">📤 Upload content.js
+      <input type="file" accept=".js" onchange="handleManualUpload(this)">
+    </label>
+    <button class="btn secondary" onclick="startBlank()">✨ Start Brand-New Content</button>
+    <div id="connect-status"></div>
+  </div>
+
+  <div id="not-connected-msg">
+    👋 Load your content above to start editing — your Leadership, Members, Events, and Activities will appear here.
+  </div>
+
+  <div id="editor-root" style="display:none">
+
+    <details class="admin-section" open>
+      <summary>👑 Leadership Team</summary>
+      <p class="hint">The first person listed appears as the featured President card; everyone else appears in the grid below them.</p>
+      <div id="leadership-container"></div>
+      <button class="btn secondary add-btn" onclick="addPerson('leadership')">+ Add Leadership Member</button>
+    </details>
+
+    <details class="admin-section">
+      <summary>🩰 Club Members</summary>
+      <div id="members-container"></div>
+      <button class="btn secondary add-btn" onclick="addPerson('members')">+ Add Member</button>
+    </details>
+
+    <details class="admin-section" open>
+      <summary>🌟 Upcoming Events</summary>
+      <p class="hint">
+        Add as many upcoming events as you need. Want one to automatically move into Past Events once it happens?
+        Set its "Auto-archive date" and pick a category.
+      </p>
+      <div id="upcoming-container"></div>
+      <button class="btn secondary add-btn" onclick="addEvent('upcoming')">+ Add Upcoming Event</button>
+    </details>
+
+    <div id="activities-root"></div>
+
+  </div>
+
+</main>
+
+<footer class="save-bar">
+  <button class="btn" id="saveBtn" onclick="saveAll()" disabled>💾 Save All Changes</button>
+  <button class="btn secondary" id="zipBtn" onclick="downloadZipPackage().then(()=>setSaveStatus('📦 Update package downloaded.', true))" disabled>⬇️ Download Backup Package (.zip)</button>
+  <a class="btn secondary" href="the-pointe-circle.html" target="_blank" style="text-decoration:none">🔗 View Live Site</a>
+  <div id="save-status"></div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script>
+/* ════════════════════════════════════════════════════════════════════
+   THE POINTE CIRCLE — ADMIN / CONTENT EDITOR
+   ════════════════════════════════════════════════════════════════════
+   This page edits content.js (which the live site reads to display
+   Leadership, Members, Upcoming Events, and Past Activities) — without
+   anyone needing to open or understand HTML or JavaScript.
+
+   How saving works:
+     • Chrome / Edge: "Connect to Website Folder" grants this page
+       permission to write directly into your site folder. "Save All
+       Changes" then writes content.js and any uploaded photos/flyers
+       straight to disk — refresh the live page and you'll see them.
+     • Safari / Firefox (no folder-write support yet): upload your
+       current content.js, make your edits, then "Save All Changes"
+       automatically downloads a .zip — unzip it and copy the
+       content.js file plus the images/ and flyers/ folders into your
+       site folder, overwriting when asked.
+   ════════════════════════════════════════════════════════════════════ */
+
+let SITE = null;       // the in-memory copy of everything content.js holds
+let dirHandle = null;  // set only when connected via showDirectoryPicker()
+
+const ACTIVITY_META = {
+  storytime: { emoji: '📚', title: 'Ballerina | Bilingual Storytime' },
+  senior:    { emoji: '🌹', title: 'Senior House Performance' },
+  ronald:    { emoji: '🏥', title: 'Ronald McDonald House' },
+  drive:     { emoji: '🤲', title: 'Drive for Dancewear, Books & Toys' }
+};
+
+/* ── Blank starting content (used by "Start Brand-New Content") ── */
+function blankSite() {
+  const blankActivities = {};
+  Object.keys(ACTIVITY_META).forEach(key => {
+    blankActivities[key] = {
+      label: ACTIVITY_META[key].emoji + ' ' + ACTIVITY_META[key].title,
+      description: '',
+      events: []
+    };
+  });
+  return {
+    leadership: [],
+    members: [],
+    upcomingEvents: [],
+    pastActivities: blankActivities
+  };
+}
+
+function blankPerson(listName) {
+  return {
+    id: listName + '-' + Date.now(),
+    name: '', role: listName === 'leadership' ? 'Officer' : 'Member',
+    bio: '', photo: '', emoji: listName === 'leadership' ? '🎀' : '🩰'
+  };
+}
+
+function blankEvent(scope) {
+  if (scope === 'upcoming') {
+    return { id: 'upcoming-' + Date.now(), title: '', dateText: '', location: '', details: '',
+      gformUrl: '', flyer: '', photos: [], youtube: '', archiveDate: '', archiveCategory: '' };
+  }
+  return { id: scope + '-ev-' + Date.now(), title: '', date: '', location: '', notes: '',
+    flyer: '', photos: [], youtube: '' };
+}
+
+/* ── Helpers ── */
+function escapeHtml(str) {
+  return String(str == null ? '' : str)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+function slugify(s) {
+  return String(s || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || 'item';
+}
+function safeExt(file) {
+  const m = /\.[a-zA-Z0-9]+$/.exec(file.name || '');
+  return m ? m[0].toLowerCase() : '';
+}
+function extractYouTubeId(raw) {
+  raw = (raw || '').trim();
+  if (!raw) return '';
+  const m = /(?:youtube\.com\/watch\?v=|youtube\.com\/embed\/|youtu\.be\/|youtube\.com\/shorts\/)([a-zA-Z0-9_-]{6,})/.exec(raw);
+  if (m) return m[1];
+  return raw.split('&')[0].split('?')[0]; // assume it's already a bare video ID
+}
+function setConnectStatus(msg, ok) {
+  const el = document.getElementById('connect-status');
+  el.textContent = msg;
+  el.className = 'show' + (ok === true ? ' success' : ok === false ? ' error' : '');
+}
+function setSaveStatus(msg, ok) {
+  const el = document.getElementById('save-status');
+  el.textContent = msg;
+  el.className = 'show' + (ok === true ? ' success' : ok === false ? ' error' : '');
+}
+
+/* ════════════════════════════════════════════════════════════════
+   LOADING CONTENT — from a connected folder, an uploaded file, or
+   from scratch.
+   ════════════════════════════════════════════════════════════════ */
+function parseContentJs(text) {
+  // Skip past any leading /* ... */ header comment first — content.js's own
+  // instructions comment mentions "window.SITE_CONTENT = { ... };" as a
+  // written example, and a plain indexOf() would latch onto that placeholder
+  // text instead of the real object below it.
+  let searchFrom = 0;
+  const trimmed = text.trimStart();
+  if (trimmed.startsWith('/*')) {
+    const commentEnd = text.indexOf('*/');
+    if (commentEnd !== -1) searchFrom = commentEnd + 2;
+  }
+  const startIdx = text.indexOf('SITE_CONTENT', searchFrom);
+  if (startIdx === -1) throw new Error('This doesn\'t look like a content.js file (no SITE_CONTENT found).');
+  const braceStart = text.indexOf('{', startIdx);
+  let depth = 0, inStr = false, strChar = '', esc = false, i = braceStart;
+  for (; i < text.length; i++) {
+    const c = text[i];
+    if (inStr) {
+      if (esc) { esc = false; }
+      else if (c === '\\') { esc = true; }
+      else if (c === strChar) { inStr = false; }
+      continue;
+    }
+    if (c === '"' || c === "'") { inStr = true; strChar = c; continue; }
+    if (c === '{') depth++;
+    else if (c === '}') { depth--; if (depth === 0) { i++; break; } }
+  }
+  const jsonStr = text.slice(braceStart, i);
+  return JSON.parse(jsonStr);
+}
+
+function serializeContentJs(site) {
+  const header = '/* ════════════════════════════════════════════════════════════════════\n' +
+    '   THE POINTE CIRCLE — SITE CONTENT\n' +
+    '   ════════════════════════════════════════════════════════════════════\n' +
+    '   This file holds every piece of content that changes often: leadership\n' +
+    '   bios, club members, upcoming events, and past event photos/videos.\n\n' +
+    '   YOU SHOULD NOT NEED TO EDIT THIS FILE BY HAND.\n' +
+    '   Open admin.html (in this same folder) instead — it gives you simple\n' +
+    '   forms and upload buttons, and it writes this file for you.\n\n' +
+    '   Last saved by admin.html: ' + new Date().toLocaleString() + '\n' +
+    '   ════════════════════════════════════════════════════════════════════ */\n';
+  return header + 'window.SITE_CONTENT = ' + JSON.stringify(site, null, 2) + ';\n';
+}
+
+async function connectFolder() {
+  if (!('showDirectoryPicker' in window)) {
+    alert('Your browser doesn\'t support direct folder saving (this works in Chrome and Edge). ' +
+      'Use "Upload content.js" to load your current content, then "Save All Changes" will give you ' +
+      'a downloadable update package instead.');
+    return;
+  }
+  try {
+    dirHandle = await window.showDirectoryPicker();
+    let text = null;
+    try {
+      const fh = await dirHandle.getFileHandle('content.js');
+      text = await (await fh.getFile()).text();
+    } catch (e) { /* no content.js yet in this folder — that's OK */ }
+    if (text) {
+      SITE = parseContentJs(text);
+      setConnectStatus('✅ Connected to "' + dirHandle.name + '" — loaded your existing content.', true);
+    } else {
+      SITE = blankSite();
+      setConnectStatus('✅ Connected to "' + dirHandle.name + '" — no content.js found yet, starting fresh.', true);
+    }
+    renderAll();
+  } catch (err) {
+    if (err && err.name !== 'AbortError') setConnectStatus('❌ Could not connect: ' + err.message, false);
+  }
+}
+
+function handleManualUpload(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function (e) {
+    try {
+      SITE = parseContentJs(e.target.result);
+      dirHandle = null;
+      setConnectStatus('📤 Loaded "' + file.name + '" for editing. Since no folder is connected, ' +
+        '"Save All Changes" will download an update package for you to install manually.', true);
+      renderAll();
+    } catch (err) {
+      setConnectStatus('❌ Could not read that file: ' + err.message, false);
+    }
+  };
+  reader.readAsText(file);
+  input.value = '';
+}
+
+function startBlank() {
+  if (SITE && !confirm('This clears anything currently loaded in this editor (your actual files are untouched until you save). Continue?')) return;
+  SITE = blankSite();
+  setConnectStatus('✨ Started brand-new content. Connect your folder or download a package below once you\'re ready to save.', true);
+  renderAll();
+}
+
+/* ════════════════════════════════════════════════════════════════
+   RENDERING — rebuilds the on-screen forms from SITE.
+   ════════════════════════════════════════════════════════════════ */
+let activitiesSkeletonBuilt = false;
+
+function renderAll() {
+  document.getElementById('editor-root').style.display = SITE ? '' : 'none';
+  document.getElementById('not-connected-msg').style.display = SITE ? 'none' : '';
+  document.getElementById('saveBtn').disabled = !SITE;
+  document.getElementById('zipBtn').disabled = !SITE;
+  if (!SITE) return;
+  renderPeopleList('leadership');
+  renderPeopleList('members');
+  renderUpcoming();
+  ensureActivitiesSkeleton();
+  Object.keys(SITE.pastActivities).forEach(key => {
+    renderActivityMeta(key);
+    renderActivityEvents(key);
+  });
+}
+
+/* ── Leadership & Members (identical shape, shared renderer) ── */
+function memberPhotoSrc(m) {
+  if (m._photoFile) return URL.createObjectURL(m._photoFile);
+  return m.photo || '';
+}
+function renderPeopleList(listName) {
+  const container = document.getElementById(listName + '-container');
+  const list = SITE[listName];
+  container.innerHTML = list.map((m, i) => {
+    const src = memberPhotoSrc(m);
+    return `
+    <div class="admin-card">
+      <div class="admin-card-row">
+        <div class="photo-upload-box">
+          ${src ? '<img class="photo-preview" src="' + escapeHtml(src) + '">'
+                : '<div class="photo-placeholder">' + escapeHtml(m.emoji || '🩰') + '</div>'}
+          <label class="small-upload-btn">📷 Photo
+            <input type="file" accept="image/*" onchange="setPersonPhoto('${listName}',${i},this)">
+          </label>
+        </div>
+        <div class="admin-card-fields">
+          <label>Name
+            <input type="text" value="${escapeHtml(m.name)}" placeholder="e.g. Jane Doe"
+              oninput="updatePerson('${listName}',${i},'name',this.value)">
+          </label>
+          <label>Role
+            <input type="text" value="${escapeHtml(m.role)}" placeholder="e.g. President"
+              oninput="updatePerson('${listName}',${i},'role',this.value)">
+          </label>
+          <label>Short Bio
+            <textarea oninput="updatePerson('${listName}',${i},'bio',this.value)" placeholder="A sentence or two…">${escapeHtml(m.bio)}</textarea>
+          </label>
+        </div>
+        <button class="remove-btn" onclick="removePerson('${listName}',${i})">🗑 Remove</button>
+      </div>
+    </div>`;
+  }).join('') || '<p class="empty-msg">No one added yet — click "+ Add" below.</p>';
+}
+function updatePerson(listName, i, field, value) { SITE[listName][i][field] = value; }
+function setPersonPhoto(listName, i, input) {
+  const file = input.files[0];
+  if (!file) return;
+  SITE[listName][i]._photoFile = file;
+  renderPeopleList(listName);
+}
+function addPerson(listName) {
+  SITE[listName].push(blankPerson(listName));
+  renderPeopleList(listName);
+}
+function removePerson(listName, i) {
+  if (!confirm('Remove this person?')) return;
+  SITE[listName].splice(i, 1);
+  renderPeopleList(listName);
+}
+
+/* ── Events: shared between Upcoming and the 4 Past Activities ──
+   scope === 'upcoming'  → SITE.upcomingEvents
+   scope === '<key>'     → SITE.pastActivities[key].events                */
+function eventsArray(scope) {
+  return scope === 'upcoming' ? SITE.upcomingEvents : SITE.pastActivities[scope].events;
+}
+function activityOptions(selected) {
+  return Object.keys(ACTIVITY_META).map(k =>
+    '<option value="' + k + '"' + (k === selected ? ' selected' : '') + '>' +
+    ACTIVITY_META[k].emoji + ' ' + escapeHtml(ACTIVITY_META[k].title) + '</option>'
+  ).join('');
+}
+function flyerPreviewHtml(scope, i, ev) {
+  if (ev._flyerFile) {
+    return '<span class="file-chip">📎 ' + escapeHtml(ev._flyerFile.name) +
+      ' <button onclick="removeFlyerField(\'' + scope + '\',' + i + ')">✕</button></span>';
+  }
+  if (ev.flyer) {
+    return '<span class="file-chip">📎 <a href="' + escapeHtml(ev.flyer) + '" target="_blank">' +
+      escapeHtml(ev.flyer.split('/').pop()) + '</a> <button onclick="removeFlyerField(\'' + scope + '\',' + i + ')">✕</button></span>';
+  }
+  return '<span class="file-chip empty">No flyer uploaded</span>';
+}
+function photoThumbsHtml(scope, i, ev) {
+  const existing = (ev.photos || []).map((src, pi) =>
+    '<div class="thumb"><img src="' + escapeHtml(src) + '">' +
+    '<button onclick="removeExistingPhoto(\'' + scope + '\',' + i + ',' + pi + ')">✕</button></div>'
+  ).join('');
+  const pending = (ev._newPhotoFiles || []).map((f, fi) =>
+    '<div class="thumb pending"><img src="' + URL.createObjectURL(f) + '">' +
+    '<button onclick="removePendingPhoto(\'' + scope + '\',' + i + ',' + fi + ')">✕</button></div>'
+  ).join('');
+  return (existing || pending) ? '<div class="thumb-grid">' + existing + pending + '</div>' : '<span class="file-chip empty">No photos yet</span>';
+}
+function eventCardHtml(scope, i, ev) {
+  const isUpcoming = scope === 'upcoming';
+  return `
+    <div class="admin-card">
+      <div class="admin-card-fields full">
+        <label>Event Title
+          <input type="text" value="${escapeHtml(ev.title)}" placeholder="e.g. Spring Storytime at Lincoln Library"
+            oninput="updateEvent('${scope}',${i},'title',this.value)">
+        </label>
+        <div class="field-row">
+          <label>${isUpcoming ? 'Date / Time (shown on site)' : 'Date'}
+            <input type="text" value="${escapeHtml(isUpcoming ? ev.dateText : ev.date)}"
+              placeholder="${isUpcoming ? 'e.g. June 14, 2026 · 2:00 PM' : 'e.g. March 15, 2026'}"
+              oninput="updateEvent('${scope}',${i},'${isUpcoming ? 'dateText' : 'date'}',this.value)">
+          </label>
+          <label>Location
+            <input type="text" value="${escapeHtml(ev.location)}" placeholder="e.g. Lincoln Public Library"
+              oninput="updateEvent('${scope}',${i},'location',this.value)">
+          </label>
+        </div>
+        <label>${isUpcoming ? 'Details' : 'Notes'}
+          <textarea placeholder="Optional info…"
+            oninput="updateEvent('${scope}',${i},'${isUpcoming ? 'details' : 'notes'}',this.value)">${escapeHtml(isUpcoming ? ev.details : ev.notes)}</textarea>
+        </label>
+        ${isUpcoming ? `
+        <label>Google Form Sign-Up Link
+          <input type="url" value="${escapeHtml(ev.gformUrl)}" placeholder="Paste the full Google Form URL"
+            oninput="updateEvent('upcoming',${i},'gformUrl',this.value)">
+        </label>
+        <div class="field-row archive-row">
+          <label>📦 Auto-archive once this date passes (optional)
+            <input type="date" value="${escapeHtml(ev.archiveDate)}"
+              oninput="updateEvent('upcoming',${i},'archiveDate',this.value)">
+          </label>
+          <label>Move into this Past Events category
+            <select onchange="updateEvent('upcoming',${i},'archiveCategory',this.value)">
+              <option value="">Don't auto-move</option>
+              ${activityOptions(ev.archiveCategory)}
+            </select>
+          </label>
+        </div>` : ''}
+        <label>YouTube Video Link (optional)
+          <input type="text" value="${escapeHtml(ev.youtube)}" placeholder="Paste the full YouTube URL or just the video ID"
+            oninput="updateEventYoutube('${scope}',${i},this.value)">
+        </label>
+        <div class="upload-row">
+          <label class="small-upload-btn">📎 Flyer (PDF or image)
+            <input type="file" accept="application/pdf,image/*" onchange="setFlyer('${scope}',${i},this)">
+          </label>
+          ${flyerPreviewHtml(scope, i, ev)}
+        </div>
+        <div class="upload-row">
+          <label class="small-upload-btn">📷 Add Photos
+            <input type="file" accept="image/*" multiple onchange="addPhotos('${scope}',${i},this)">
+          </label>
+          ${photoThumbsHtml(scope, i, ev)}
+        </div>
+      </div>
+      <button class="remove-btn" onclick="removeEvent('${scope}',${i})">🗑 Remove Event</button>
+    </div>`;
+}
+function renderUpcoming() {
+  const container = document.getElementById('upcoming-container');
+  container.innerHTML = SITE.upcomingEvents.map((ev, i) => eventCardHtml('upcoming', i, ev)).join('') ||
+    '<p class="empty-msg">No upcoming events — click "+ Add Upcoming Event" below.</p>';
+}
+function renderActivityEvents(key) {
+  const container = document.getElementById('activity-admin-' + key + '-events');
+  if (!container) return;
+  const events = SITE.pastActivities[key].events;
+  container.innerHTML = events.map((ev, i) => eventCardHtml(key, i, ev)).join('') ||
+    '<p class="empty-msg">No events yet — click "+ Add Event" below.</p>';
+}
+function renderActivityMeta(key) {
+  const a = SITE.pastActivities[key];
+  const labelEl = document.getElementById('activity-admin-' + key + '-label');
+  const descEl = document.getElementById('activity-admin-' + key + '-desc');
+  if (labelEl) labelEl.value = a.label || '';
+  if (descEl) descEl.value = a.description || '';
+}
+function updateActivityMeta(key, field, value) { SITE.pastActivities[key][field] = value; }
+
+function renderScope(scope) {
+  if (scope === 'upcoming') renderUpcoming(); else renderActivityEvents(scope);
+}
+function updateEvent(scope, i, field, value) { eventsArray(scope)[i][field] = value; }
+function updateEventYoutube(scope, i, raw) { eventsArray(scope)[i].youtube = extractYouTubeId(raw); }
+function setFlyer(scope, i, input) {
+  const f = input.files[0];
+  if (!f) return;
+  eventsArray(scope)[i]._flyerFile = f;
+  renderScope(scope);
+}
+function removeFlyerField(scope, i) {
+  const ev = eventsArray(scope)[i];
+  delete ev._flyerFile;
+  ev.flyer = '';
+  renderScope(scope);
+}
+function addPhotos(scope, i, input) {
+  const files = Array.from(input.files || []);
+  if (!files.length) return;
+  const ev = eventsArray(scope)[i];
+  ev._newPhotoFiles = (ev._newPhotoFiles || []).concat(files);
+  renderScope(scope);
+  input.value = '';
+}
+function removeExistingPhoto(scope, i, photoIdx) {
+  eventsArray(scope)[i].photos.splice(photoIdx, 1);
+  renderScope(scope);
+}
+function removePendingPhoto(scope, i, fileIdx) {
+  eventsArray(scope)[i]._newPhotoFiles.splice(fileIdx, 1);
+  renderScope(scope);
+}
+function addEvent(scope) {
+  eventsArray(scope).push(blankEvent(scope));
+  renderScope(scope);
+}
+function removeEvent(scope, i) {
+  if (!confirm('Remove this event?')) return;
+  eventsArray(scope).splice(i, 1);
+  renderScope(scope);
+}
+
+/* ── Build the 4 Past Activity sections once, then fill them in ── */
+function ensureActivitiesSkeleton() {
+  if (activitiesSkeletonBuilt) return;
+  const root = document.getElementById('activities-root');
+  root.innerHTML = Object.keys(ACTIVITY_META).map(key => {
+    const meta = ACTIVITY_META[key];
+    return `
+    <details class="admin-section">
+      <summary>${meta.emoji} ${escapeHtml(meta.title)}</summary>
+      <div class="admin-card-fields full" style="margin-bottom:14px">
+        <label>Section title shown on site
+          <input type="text" id="activity-admin-${key}-label" oninput="updateActivityMeta('${key}','label',this.value)">
+        </label>
+        <label>Description paragraph
+          <textarea id="activity-admin-${key}-desc" oninput="updateActivityMeta('${key}','description',this.value)"></textarea>
+        </label>
+      </div>
+      <div id="activity-admin-${key}-events"></div>
+      <button class="btn secondary add-btn" onclick="addEvent('${key}')">+ Add Event</button>
+    </details>`;
+  }).join('');
+  activitiesSkeletonBuilt = true;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   SAVING — writes content.js (+ any new photos/flyers) either
+   straight to disk (Chrome/Edge, folder connected) or into a
+   downloadable .zip package (everyone else).
+   ════════════════════════════════════════════════════════════════ */
+async function writeFileToDir(subfolder, filename, fileOrBlob) {
+  const sub = await dirHandle.getDirectoryHandle(subfolder, { create: true });
+  const fh = await sub.getFileHandle(filename, { create: true });
+  const w = await fh.createWritable();
+  await w.write(fileOrBlob);
+  await w.close();
+  return subfolder + '/' + filename;
+}
+async function flushMemberFilesToDisk(m) {
+  if (m._photoFile) {
+    const ext = safeExt(m._photoFile) || '.jpg';
+    m.photo = await writeFileToDir('images', slugify(m.id) + '-photo' + ext, m._photoFile);
+    delete m._photoFile;
+  }
+}
+async function flushEventFilesToDisk(ev) {
+  if (ev._flyerFile) {
+    const ext = safeExt(ev._flyerFile) || '.pdf';
+    ev.flyer = await writeFileToDir('flyers', slugify(ev.id) + '-flyer' + ext, ev._flyerFile);
+    delete ev._flyerFile;
+  }
+  if (ev._newPhotoFiles && ev._newPhotoFiles.length) {
+    ev.photos = ev.photos || [];
+    let n = ev.photos.length;
+    for (const f of ev._newPhotoFiles) {
+      n++;
+      const ext = safeExt(f) || '.jpg';
+      ev.photos.push(await writeFileToDir('images', slugify(ev.id) + '-photo-' + n + ext, f));
+    }
+    delete ev._newPhotoFiles;
+  }
+}
+async function flushAllFilesToDisk() {
+  for (const m of SITE.leadership) await flushMemberFilesToDisk(m);
+  for (const m of SITE.members) await flushMemberFilesToDisk(m);
+  for (const ev of SITE.upcomingEvents) await flushEventFilesToDisk(ev);
+  for (const key of Object.keys(SITE.pastActivities)) {
+    for (const ev of SITE.pastActivities[key].events) await flushEventFilesToDisk(ev);
+  }
+}
+
+async function memberFileToZip(zip, m) {
+  if (m._photoFile) {
+    const ext = safeExt(m._photoFile) || '.jpg';
+    const name = slugify(m.id) + '-photo' + ext;
+    zip.file('images/' + name, m._photoFile);
+    m.photo = 'images/' + name;
+    delete m._photoFile;
+  }
+}
+async function eventFileToZip(zip, ev) {
+  if (ev._flyerFile) {
+    const ext = safeExt(ev._flyerFile) || '.pdf';
+    const name = slugify(ev.id) + '-flyer' + ext;
+    zip.file('flyers/' + name, ev._flyerFile);
+    ev.flyer = 'flyers/' + name;
+    delete ev._flyerFile;
+  }
+  if (ev._newPhotoFiles && ev._newPhotoFiles.length) {
+    ev.photos = ev.photos || [];
+    let n = ev.photos.length;
+    for (const f of ev._newPhotoFiles) {
+      n++;
+      const ext = safeExt(f) || '.jpg';
+      const name = slugify(ev.id) + '-photo-' + n + ext;
+      zip.file('images/' + name, f);
+      ev.photos.push('images/' + name);
+    }
+    delete ev._newPhotoFiles;
+  }
+}
+async function collectFilesIntoZip(zip) {
+  for (const m of SITE.leadership) await memberFileToZip(zip, m);
+  for (const m of SITE.members) await memberFileToZip(zip, m);
+  for (const ev of SITE.upcomingEvents) await eventFileToZip(zip, ev);
+  for (const key of Object.keys(SITE.pastActivities)) {
+    for (const ev of SITE.pastActivities[key].events) await eventFileToZip(zip, ev);
+  }
+}
+async function downloadZipPackage() {
+  if (typeof JSZip === 'undefined') {
+    setSaveStatus('❌ Could not load the zip tool — check your internet connection and try again.', false);
+    return;
+  }
+  const zip = new JSZip();
+  await collectFilesIntoZip(zip);
+  zip.file('content.js', serializeContentJs(SITE));
+  zip.file('README-INSTALL.txt',
+    'How to install this update:\n\n' +
+    '1. Unzip this package.\n' +
+    '2. Copy "content.js" into your website folder, replacing the old one.\n' +
+    '3. Copy the "images" and "flyers" folders in too — if your site already has\n' +
+    '   those folders, just drop these files in alongside what\'s already there\n' +
+    '   (say "yes" if asked to merge folders; nothing existing gets deleted).\n' +
+    '4. Open your website and refresh — your changes will be live.\n');
+  const blob = await zip.generateAsync({ type: 'blob' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'pointe-circle-content-update.zip';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+  renderAll();
+}
+
+async function saveAll() {
+  if (!SITE) { setSaveStatus('Nothing to save yet — load your content above first.', false); return; }
+  document.getElementById('saveBtn').disabled = true;
+  setSaveStatus('Saving…');
+  try {
+    if (dirHandle) {
+      await flushAllFilesToDisk();
+      const fh = await dirHandle.getFileHandle('content.js', { create: true });
+      const w = await fh.createWritable();
+      await w.write(serializeContentJs(SITE));
+      await w.close();
+      setSaveStatus('✅ Saved directly to your website folder! Refresh the live page to see your changes.', true);
+      renderAll();
+    } else {
+      await downloadZipPackage();
+      setSaveStatus('📦 No folder connected — downloaded an update package instead. See README-INSTALL.txt inside it.', true);
+    }
+  } catch (err) {
+    console.error(err);
+    setSaveStatus('❌ Something went wrong: ' + err.message, false);
+  }
+  document.getElementById('saveBtn').disabled = false;
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,2276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The Pointe Circle</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+    /* ─── Design Tokens ─── */
+    :root {
+      --rose:      #e8a0b4;
+      --rose-dark: #c9607c;
+      --blush:     #f7dde6;
+      --cream:     #fdf6f0;
+      --sand:      #f0e4d7;
+      --gold:      #c89d6e;
+      --gold-light:#f6cf8e;
+      --gold-bright:#ffd84d;
+      --brown:     #7a4f3a;
+      --text:      #4a3330;
+      --muted:     #9c7b74;
+      --white:     #ffffff;
+      --shadow:    0 2px 16px rgba(200,100,120,0.10);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Georgia', serif;
+      background: var(--cream);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ─── Header / Hero ─── */
+    header {
+      position: relative;
+      min-height: 791px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 60px 20px 50px;
+      border-bottom: 3px solid var(--rose);
+      overflow: hidden;
+      background-color: var(--rose-dark);
+    }
+
+    /* Rotating photo slideshow behind the header text — each slide is a
+       full-bleed real club photo; JS toggles .active to crossfade between them.
+       All 4 photos are now standardized to the same 1920×1080 (16:9)
+       resolution/aspect ratio so each one crops by the same amount here —
+       no single photo gets zoomed in more aggressively than the others.
+       min-height above is taller than a typical hero so these photos have
+       room to show faces and bodies instead of being cropped to a thin strip. */
+    header .hero-slides {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+    }
+    header .hero-slide {
+      position: absolute;
+      inset: 0;
+      background-size: cover;
+      background-position: center 25%;
+      background-repeat: no-repeat;
+      opacity: 0;
+      transition: opacity 1.8s ease-in-out;
+    }
+    header .hero-slide.active { opacity: 1; }
+
+    /* Fallback color for any photo that fails to load (missing file, bad
+       connection, etc.) — keeps that slide from showing a blank/broken-image
+       icon. JS removes this class the instant a photo loads successfully, so
+       loaded photos are never tinted and always display their own true
+       colors; the color only ever shows for a slide that genuinely failed. */
+    header .hero-slide.load-error { background-color: var(--rose-dark); }
+
+    header::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      /* ~95% lighter than the original scrim — barely a whisper of tint, so
+         photos display essentially as their original images. Legibility
+         relies almost entirely on the text-stroke + heavy text-shadow on the
+         title/subtitle below and the dark frosted chips on the taglines/badge. */
+      background: linear-gradient(160deg, rgba(50,12,26,0.04) 0%, rgba(120,40,60,0.03) 50%, rgba(70,24,38,0.03) 100%);
+      z-index: 1;
+    }
+    header::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--rose-dark), var(--gold), var(--rose-dark));
+      z-index: 2;
+    }
+    /* Title block is pinned at roughly a quarter of the way down the header,
+       independent of the cascade/badge group below — they no longer share
+       one centered flow. */
+    header .hero-content {
+      position: absolute;
+      top: calc(25% + 5px);
+      left: 50%;
+      width: 100%;
+      transform: translate(-50%, -50%);
+      z-index: 3;
+      padding: 0 20px;
+    }
+    header .logo-icon { font-size: 3.2rem; margin-bottom: 10px; filter: drop-shadow(0 2px 8px rgba(0,0,0,0.45)); }
+
+    /* Manual "next photo" button — lets visitors flip through the header
+       photos themselves instead of only waiting on the automatic timer. */
+    header .hero-photo-nav {
+      position: absolute;
+      right: 18px;
+      bottom: 18px;
+      z-index: 4;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: 1px solid rgba(255,255,255,0.35);
+      background: rgba(0,0,0,0.32);
+      backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+      color: #fff;
+      font-size: 1.3rem;
+      line-height: 1;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s ease, transform 0.2s ease;
+    }
+    header .hero-photo-nav:hover,
+    header .hero-photo-nav:focus-visible {
+      background: rgba(0,0,0,0.5);
+      transform: scale(1.08);
+    }
+
+    /* Title — script font + layered glow so it pops off the photo instead of blending in */
+    header h1 {
+      font-family: 'Dancing Script', 'Georgia', serif;
+      font-size: 8rem;
+      font-weight: 700;
+      font-style: normal;
+      letter-spacing: 1px;
+      line-height: 1.15;
+      color: #fff;
+      /* Plain neutral black shadow layers only — no colored glow/halo and no
+         dark patch behind the text, just enough crisp edge definition to
+         stay readable directly on top of the photo. */
+      -webkit-text-stroke: 1.4px rgba(0,0,0,0.6);
+      text-shadow:
+        0 1px 1px rgba(0,0,0,0.95),
+        0 1px 3px rgba(0,0,0,0.9),
+        0 3px 12px rgba(0,0,0,0.8);
+    }
+
+    /* Subtitle — warm gold accent so it reads as a distinct tier under the title.
+       Positioned independently of the title, vertically centered on the
+       header and shifted toward the right side, with its first word
+       ("Where") starting under the title's last word ("Circle"). */
+    header p.hero-subtitle {
+      position: absolute;
+      left: 61%;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 3;
+      display: block;
+      text-align: left;
+      color: var(--gold-bright);
+      font-size: 2.025rem;
+      letter-spacing: 2.4px;
+      text-transform: uppercase;
+      font-weight: 700;
+      -webkit-text-stroke: 0.9px rgba(0,0,0,0.45);
+      text-shadow: 0 1px 1px rgba(0,0,0,0.95), 0 1px 3px rgba(0,0,0,0.9), 0 2px 12px rgba(0,0,0,0.75), 0 0 16px rgba(0,0,0,0.45);
+    }
+
+    /* Cascade taglines + the 501(c)(3) badge now travel together as one
+       group, pinned near the bottom edge of the header. The badge's own
+       position (bottom:34px) never moves; the cascade gap and the group's
+       own gap are kept equal so all four lines (3 taglines + badge) sit
+       with even spacing between them. */
+    header .hero-bottom-group {
+      position: absolute;
+      left: 50%;
+      bottom: 34px;
+      transform: translateX(-50%);
+      z-index: 3;
+      width: 100%;
+      padding: 0 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 24px;
+    }
+    /* Cascading taglines — frosted pill chips so each line stays legible against
+       the photo; now arranged in a single centered row instead of stacked. */
+    header .hero-cascade {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+      max-width: 100%;
+      gap: 14px;
+    }
+    header .cascade-line {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #fff;
+      font-size: 1.35rem;
+      font-style: italic;
+      letter-spacing: 0.3px;
+      background: rgba(20,8,14,0.62);
+      border: 1px solid rgba(255,255,255,0.30);
+      backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px);
+      border-radius: 30px;
+      padding: 6px 18px 6px 14px;
+      text-shadow: 0 1px 6px rgba(0,0,0,0.65);
+      white-space: nowrap;
+    }
+    header .cascade-line::before { content: '✦'; font-size: 0.65em; color: var(--gold-light); }
+
+    /* Badge — plain text now (no pill/box), matching the subtitle's gold
+       color, nudged 5px lower than the cascade row above it. */
+    header .hero-badge {
+      display: inline-block;
+      color: #fff;
+      font-size: 1rem; letter-spacing: 1.5px; font-weight: 600;
+      margin-top: 5px;
+      -webkit-text-stroke: 0.5px rgba(0,0,0,0.5);
+      text-shadow: 0 1px 1px rgba(0,0,0,0.95), 0 1px 3px rgba(0,0,0,0.9), 0 2px 10px rgba(0,0,0,0.75);
+    }
+    @media (max-width: 600px) {
+      header { min-height: 632px; padding: 46px 16px 36px; }
+      header h1 { font-size: 4.8rem; }
+      header p.hero-subtitle { font-size: 1.5rem; letter-spacing: 1.6px; }
+      header .hero-bottom-group { bottom: 20px; gap: 16px; }
+      header .hero-cascade { gap: 10px; }
+      header .cascade-line { font-size: 1.11rem; white-space: normal; padding: 5px 14px; }
+      header .hero-badge { font-size: 0.85rem; }
+      header .hero-photo-nav { width: 34px; height: 34px; right: 12px; bottom: 12px; font-size: 1.1rem; }
+    }
+
+    /* ─── Top Nav ─── */
+    nav.top-nav {
+      display: flex;
+      justify-content: center;
+      background: var(--white);
+      border-bottom: 2px solid var(--blush);
+      flex-wrap: wrap;
+      box-shadow: var(--shadow);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    nav.top-nav button {
+      background: none;
+      border: none;
+      padding: 16px 28px;
+      font-size: 0.95rem;
+      font-family: 'Georgia', serif;
+      color: var(--muted);
+      cursor: pointer;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      border-bottom: 3px solid transparent;
+      transition: all 0.2s;
+    }
+    nav.top-nav button:hover { color: var(--rose-dark); }
+    nav.top-nav button.active {
+      color: var(--rose-dark);
+      border-bottom: 3px solid var(--rose-dark);
+      font-weight: bold;
+    }
+
+    /* ─── Main Content ─── */
+    main { max-width: 1440px; margin: 0 auto; padding: 40px 20px 60px; }
+
+    /* ─── Tab Panels ─── */
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* ─── Section Heading ─── */
+    .section-title {
+      font-size: 1.7rem;
+      color: var(--rose-dark);
+      text-align: center;
+      margin-bottom: 8px;
+      font-style: italic;
+    }
+    .section-divider {
+      width: 60px; height: 3px;
+      background: var(--rose);
+      margin: 0 auto 32px;
+      border-radius: 2px;
+    }
+
+    /* ─── About Tab — Mission ─── */
+    .mission-card {
+      position: relative;
+      background: var(--white);
+      border-radius: 20px;
+      border: 1px solid var(--blush);
+      box-shadow: 0 4px 24px rgba(200,96,124,0.10);
+      padding: 48px 52px 40px;
+      margin-bottom: 40px;
+      overflow: hidden;
+    }
+    /* rose left accent bar */
+    .mission-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 6px; height: 100%;
+      background: linear-gradient(180deg, var(--rose-dark) 0%, var(--gold) 100%);
+      border-radius: 20px 0 0 20px;
+    }
+    /* large decorative quote mark */
+    .mission-card::after {
+      content: '\201C';
+      position: absolute;
+      top: -10px; right: 28px;
+      font-size: 9rem;
+      color: var(--blush);
+      font-family: Georgia, serif;
+      line-height: 1;
+      pointer-events: none;
+      user-select: none;
+    }
+    .mission-body {
+      font-size: 1.08rem;
+      line-height: 1.9;
+      color: var(--brown);
+      text-align: left;
+      position: relative;
+      z-index: 1;
+    }
+    .mission-body em {
+      color: var(--rose-dark);
+      font-style: italic;
+      font-weight: bold;
+    }
+    .mission-tagline {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 28px;
+      padding-top: 22px;
+      border-top: 1.5px dashed var(--rose);
+    }
+    .mission-tagline-icon {
+      font-size: 1.6rem;
+      flex-shrink: 0;
+    }
+    .mission-tagline p {
+      font-size: 1.12rem;
+      font-style: italic;
+      color: var(--rose-dark);
+      font-family: Georgia, serif;
+      margin: 0;
+      line-height: 1.5;
+    }
+    @media (max-width: 600px) {
+      .mission-card { padding: 36px 28px 28px; }
+      .mission-card::after { font-size: 6rem; right: 14px; }
+    }
+
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 24px;
+      margin-bottom: 40px;
+    }
+    /* Leadership: President sits alone on her own row, everyone else
+       (VP, Secretary, Treasurer, officers) flows into the row(s) below. */
+    .leadership-top {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 24px;
+    }
+    .leadership-top .card { width: calc((100% - 24px) / 2); }
+    .two-col-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    @media (max-width: 600px) {
+      .two-col-grid { grid-template-columns: 1fr; }
+    }
+    .card {
+      background: var(--white);
+      border-radius: 18px;
+      padding: 28px 22px 24px;
+      text-align: center;
+      border: 1px solid var(--blush);
+      box-shadow: var(--shadow);
+      transition: transform 0.2s, box-shadow 0.2s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0;
+    }
+    .card:hover { transform: translateY(-5px); box-shadow: 0 8px 28px rgba(200,96,124,0.18); }
+
+    /* ── Member Photo Upload ── */
+    .card .member-photo-wrap {
+      position: relative;
+      width: 100px; height: 100px;
+      margin-bottom: 14px;
+      cursor: pointer;
+    }
+    .card .member-photo-wrap img.member-photo {
+      width: 100px; height: 100px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid var(--rose);
+      display: block;
+    }
+    .card .member-photo-wrap .avatar-placeholder {
+      width: 100px; height: 100px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--rose), var(--gold));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2.2rem;
+      border: 3px solid var(--rose);
+    }
+    .card .member-photo-wrap .photo-overlay {
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      background: rgba(201, 96, 124, 0.65);
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0;
+      transition: opacity 0.2s;
+      color: white;
+      font-size: 0.75rem;
+      flex-direction: column;
+      gap: 3px;
+    }
+    .card .member-photo-wrap .photo-overlay span { font-size: 1.3rem; }
+    .card .member-photo-wrap:hover .photo-overlay { opacity: 1; }
+    .card .member-photo-wrap input[type="file"] { display: none; }
+
+    .card h3 { font-size: 1.05rem; color: var(--brown); margin-bottom: 3px; font-weight: bold; }
+    .card .member-role { font-size: 0.82rem; color: var(--rose-dark); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 14px; }
+
+    /* ── Self-introduction ── */
+    .card .member-bio {
+      width: 100%;
+      min-height: 80px;
+      font-family: 'Georgia', serif;
+      font-size: 0.88rem;
+      color: var(--text);
+      line-height: 1.65;
+      background: var(--cream);
+      border: 1.5px dashed var(--blush);
+      border-radius: 10px;
+      padding: 10px 12px;
+      outline: none;
+      resize: none;
+      text-align: left;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .card .member-bio:focus {
+      border-color: var(--rose-dark);
+      background: var(--white);
+    }
+    .card .member-bio:empty:before {
+      content: attr(data-placeholder);
+      color: var(--muted);
+      font-style: italic;
+      pointer-events: none;
+    }
+    .card .bio-hint {
+      font-size: 0.72rem;
+      color: var(--muted);
+      margin-top: 6px;
+      font-style: italic;
+    }
+
+    .contact-box {
+      background: var(--white);
+      border-radius: 16px;
+      padding: 28px 32px;
+      border: 1px solid var(--blush);
+      box-shadow: var(--shadow);
+    }
+    .contact-box h3 { color: var(--rose-dark); margin-bottom: 16px; font-size: 1.2rem; }
+    .contact-row { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+    .contact-row span.icon { font-size: 1.2rem; }
+    .contact-row a { color: var(--rose-dark); text-decoration: none; }
+
+    /* ─── Accordion ─── */
+    .accordion-section {
+      margin-bottom: 14px;
+      border-radius: 16px;
+      overflow: hidden;
+      border: 2px solid var(--blush);
+      box-shadow: var(--shadow);
+    }
+    .accordion-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 26px;
+      background: linear-gradient(135deg, var(--blush), var(--sand));
+      cursor: pointer;
+      font-size: 1.15rem;
+      font-family: 'Georgia', serif;
+      color: var(--rose-dark);
+      font-style: italic;
+      user-select: none;
+      transition: background 0.2s, color 0.2s;
+      letter-spacing: 0.5px;
+    }
+    .accordion-header:hover { filter: brightness(0.97); }
+    .accordion-header.open {
+      background: linear-gradient(135deg, var(--rose-dark), var(--gold));
+      color: white;
+    }
+    .accordion-chevron {
+      font-size: 0.8rem;
+      transition: transform 0.25s;
+      display: inline-block;
+      margin-left: 10px;
+    }
+    .accordion-header.open .accordion-chevron { transform: rotate(180deg); }
+    .accordion-body {
+      display: none;
+      padding: 24px 18px 20px;
+      background: var(--cream);
+      border-top: 2px solid var(--blush);
+    }
+    .accordion-body.open { display: block; }
+
+    /* ─── Past-Events Sub-nav: one row ─── */
+    nav.sub-nav#past-sub-nav {
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      gap: 6px;
+      justify-content: flex-start;
+      padding-bottom: 4px;
+      margin-bottom: 24px;
+      scrollbar-width: thin;
+    }
+    nav.sub-nav#past-sub-nav button {
+      font-size: 0.85rem;
+      padding: 9px 15px;
+      border-radius: 20px;
+      white-space: nowrap;
+      letter-spacing: 0;
+      box-shadow: none;
+      flex-shrink: 0;
+    }
+
+    /* ─── Event Media Sections (flyer + photo grid + video grid) ─── */
+    .evt-media-section {
+      margin-top: 18px;
+      padding-top: 16px;
+      border-top: 1.5px dashed var(--blush);
+    }
+    .evt-media-section h4 {
+      font-size: 0.9rem;
+      color: var(--brown);
+      margin-bottom: 10px;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .evt-media-count { font-size: 0.72rem; color: var(--muted); font-style: italic; font-weight: normal; }
+    .evt-placeholder-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+      width: 100%;
+      margin-bottom: 12px;
+    }
+    .evt-placeholder-cell {
+      background: var(--sand);
+      border: 2px dashed var(--rose);
+      border-radius: 10px;
+      aspect-ratio: 4/3;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      color: var(--muted); gap: 3px; font-size: 1.15rem;
+    }
+    @media (max-width: 600px) {
+      .evt-placeholder-grid { grid-template-columns: 1fr; }
+    }
+    .evt-placeholder-cell small { font-size: 0.62rem; }
+    .evt-video-placeholders {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+      width: 100%;
+      margin-bottom: 12px;
+    }
+
+    /* ─── Featured Photo & Video (real, permanent media — set via admin.html,
+       stored in content.js, rendered automatically by renderSite()). ─── */
+    .featured-media h4 { justify-content: center; }
+    .no-events-msg {
+      text-align: center;
+      color: var(--muted);
+      font-style: italic;
+      padding: 24px 12px;
+      font-size: 0.95rem;
+    }
+    .featured-video-wrap {
+      position: relative;
+      width: 100%;
+      max-width: 560px;
+      margin: 0 auto;
+      padding-top: 56.25%; /* 16:9 */
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+    .featured-video-wrap iframe {
+      position: absolute; top: 0; left: 0;
+      width: 100%; height: 100%; border: 0;
+    }
+    /* Featured photo gallery — unlimited photos, always 2 per row, full
+       width of the main column. Each photo auto-fits a consistent frame
+       (object-fit: cover) regardless of its original size/orientation. */
+    .featured-photo-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+      width: 100%;
+      margin: 0 auto 14px;
+    }
+    .featured-photo-grid img {
+      width: 100%;
+      aspect-ratio: 4 / 3;
+      object-fit: cover;
+      border-radius: 10px;
+      box-shadow: var(--shadow);
+      display: block;
+    }
+    @media (max-width: 600px) {
+      .featured-photo-grid { grid-template-columns: 1fr; }
+    }
+
+    /* ─── Upcoming Event Cards ─── */
+    .upcoming-event-card {
+      background: var(--white);
+      border-radius: 18px;
+      border: 1px solid var(--blush);
+      box-shadow: var(--shadow);
+      padding: 28px 28px 24px;
+      margin-bottom: 28px;
+      position: relative;
+      overflow: hidden;
+    }
+    .upcoming-event-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 5px; height: 100%;
+      background: linear-gradient(180deg, var(--rose-dark), var(--gold));
+      border-radius: 18px 0 0 18px;
+    }
+    .upcoming-badge {
+      display: inline-block;
+      background: linear-gradient(135deg, var(--rose-dark), var(--gold));
+      color: white;
+      font-size: 0.72rem;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      border-radius: 20px;
+      padding: 3px 12px;
+      margin-bottom: 12px;
+    }
+    .upcoming-event-title {
+      font-size: 1.35rem;
+      color: var(--brown);
+      font-style: italic;
+      margin-bottom: 16px;
+      outline: none;
+      border-bottom: 1.5px dashed var(--blush);
+      padding-bottom: 10px;
+    }
+    .upcoming-event-title:focus { border-bottom-color: var(--rose-dark); }
+    .upcoming-event-title:empty:before {
+      content: attr(data-placeholder);
+      color: var(--muted);
+      font-style: italic;
+    }
+    .upcoming-meta-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 22px;
+    }
+    @media (max-width: 600px) { .upcoming-meta-grid { grid-template-columns: 1fr; } }
+    .upcoming-meta-item label {
+      display: block;
+      font-size: 0.72rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 5px;
+    }
+    .upcoming-meta-item .uf {
+      font-family: 'Georgia', serif;
+      font-size: 0.95rem;
+      color: var(--text);
+      background: var(--cream);
+      border: 1.5px dashed var(--blush);
+      border-radius: 8px;
+      padding: 7px 11px;
+      outline: none;
+      width: 100%;
+      transition: border-color 0.2s, background 0.2s;
+      display: block;
+    }
+    .upcoming-meta-item .uf:focus { border-color: var(--rose-dark); background: var(--white); }
+    .upcoming-meta-item .uf:empty:before { content: attr(data-placeholder); color: var(--muted); font-style: italic; pointer-events: none; }
+
+    /* Admin-only auto-archive controls — set a real date + destination so
+       this card automatically moves itself into Past Events once the date
+       has passed. Purely a site-owner tool; doesn't affect visitors. */
+    .archive-date-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 6px;
+    }
+    .archive-date-input, .archive-target-select {
+      font-size: 0.72rem;
+      color: var(--muted);
+      background: var(--white);
+      border: 1px dashed var(--blush);
+      border-radius: 6px;
+      padding: 4px 6px;
+      font-family: inherit;
+    }
+    .archive-target-select { flex: 1; min-width: 0; }
+    .archive-date-input:focus, .archive-target-select:focus { border-color: var(--rose-dark); outline: none; }
+
+    /* Once an upcoming card has been auto-archived into Past Events */
+    .archived-event-card {
+      border-left: 5px solid var(--rose-dark);
+    }
+    .archived-event-card .upcoming-badge {
+      background: var(--muted);
+    }
+    .archived-event-note {
+      font-size: 0.78rem;
+      color: var(--muted);
+      font-style: italic;
+      margin: -6px 0 16px;
+      text-align: center;
+    }
+
+    .upcoming-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      align-items: flex-start;
+      margin-top: 4px;
+    }
+    /* Google Form signup button */
+    .btn-signup-event {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      background: linear-gradient(135deg, var(--rose-dark), #b0405e);
+      color: white;
+      border: none;
+      border-radius: 24px;
+      padding: 10px 24px;
+      font-size: 0.92rem;
+      font-family: 'Georgia', serif;
+      cursor: pointer;
+      letter-spacing: 0.5px;
+      transition: opacity 0.2s, transform 0.2s;
+      text-decoration: none;
+    }
+    .btn-signup-event:hover { opacity: 0.88; transform: translateY(-2px); }
+
+    /* Google Form URL setter */
+    .gform-url-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex: 1;
+      min-width: 220px;
+    }
+    .gform-url-wrap input {
+      flex: 1;
+      font-size: 0.82rem;
+      font-family: 'Georgia', serif;
+      color: var(--text);
+      background: var(--cream);
+      border: 1.5px dashed var(--blush);
+      border-radius: 8px;
+      padding: 8px 11px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .gform-url-wrap input:focus { border-color: var(--rose-dark); }
+    .gform-url-wrap input::placeholder { color: var(--muted); font-style: italic; }
+    .btn-set-url {
+      background: var(--blush);
+      border: 1.5px solid var(--rose);
+      border-radius: 8px;
+      padding: 7px 14px;
+      font-size: 0.8rem;
+      font-family: 'Georgia', serif;
+      color: var(--rose-dark);
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 0.2s;
+    }
+    .btn-set-url:hover { background: var(--rose); color: white; }
+
+    /* PDF Flyer */
+    .flyer-section {
+      margin-top: 18px;
+      padding-top: 16px;
+      border-top: 1.5px dashed var(--blush);
+    }
+    .flyer-section h4 {
+      font-size: 0.88rem;
+      color: var(--brown);
+      margin-bottom: 10px;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .flyer-upload-zone {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--cream);
+      border: 2px dashed var(--rose);
+      border-radius: 12px;
+      padding: 12px 20px;
+      cursor: pointer;
+      transition: background 0.2s;
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+    .flyer-upload-zone:hover { background: var(--blush); }
+    .flyer-upload-zone strong { color: var(--rose-dark); }
+    .flyer-upload-zone input[type="file"] { display: none; }
+    .flyer-preview-link {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      margin-top: 10px;
+      font-size: 0.88rem;
+      color: var(--rose-dark);
+    }
+    .flyer-preview-row { display: flex; align-items: center; gap: 8px; }
+    .flyer-preview-link a { color: var(--rose-dark); font-weight: bold; }
+    .flyer-preview-link .remove-flyer {
+      background: none; border: none; color: var(--muted);
+      cursor: pointer; font-size: 0.8rem;
+    }
+    /* Inline flyer image preview — auto-fits and centers, only shown when
+       the uploaded flyer file is an image (JPG/PNG); PDFs stay link-only. */
+    .flyer-preview-img {
+      display: none;
+      width: 100%;
+      max-width: 420px;
+      border-radius: 10px;
+      box-shadow: var(--shadow);
+      margin: 0 auto;
+    }
+
+    /* Google Form Modal */
+    .gform-modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(60,20,35,0.65);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(3px);
+    }
+    .gform-modal-overlay.open { display: flex; }
+    .gform-modal {
+      background: var(--white);
+      border-radius: 18px;
+      width: 92%;
+      max-width: 680px;
+      max-height: 88vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 8px 40px rgba(60,20,35,0.3);
+    }
+    .gform-modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 22px;
+      border-bottom: 2px solid var(--blush);
+      background: linear-gradient(135deg, var(--blush), var(--sand));
+    }
+    .gform-modal-header h3 { color: var(--rose-dark); font-size: 1.05rem; font-style: italic; }
+    .gform-close-btn {
+      background: var(--rose-dark);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 30px; height: 30px;
+      font-size: 1rem;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: opacity 0.2s;
+    }
+    .gform-close-btn:hover { opacity: 0.8; }
+    .gform-modal-body {
+      flex: 1;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    .gform-modal-body iframe {
+      flex: 1;
+      border: none;
+      width: 100%;
+      min-height: 500px;
+    }
+    .gform-no-url {
+      padding: 40px;
+      text-align: center;
+      color: var(--muted);
+      font-style: italic;
+      font-size: 1rem;
+    }
+
+    /* ─── Activities Sub-tabs ─── */
+    nav.sub-nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
+      margin-bottom: 32px;
+    }
+    nav.sub-nav button {
+      background: var(--white);
+      border: 2px solid var(--rose);
+      border-radius: 30px;
+      padding: 13px 28px;
+      font-size: 1.15rem;
+      font-family: 'Georgia', serif;
+      color: var(--rose-dark);
+      cursor: pointer;
+      letter-spacing: 0.5px;
+      transition: all 0.2s;
+      box-shadow: 0 2px 8px rgba(200,96,124,0.08);
+    }
+    nav.sub-nav button:hover,
+    nav.sub-nav button.active {
+      background: var(--rose-dark);
+      color: var(--white);
+      border-color: var(--rose-dark);
+      box-shadow: 0 4px 14px rgba(200,96,124,0.25);
+    }
+
+    .activity-panel { display: none; }
+    .activity-panel.active { display: block; }
+
+    /* ─── Event Blocks ─── */
+    .event-block {
+      background: var(--white);
+      border-radius: 18px;
+      border: 1px solid var(--blush);
+      box-shadow: var(--shadow);
+      padding: 28px 28px 24px;
+      margin-bottom: 32px;
+    }
+    .event-block-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+      padding-bottom: 16px;
+      border-bottom: 2px dashed var(--blush);
+    }
+    .event-number {
+      width: 36px; height: 36px;
+      background: linear-gradient(135deg, var(--rose-dark), var(--gold));
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      color: white;
+      font-size: 1rem;
+      font-weight: bold;
+      flex-shrink: 0;
+    }
+    .event-block-header h3 {
+      font-size: 1.2rem;
+      color: var(--rose-dark);
+      font-style: italic;
+    }
+    .event-meta {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 22px;
+    }
+    @media (max-width: 600px) {
+      .event-meta { grid-template-columns: 1fr; }
+    }
+    .event-meta-field label {
+      display: block;
+      font-size: 0.75rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 5px;
+    }
+    .event-meta-field .editable-field {
+      font-family: 'Georgia', serif;
+      font-size: 0.95rem;
+      color: var(--text);
+      background: var(--cream);
+      border: 1.5px dashed var(--blush);
+      border-radius: 8px;
+      padding: 7px 11px;
+      outline: none;
+      width: 100%;
+      transition: border-color 0.2s, background 0.2s;
+      display: block;
+    }
+    .event-meta-field .editable-field:focus {
+      border-color: var(--rose-dark);
+      background: var(--white);
+    }
+    .event-meta-field .editable-field:empty:before {
+      content: attr(data-placeholder);
+      color: var(--muted);
+      font-style: italic;
+      pointer-events: none;
+    }
+    .event-media-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+    @media (max-width: 600px) {
+      .event-media-row { grid-template-columns: 1fr; }
+    }
+    .event-media-col h4 {
+      font-size: 0.92rem;
+      color: var(--brown);
+      margin-bottom: 10px;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .event-upload-zone {
+      background: var(--cream);
+      border: 2px dashed var(--rose);
+      border-radius: 12px;
+      padding: 18px 12px;
+      text-align: center;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .event-upload-zone:hover { background: var(--blush); }
+    .event-upload-zone .u-icon { font-size: 1.8rem; margin-bottom: 4px; }
+    .event-upload-zone p { font-size: 0.8rem; color: var(--muted); }
+    .event-upload-zone strong { color: var(--rose-dark); }
+    .event-upload-zone input[type="file"] { display: none; }
+    .event-preview {
+      display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px;
+    }
+    .event-preview .preview-item {
+      width: 80px; height: 64px;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 2px solid var(--rose);
+      position: relative;
+    }
+    .event-preview .preview-item img,
+    .event-preview .preview-item video {
+      width: 100%; height: 100%; object-fit: cover;
+    }
+    .event-preview .preview-item .remove-btn {
+      position: absolute; top: 2px; right: 3px;
+      background: rgba(200,96,124,0.85);
+      color: white; border: none; border-radius: 50%;
+      width: 16px; height: 16px; font-size: 0.65rem;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+    }
+
+    .activity-header {
+      background: linear-gradient(135deg, var(--blush), var(--sand));
+      border-radius: 16px;
+      padding: 28px 24px;
+      margin-bottom: 28px;
+      border-left: 5px solid var(--rose-dark);
+    }
+    .activity-header h2 { color: var(--rose-dark); font-size: 1.5rem; margin-bottom: 8px; }
+    .activity-header p { color: var(--brown); line-height: 1.7; }
+
+    /* ─── Media Gallery & Upload ─── */
+    .gallery-section {
+      margin-bottom: 32px;
+    }
+    .gallery-section h3 {
+      color: var(--brown);
+      font-size: 1.1rem;
+      margin-bottom: 14px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+      width: 100%;
+      margin-bottom: 16px;
+    }
+    @media (max-width: 600px) {
+      .gallery-grid { grid-template-columns: 1fr; }
+    }
+    .gallery-placeholder {
+      background: var(--sand);
+      border: 2px dashed var(--rose);
+      border-radius: 12px;
+      aspect-ratio: 4/3;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: var(--muted);
+      font-size: 0.8rem;
+      gap: 6px;
+    }
+    .gallery-placeholder span { font-size: 1.8rem; }
+
+    .upload-zone {
+      background: var(--white);
+      border: 2px dashed var(--rose-dark);
+      border-radius: 16px;
+      padding: 32px;
+      text-align: center;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .upload-zone:hover { background: var(--blush); }
+    .upload-zone .upload-icon { font-size: 2.5rem; margin-bottom: 8px; }
+    .upload-zone p { color: var(--muted); font-size: 0.9rem; }
+    .upload-zone strong { color: var(--rose-dark); }
+    .upload-zone input[type="file"] { display: none; }
+
+    .uploaded-preview {
+      margin-top: 16px;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+      width: 100%;
+    }
+    .uploaded-preview.videos-preview {
+      grid-template-columns: 1fr;
+    }
+    @media (max-width: 600px) {
+      .uploaded-preview { grid-template-columns: 1fr; }
+    }
+    .preview-item {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 4/3;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 2px solid var(--rose);
+    }
+    .uploaded-preview.videos-preview .preview-item {
+      aspect-ratio: 16/9;
+    }
+    .preview-item img, .preview-item video {
+      width: 100%; height: 100%;
+      object-fit: cover;
+    }
+    .preview-item .remove-btn {
+      position: absolute;
+      top: 2px; right: 4px;
+      background: rgba(200,96,124,0.85);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 18px; height: 18px;
+      font-size: 0.7rem;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    /* ─── Sign Up Tab ─── */
+    .form-card {
+      background: var(--white);
+      border-radius: 18px;
+      padding: 40px 36px;
+      border: 1px solid var(--blush);
+      box-shadow: var(--shadow);
+      max-width: 560px;
+      margin: 0 auto;
+    }
+    .form-group { margin-bottom: 20px; }
+    .form-group label {
+      display: block;
+      font-size: 0.9rem;
+      color: var(--brown);
+      margin-bottom: 6px;
+      font-weight: bold;
+    }
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1.5px solid var(--blush);
+      border-radius: 10px;
+      font-family: 'Georgia', serif;
+      font-size: 0.95rem;
+      color: var(--text);
+      background: var(--cream);
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      border-color: var(--rose-dark);
+    }
+    .form-group textarea { resize: vertical; min-height: 90px; }
+
+    /* ─── Two-column form row ─── */
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    @media (max-width: 520px) { .form-row { grid-template-columns: 1fr; } }
+
+    /* ─── Form section heading ─── */
+    .form-section-heading {
+      font-size: 0.78rem;
+      font-weight: bold;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--rose-dark);
+      border-bottom: 1.5px solid var(--blush);
+      padding-bottom: 8px;
+      margin: 28px 0 18px;
+    }
+    .form-section-heading:first-of-type { margin-top: 4px; }
+
+    /* ─── Join Us intro card ─── */
+    .joinus-intro {
+      background: linear-gradient(135deg, var(--blush), var(--sand));
+      border-radius: 16px;
+      padding: 28px 32px;
+      text-align: center;
+      margin-bottom: 32px;
+      border: 1px solid var(--rose);
+    }
+    .joinus-intro p { color: var(--brown); line-height: 1.8; max-width: 600px; margin: 0 auto; }
+
+    /* ─── Embedded Google Form (Join Us) ─── */
+    .gform-embed-wrap {
+      max-width: none;
+      width: 100%;
+      margin: 0 auto;
+      background: var(--white);
+      border-radius: 18px;
+      padding: 10px;
+      border: 1px solid var(--blush);
+      box-shadow: var(--shadow);
+    }
+    .gform-embed-wrap iframe {
+      width: 100%;
+      border: none;
+      border-radius: 12px;
+      display: block;
+    }
+    .gform-fallback-note {
+      text-align: center;
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-top: 14px;
+    }
+    .gform-fallback-note a { color: var(--rose-dark); font-weight: bold; }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--rose-dark), var(--gold));
+      color: var(--white);
+      border: none;
+      border-radius: 30px;
+      padding: 14px 40px;
+      font-size: 1rem;
+      font-family: 'Georgia', serif;
+      cursor: pointer;
+      letter-spacing: 1px;
+      width: 100%;
+      transition: opacity 0.2s, transform 0.2s;
+    }
+    .btn-primary:hover { opacity: 0.9; transform: translateY(-2px); }
+
+    .success-msg {
+      display: none;
+      background: #d4edda;
+      color: #3a7a50;
+      border-radius: 12px;
+      padding: 14px 18px;
+      text-align: center;
+      margin-top: 16px;
+      font-size: 0.95rem;
+    }
+
+    /* ─── Donation Tab ─── */
+    .donate-intro {
+      background: linear-gradient(135deg, var(--blush), var(--sand));
+      border-radius: 16px;
+      padding: 32px;
+      text-align: center;
+      margin-bottom: 36px;
+      border: 1px solid var(--rose);
+    }
+    .donate-intro p { color: var(--brown); line-height: 1.8; max-width: 600px; margin: 0 auto; }
+
+    .donate-tiers {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 16px;
+      margin-bottom: 36px;
+    }
+    .donate-tier {
+      background: var(--white);
+      border: 2px solid var(--blush);
+      border-radius: 16px;
+      padding: 24px 16px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      flex: 0 1 180px;
+    }
+    .donate-tier:hover,
+    .donate-tier.selected {
+      border-color: var(--rose-dark);
+      background: var(--blush);
+      transform: translateY(-4px);
+    }
+    .donate-tier .amount {
+      font-size: 1.8rem;
+      color: var(--rose-dark);
+      font-style: italic;
+      margin-bottom: 6px;
+    }
+    .donate-tier .label { font-size: 0.85rem; color: var(--muted); }
+    .donate-tier .icon { font-size: 1.4rem; margin-bottom: 8px; }
+
+    .donate-form {
+      background: var(--white);
+      border-radius: 18px;
+      padding: 36px;
+      border: 1px solid var(--blush);
+      box-shadow: var(--shadow);
+      max-width: none;
+      width: 100%;
+      margin: 0 auto;
+      text-align: center;
+    }
+    .donate-form h3 { color: var(--rose-dark); margin-bottom: 20px; font-size: 1.2rem; text-align: center; }
+    .donate-form .form-group,
+    .donate-form .zelle-card,
+    .donate-form .btn-outline,
+    .donate-form .donate-honesty-note {
+      max-width: 480px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .donate-form .form-group { text-align: left; }
+
+    /* ─── Zelle Donation Card ─── */
+    .zelle-card {
+      background: linear-gradient(135deg, var(--blush), var(--sand));
+      border: 1.5px solid var(--rose);
+      border-radius: 16px;
+      padding: 26px 24px;
+      text-align: center;
+      margin: 20px 0 22px;
+    }
+    .zelle-card .zelle-label {
+      font-size: 0.72rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+    .zelle-card .zelle-name {
+      font-size: 1.15rem;
+      color: var(--rose-dark);
+      font-weight: bold;
+      font-style: italic;
+      margin-bottom: 16px;
+    }
+    .zelle-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .zelle-email {
+      font-size: 1.05rem;
+      color: var(--brown);
+      font-weight: bold;
+      background: var(--white);
+      border: 1.5px solid var(--rose);
+      border-radius: 10px;
+      padding: 9px 16px;
+      letter-spacing: 0.3px;
+    }
+    .copy-btn {
+      background: var(--rose-dark);
+      color: var(--white);
+      border: none;
+      border-radius: 20px;
+      padding: 9px 18px;
+      font-size: 0.8rem;
+      font-family: 'Georgia', serif;
+      cursor: pointer;
+      transition: background 0.2s;
+      white-space: nowrap;
+    }
+    .copy-btn:hover { background: var(--brown); }
+    .copy-btn.copied { background: #5a8a5a; }
+
+    .verify-warning {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      background: #fff8ec;
+      border: 1.5px solid var(--gold);
+      border-radius: 12px;
+      padding: 14px 16px;
+      margin-top: 18px;
+      text-align: left;
+    }
+    .verify-warning .warn-icon { font-size: 1.25rem; line-height: 1.3; }
+    .verify-warning p { font-size: 0.82rem; color: var(--brown); line-height: 1.55; margin: 0; }
+    .verify-warning strong { color: var(--rose-dark); }
+
+    .zelle-steps {
+      text-align: left;
+      margin: 18px auto 0;
+      max-width: 420px;
+      padding-left: 22px;
+    }
+    .zelle-steps li { font-size: 0.85rem; color: var(--brown); line-height: 1.7; margin-bottom: 4px; }
+
+    .btn-outline {
+      display: block;
+      width: 100%;
+      background: var(--white);
+      color: var(--rose-dark);
+      border: 2px solid var(--rose-dark);
+      border-radius: 30px;
+      padding: 12px 28px;
+      font-size: 0.95rem;
+      font-family: 'Georgia', serif;
+      cursor: pointer;
+      letter-spacing: 0.5px;
+      text-align: center;
+      transition: background 0.2s, color 0.2s;
+      margin-top: 10px;
+    }
+    .btn-outline:hover { background: var(--blush); }
+
+    .donate-honesty-note {
+      font-size: 0.78rem;
+      color: var(--muted);
+      text-align: center;
+      margin-top: 14px;
+      line-height: 1.6;
+    }
+
+    /* ─── Unified Footer ─── */
+    /* ─── Unified Footer ─── */
+    footer {
+      background: linear-gradient(160deg, #4a1e2e 0%, #7a3a4a 60%, #5a3020 100%);
+      color: rgba(255,240,245,0.85);
+      border-top: 3px solid var(--rose-dark);
+      padding: 22px 24px 18px;
+      text-align: center;
+      font-family: 'Georgia', serif;
+    }
+    .footer-contact-title {
+      font-size: 1.1rem;
+      letter-spacing: 2px;
+      font-style: italic;
+      color: #ffffff;
+      margin-bottom: 14px;
+    }
+    .footer-copy {
+      font-size: 0.72rem;
+      color: rgba(255,220,230,0.45);
+      margin-top: 14px;
+      padding-top: 12px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      letter-spacing: 0.5px;
+    }
+    .footer-contact-grid {
+      display: flex;
+      flex-wrap: nowrap;
+      justify-content: center;
+      align-items: center;
+      gap: 0;
+      max-width: 900px;
+      margin: 0 auto;
+      overflow-x: auto;
+    }
+    .footer-contact-item + .footer-contact-item::before {
+      content: '·';
+      color: rgba(255,200,220,0.35);
+      margin: 0 16px;
+      font-size: 1rem;
+    }
+    .footer-contact-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.85rem;
+      color: rgba(255,235,240,0.78);
+    }
+    .footer-contact-item .fci { font-size: 0.95rem; }
+    .footer-contact-item a {
+      color: #f0a8be;
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .footer-contact-item a:hover { color: #fff; }
+
+    /* ─── Responsive ─── */
+    @media (max-width: 600px) {
+      nav.top-nav button { padding: 12px 14px; font-size: 0.8rem; }
+      main { padding: 24px 14px 48px; }
+      .form-card, .donate-form { padding: 24px 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════ HEADER ═══════════════════════════ -->
+<header>
+  <div class="hero-slides" id="heroSlides">
+    <div class="hero-slide active" data-src="images/header-slide-1.jpg" aria-label="Ballerina storytime with children"></div>
+    <div class="hero-slide" data-src="images/header-slide-2.jpg" aria-label="Club members at a community event"></div>
+    <div class="hero-slide" data-src="images/header-slide-3.jpg" aria-label="Dancers in recital costumes"></div>
+    <div class="hero-slide" data-src="images/header-slide-4.jpg" aria-label="Dancers backstage in performance dress"></div>
+    <div class="hero-slide" data-src="images/header-slide-8.jpg" aria-label="Club families celebrating the holidays together"></div>
+    <div class="hero-slide" data-src="images/header-slide-9.jpg" aria-label="Club members and volunteers at a community gathering"></div>
+    <div class="hero-slide" data-src="images/header-slide-10.jpg" aria-label="Dancers backstage before a performance"></div>
+    <div class="hero-slide" data-src="images/header-slide-11.jpg" aria-label="Club members at a holiday celebration"></div>
+    <div class="hero-slide" data-src="images/header-slide-12.jpg" aria-label="Dancers in matching club t-shirts at a holiday event"></div>
+  </div>
+  <button type="button" class="hero-photo-nav" id="heroPhotoNav" aria-label="Show next header photo" title="Show next photo">›</button>
+  <div class="hero-content">
+    <h1>The Pointe Circle</h1>
+  </div>
+  <p class="hero-subtitle">- Where Movement Meets Community</p>
+  <div class="hero-bottom-group">
+    <div class="hero-cascade">
+      <span class="cascade-line line-1">Making dance accessible for everyone</span>
+      <span class="cascade-line line-2">Youth-led outreach</span>
+      <span class="cascade-line line-3">Creative service projects</span>
+      <span class="cascade-line line-4">Community connection through movement</span>
+    </div>
+    <span class="hero-badge">501(c)(3) non-profit organization</span>
+  </div>
+</header>
+
+<!-- ═══════════════════════════ TOP NAV ══════════════════════════ -->
+<nav class="top-nav" id="topNav">
+  <button class="active" onclick="showTab('about', this)">About Us</button>
+  <button onclick="showTab('activities', this)">Activities</button>
+  <button onclick="showTab('signup', this)">Join Us</button>
+  <button onclick="showTab('donate', this)">Donate</button>
+</nav>
+
+<!-- ═══════════════════════════ MAIN ═════════════════════════════ -->
+<main>
+
+  <!-- ══════════════ TAB 1: ABOUT US ══════════════ -->
+  <div id="tab-about" class="tab-panel active">
+
+    <h2 class="section-title">MISSION STATEMENT</h2>
+     <div class="section-divider"></div>
+
+    <!-- Mission -->
+    <div class="mission-card">
+      <p class="mission-body">
+        <em>The Pointe Circle</em> is a volunteer-driven non-profit organization built on our shared passion
+        for dance, our commitment to fostering a supportive community, and our dedication to meaningful service.
+        We welcome dancers of all genres, artists of other disciplines, and anyone eager to contribute through
+        volunteer work. Together, we celebrate the joy of movement while making a lasting impact through
+        performances, collaborations, and community service.
+      </p>
+      <div class="mission-tagline">
+        <span class="mission-tagline-icon">🫶</span>
+        <p>Let's dance, share, and inspire — together!</p>
+      </div>
+    </div>
+
+    <!-- Leadership (rendered from content.js by renderSite() — see admin.html to edit) -->
+    <h2 class="section-title">Leadership Team</h2>
+    <div class="section-divider"></div>
+    <div class="leadership-top" id="leadership-top-container"></div>
+    <div class="card-grid two-col-grid" id="leadership-grid-container"></div>
+
+    <!-- Club Members (rendered from content.js by renderSite() — see admin.html to edit) -->
+    <h2 class="section-title">Club Members</h2>
+    <div class="section-divider"></div>
+    <div class="card-grid two-col-grid" id="members-container"></div>
+
+  </div><!-- /tab-about -->
+
+
+  <!-- ══════════════ TAB 2: ACTIVITIES ══════════════ -->
+  <div id="tab-activities" class="tab-panel">
+
+    <h2 class="section-title">Our Activities</h2>
+    <div class="section-divider"></div>
+
+    <!-- ── Accordion: Upcoming Events ── -->
+    <div class="accordion-section">
+      <div class="accordion-header" id="acc-header-upcoming" onclick="toggleAccordion('upcoming')">
+        <span>🌟 Upcoming Events</span>
+        <span class="accordion-chevron">▼</span>
+      </div>
+      <div class="accordion-body" id="accordion-body-upcoming">
+
+      <p style="text-align:center; color:var(--muted); font-style:italic; margin-bottom:28px; font-size:0.95rem;">
+        Want to add or change an event? Open <strong>admin.html</strong> in this folder — no coding needed.
+      </p>
+
+      <!-- Rendered from content.js by renderSite() — see admin.html to edit -->
+      <div id="upcoming-events-container"></div>
+
+      </div><!-- /accordion-body-upcoming -->
+    </div><!-- /accordion-section upcoming -->
+
+    <!-- ── Accordion: Past Events ── -->
+    <div class="accordion-section">
+      <div class="accordion-header open" id="acc-header-past" onclick="toggleAccordion('past')">
+        <span>📖 Past Events</span>
+        <span class="accordion-chevron">▼</span>
+      </div>
+      <div class="accordion-body open" id="accordion-body-past">
+
+    <!-- Sub-nav (one row) -->
+    <nav class="sub-nav" id="past-sub-nav">
+      <button class="active" onclick="showActivity('storytime', this)">📚 Ballerina | Bilingual Storytime</button>
+      <button onclick="showActivity('senior', this)">🌹 Senior House Performance</button>
+      <button onclick="showActivity('ronald', this)">🏥 Ronald McDonald House</button>
+      <button onclick="showActivity('drive', this)">🤲 Service Drive</button>
+    </nav>
+
+    <!-- Past activity panels are rendered from content.js by renderSite() — see admin.html to edit -->
+
+    <!-- ── Activity: Ballerina Storytime ── -->
+    <div id="activity-storytime" class="activity-panel active">
+      <div class="activity-header" id="activity-storytime-header"></div>
+      <div id="activity-storytime-events"></div>
+    </div>
+
+    <!-- ── Activity: Senior House Performance ── -->
+    <div id="activity-senior" class="activity-panel">
+      <div class="activity-header" id="activity-senior-header"></div>
+      <div id="activity-senior-events"></div>
+    </div>
+
+    <!-- ── Activity: Ronald McDonald House ── -->
+    <div id="activity-ronald" class="activity-panel">
+      <div class="activity-header" id="activity-ronald-header"></div>
+      <div id="activity-ronald-events"></div>
+    </div>
+
+    <!-- ── Activity: Drive for Dancewear, Books & Toys ── -->
+    <div id="activity-drive" class="activity-panel">
+      <div class="activity-header" id="activity-drive-header"></div>
+      <div id="activity-drive-events"></div>
+    </div>
+
+      </div><!-- /accordion-body-past -->
+    </div><!-- /accordion-section past -->
+
+
+  </div><!-- /tab-activities -->
+
+
+  <!-- ══ Google Form Modal ══ -->
+  <div class="gform-modal-overlay" id="gformModalOverlay" onclick="closeGFormModal(event)">
+    <div class="gform-modal">
+      <div class="gform-modal-header">
+        <h3 id="gformModalTitle">🩰 Event Sign-Up</h3>
+        <button class="gform-close-btn" onclick="closeGFormModal()">✕</button>
+      </div>
+      <div class="gform-modal-body" id="gformModalBody">
+        <div class="gform-no-url">No sign-up form linked yet.<br>Paste a Google Form URL and click "Set Link" to activate.</div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ══════════════ TAB 3: JOIN US ══════════════ -->
+  <div id="tab-signup" class="tab-panel">
+
+    <h2 class="section-title">Join The Pointe Circle</h2>
+    <div class="section-divider"></div>
+
+    <div class="joinus-intro">
+      <p>
+        We'd love to welcome you to our community! Whether you're a dancer, musician, artist, or simply passionate
+        about giving back — there's a place for you here. Fill out the form below and we'll be in touch. 🌸
+      </p>
+    </div>
+
+    <!-- Live Google Form embed — this is the club's real application form; -->
+    <!-- responses go straight into the connected Google Sheet, no site backend involved. -->
+    <div class="gform-embed-wrap">
+      <iframe
+        src="https://docs.google.com/forms/d/e/1FAIpQLSeFIpg4VIVGFLUaYcxGjVCJYHGgSQcUgkb0mhMrSW6O4_kYgg/viewform?embedded=true"
+        width="100%" height="1550" frameborder="0" marginheight="0" marginwidth="0"
+        title="The Pointe Circle — Join Us Application Form">
+        Loading…
+      </iframe>
+    </div>
+    <p class="gform-fallback-note">
+      Form not loading?
+      <a href="https://docs.google.com/forms/d/e/1FAIpQLSeFIpg4VIVGFLUaYcxGjVCJYHGgSQcUgkb0mhMrSW6O4_kYgg/viewform"
+         target="_blank" rel="noopener noreferrer">Open it in a new tab instead →</a>
+    </p>
+
+  </div><!-- /tab-signup -->
+
+
+  <!-- ══════════════ TAB 4: DONATE ══════════════ -->
+  <div id="tab-donate" class="tab-panel">
+
+    <h2 class="section-title">Support Our Mission</h2>
+    <div class="section-divider"></div>
+
+    <div class="donate-intro">
+      <p>
+        Your generosity helps us bring ballet performances to seniors,
+        comfort families at the Ronald McDonald House, and provide children
+        with dancewear, books, and toys. Every dollar makes a difference.
+        Thank you for dancing with us in spirit. 🩰🌸
+      </p>
+    </div>
+
+    <!-- Donation Tiers -->
+    <h3 style="text-align:center; color:var(--brown); margin-bottom:20px;">Choose an Amount</h3>
+    <div class="donate-tiers">
+      <div class="donate-tier" onclick="selectTier(this, '10')">
+        <div class="icon">🌷</div>
+        <div class="amount">$10</div>
+        <div class="label">Helps supply one child with a book</div>
+      </div>
+      <div class="donate-tier" onclick="selectTier(this, '25')">
+        <div class="icon">🌸</div>
+        <div class="amount">$25</div>
+        <div class="label">Covers a set of dancewear for a child</div>
+      </div>
+      <div class="donate-tier" onclick="selectTier(this, '50')">
+        <div class="icon">🌹</div>
+        <div class="amount">$50</div>
+        <div class="label">Funds a full storytime performance</div>
+      </div>
+      <div class="donate-tier" onclick="selectTier(this, '100')">
+        <div class="icon">🌺</div>
+        <div class="amount">$100</div>
+        <div class="label">Sponsors a Ronald McDonald House visit</div>
+      </div>
+      <div class="donate-tier" onclick="selectTier(this, 'custom')">
+        <div class="icon">💛</div>
+        <div class="amount">Other</div>
+        <div class="label">Choose your own amount</div>
+      </div>
+    </div>
+
+    <!-- Donation Form -->
+    <div class="donate-form">
+      <h3>Give Securely via Zelle</h3>
+
+      <div class="form-group">
+        <label>Donation Amount ($)</label>
+        <input type="number" id="donationAmount" placeholder="Enter the amount you plan to send" min="1" />
+      </div>
+
+      <!-- Verified Zelle recipient -->
+      <div class="zelle-card">
+        <div class="zelle-label">Send your Zelle transfer to</div>
+        <div class="zelle-name">The Pointe Circle</div>
+        <div class="zelle-row">
+          <span class="zelle-email" id="zelleEmail">thepointecircle@gmail.com</span>
+          <button class="copy-btn" id="zelleCopyBtn" onclick="copyZelleEmail()" type="button">📋 Copy</button>
+        </div>
+
+        <ol class="zelle-steps">
+          <li>Open Zelle in your own bank's app (no account or routing numbers needed).</li>
+          <li>Enter <strong>thepointecircle@gmail.com</strong> as the recipient.</li>
+          <li>Confirm your bank displays the recipient name as <strong>"The Pointe Circle"</strong> — see the warning below.</li>
+          <li>Enter your amount and send. Your own bank handles the transfer; we never see your account details.</li>
+        </ol>
+
+        <div class="verify-warning">
+          <span class="warn-icon">⚠️</span>
+          <p>
+            <strong>Always verify before sending:</strong> when you enter our email in Zelle, your bank should show the registered
+            name <strong>"The Pointe Circle"</strong>. If a different name appears, do not send the money — stop and
+            email us at <strong>thepointecircle@gmail.com</strong> to confirm before trying again. This protects you from sending
+            funds to the wrong account.
+          </p>
+        </div>
+      </div>
+
+      <!-- Optional: let the club know a gift is coming, since Zelle itself carries no dedication/message -->
+      <div class="form-group">
+        <label>Your Name (optional, for our thank-you note)</label>
+        <input type="text" id="donorName" placeholder="Your full name" />
+      </div>
+      <div class="form-group">
+        <label>Email Address (optional, for a receipt)</label>
+        <input type="email" id="donorEmail" placeholder="you@example.com" />
+      </div>
+      <div class="form-group">
+        <label>Dedicate this donation (optional)</label>
+        <input type="text" id="donorDedication" placeholder="In honor of... / In memory of..." />
+      </div>
+      <div class="form-group">
+        <label>Message (optional)</label>
+        <textarea id="donorMessage" placeholder="Leave a note of encouragement 🌸"></textarea>
+      </div>
+
+      <button class="btn-outline" type="button" onclick="emailDonationDetails()">✉️ Let Us Know You Gave</button>
+
+      <p class="donate-honesty-note">
+        This site never collects or stores card, bank, or account numbers. Your Zelle transfer is confirmed by your own
+        bank, not by this website — the button above simply opens an email to let us know to expect your gift and
+        send a thank-you and receipt.
+      </p>
+    </div>
+
+  </div><!-- /tab-donate -->
+
+</main>
+
+<!-- ═══════════════════════════ FOOTER ═══════════════════════════ -->
+<footer>
+  <div class="footer-contact-title">Contact Us</div>
+  <div class="footer-contact-grid">
+    <div class="footer-contact-item">
+      <span class="fci">📧</span>
+      <a href="mailto:thepointecircle@gmail.com">thepointecircle@gmail.com</a>
+    </div>
+    <div class="footer-contact-item">
+      <span class="fci">📍</span>
+      <span>San Diego, CA</span>
+    </div>
+    <div class="footer-contact-item">
+      <span class="fci">📸</span>
+      <a href="https://www.instagram.com/thepointecircle/" target="_blank">@thepointecircle</a>
+    </div>
+    <div class="footer-contact-item">
+      <span class="fci">🌐</span>
+      <a href="https://thepointecircle.org" target="_blank">thepointecircle.org</a>
+    </div>
+  </div>
+  <div class="footer-copy">© 2024 The Pointe Circle · A Nonprofit Student Organization</div>
+</footer>
+
+<!-- ═══════════════════════════ SCRIPTS ══════════════════════════ -->
+<!-- content.js holds all the text/photos/links that change often. Edit it
+     via admin.html (in this same folder) — never need to touch this HTML. -->
+<script src="content.js"></script>
+<script>
+  /* ── Header Photo Slideshow ── */
+  /* Cycles through the .hero-slide photos behind the header text. Always
+     rotates — for visitors with prefers-reduced-motion set, it still swaps
+     photos on a timer but skips the long crossfade animation (instant cut
+     instead), so the feature never silently disables itself. Each slide's
+     real photo URL lives in data-src rather than inline background-image so
+     this script can preload it, confirm it actually loaded, and only then
+     apply it — see the load-error handling below. A manual nav button lets
+     visitors step through the photos themselves at any time. */
+  (function() {
+    var slides = Array.prototype.slice.call(document.querySelectorAll('#heroSlides .hero-slide'));
+    if (slides.length === 0) return;
+
+    var prefersReducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReducedMotion) {
+      slides.forEach(function(s) { s.style.transition = 'none'; });
+    }
+
+    /* Preload every photo. While a photo is still loading (or if it 404s /
+       fails outright), its slide carries .load-error so the header's own
+       --rose-dark shows through instead of a blank/broken-image icon. The
+       moment a photo loads successfully, its true background-image is set
+       and .load-error is removed — so a loaded photo is never tinted and
+       always displays its own original colors. */
+    slides.forEach(function(slide) {
+      var src = slide.getAttribute('data-src');
+      if (!src) return;
+      slide.classList.add('load-error');
+      var img = new Image();
+      img.onload = function() {
+        slide.style.backgroundImage = "url('" + src + "')";
+        slide.classList.remove('load-error');
+      };
+      img.onerror = function() {
+        slide.classList.add('load-error');
+      };
+      img.src = src;
+    });
+
+    if (slides.length < 2) return;
+
+    var current = 0;
+    for (var i = 0; i < slides.length; i++) {
+      if (slides[i].classList.contains('active')) { current = i; break; }
+    }
+
+    /* Skip past any slide that failed to load so the rotation/manual button
+       never lands on a bare color frame while a working photo is available. */
+    function nextIndex(from) {
+      var idx = from;
+      for (var i = 0; i < slides.length; i++) {
+        idx = (idx + 1) % slides.length;
+        if (!slides[idx].classList.contains('load-error')) return idx;
+      }
+      return (from + 1) % slides.length;
+    }
+
+    function advance() {
+      slides[current].classList.remove('active');
+      current = nextIndex(current);
+      slides[current].classList.add('active');
+    }
+
+    var timer = setInterval(advance, 5500);
+
+    var navBtn = document.getElementById('heroPhotoNav');
+    if (navBtn) {
+      navBtn.addEventListener('click', function() {
+        advance();
+        /* Restart the auto-rotation clock so it doesn't immediately flip
+           again right after someone manually clicks through. */
+        clearInterval(timer);
+        timer = setInterval(advance, 5500);
+      });
+    }
+  })();
+
+  /* ── Accordion (Past / Upcoming) ── */
+  function toggleAccordion(section) {
+    var header = document.getElementById('acc-header-' + section);
+    var body   = document.getElementById('accordion-body-' + section);
+    var isOpen = body.classList.contains('open');
+    header.classList.toggle('open', !isOpen);
+    body.classList.toggle('open', !isOpen);
+  }
+
+  /* ════════════════════════════════════════════════════════════════
+     SITE RENDERER — builds Leadership, Members, Upcoming Events, and
+     all 4 Past Activities from window.SITE_CONTENT (see content.js).
+     Students never need to edit this code — open admin.html instead;
+     it edits content.js for you and this code does the rest.
+     ════════════════════════════════════════════════════════════════ */
+  function escapeHtml(str) {
+    return String(str == null ? '' : str)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+
+  function buildMemberCard(m) {
+    var photoHtml = m.photo
+      ? '<img class="member-photo" src="' + escapeHtml(m.photo) + '" alt="' + escapeHtml(m.name || m.role || 'Member') + ' photo" style="display:block">'
+      : '<div class="avatar-placeholder">' + (m.emoji || '🩰') + '</div>';
+    var name = m.name ? escapeHtml(m.name) : '[ Name coming soon ]';
+    var bioHtml = m.bio ? '<div class="member-bio">' + escapeHtml(m.bio) + '</div>' : '';
+    return '<div class="card">' +
+      '<div class="member-photo-wrap">' + photoHtml + '</div>' +
+      '<h3>' + name + '</h3>' +
+      '<div class="member-role">' + escapeHtml(m.role || '') + '</div>' +
+      bioHtml +
+      '</div>';
+  }
+
+  /* Renders an unlimited photo gallery (2 per row, full width), a real
+     responsive YouTube embed, and a flyer link/preview for any item
+     that has photos/youtube/flyer fields. Returns '' if none are set. */
+  function buildMediaSection(item) {
+    var photos = item.photos || [];
+    var photoHtml = photos.length
+      ? '<div class="featured-photo-grid">' +
+          photos.map(function(src) { return '<img src="' + escapeHtml(src) + '" alt="Event photo">'; }).join('') +
+        '</div>'
+      : '';
+    var videoHtml = item.youtube
+      ? '<div class="featured-video-wrap"><iframe src="https://www.youtube.com/embed/' + escapeHtml(item.youtube) + '" title="Event video" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>'
+      : '';
+    var flyerHtml = '';
+    if (item.flyer) {
+      var isImg = /\.(jpe?g|png|gif|webp)$/i.test(item.flyer);
+      flyerHtml = '<div class="evt-media-section">' +
+        '<h4>📄 Event Flyer</h4>' +
+        '<div class="flyer-preview-link" style="display:flex">' +
+        (isImg ? '<img class="flyer-preview-img" src="' + escapeHtml(item.flyer) + '" alt="Flyer">' : '') +
+        '<div class="flyer-preview-row">📄 <a href="' + escapeHtml(item.flyer) + '" target="_blank">View flyer</a></div>' +
+        '</div></div>';
+    }
+    if (!photoHtml && !videoHtml && !flyerHtml) return '';
+    return '<div class="evt-media-section featured-media">' +
+      (photoHtml ? '<h4>📸 Photos</h4>' + photoHtml : '') +
+      (videoHtml ? '<h4>🎥 Video</h4>' + videoHtml : '') +
+      '</div>' + flyerHtml;
+  }
+
+  function metaField(label, value) {
+    if (!value) return '';
+    return '<div class="event-meta-field"><label>' + label + '</label><div class="editable-field">' + escapeHtml(value) + '</div></div>';
+  }
+
+  function buildEventBlock(ev, number) {
+    var title = ev.title ? escapeHtml(ev.title) : '[ Event Title ]';
+    var meta = metaField('📅 Date', ev.date) + metaField('📍 Location', ev.location) + metaField('📝 Notes', ev.notes);
+    var note = ev._archived ? '<p class="archived-event-note">↩️ Auto-moved here from Upcoming Events once its date passed.</p>' : '';
+    return '<div class="event-block">' +
+      '<div class="event-block-header"><div class="event-number">' + number + '</div><h3>' + title + '</h3></div>' +
+      (meta ? '<div class="event-meta">' + meta + '</div>' : '') +
+      note +
+      buildMediaSection(ev) +
+      '</div>';
+  }
+
+  function upcomingMetaField(label, value) {
+    if (!value) return '';
+    return '<div class="upcoming-meta-item"><label>' + label + '</label><div class="uf">' + escapeHtml(value) + '</div></div>';
+  }
+
+  function buildUpcomingCard(ev) {
+    var title = ev.title ? escapeHtml(ev.title) : '[ Event Title — coming soon ]';
+    var meta = upcomingMetaField('📅 Date &amp; Time', ev.dateText) + upcomingMetaField('📍 Location', ev.location) + upcomingMetaField('📝 Details', ev.details);
+    var signup = ev.gformUrl
+      ? '<div class="upcoming-actions"><button class="btn-signup-event" data-gform-url="' + escapeHtml(ev.gformUrl) + '">📋 Sign Up</button></div>'
+      : '';
+    return '<div class="upcoming-event-card">' +
+      '<div class="upcoming-badge">✦ Upcoming Event</div>' +
+      '<div class="upcoming-event-title">' + title + '</div>' +
+      (meta ? '<div class="upcoming-meta-grid">' + meta + '</div>' : '') +
+      signup +
+      buildMediaSection(ev) +
+      '</div>';
+  }
+
+  /* Adapts an upcoming-event object into the shape buildEventBlock expects,
+     once it has been auto-archived into a Past activity. */
+  function upcomingToEventShape(ev) {
+    return {
+      id: ev.id, title: ev.title, date: ev.dateText, location: ev.location,
+      notes: ev.details, flyer: ev.flyer, photos: ev.photos, youtube: ev.youtube,
+      _archived: true
+    };
+  }
+
+  /* ── Auto-Archive: Upcoming → Past ──
+     Computed fresh at every render from each upcoming event's archiveDate +
+     archiveCategory fields (set in admin.html). Once today is past that
+     date, the event drops out of Upcoming and — if a category was chosen —
+     is folded into that Past activity's event list automatically. No DOM
+     surgery needed, so this is always consistent no matter how many times
+     the page re-renders. */
+  function getEffectiveUpcoming(allUpcoming) {
+    var today = new Date();
+    today.setHours(0, 0, 0, 0);
+    var stillUpcoming = [];
+    var archivedByCategory = {};
+    (allUpcoming || []).forEach(function(ev) {
+      if (ev.archiveDate) {
+        var d = new Date(ev.archiveDate + 'T00:00:00');
+        if (d.getTime() < today.getTime()) {
+          if (ev.archiveCategory) {
+            archivedByCategory[ev.archiveCategory] = archivedByCategory[ev.archiveCategory] || [];
+            archivedByCategory[ev.archiveCategory].push(upcomingToEventShape(ev));
+          }
+          return; // past its date either way — no longer "upcoming"
+        }
+      }
+      stillUpcoming.push(ev);
+    });
+    return { upcoming: stillUpcoming, archivedByCategory: archivedByCategory };
+  }
+
+  /* ── Master render: rebuilds every dynamic section from SITE_CONTENT ── */
+  function renderSite() {
+    var data = window.SITE_CONTENT;
+    if (!data) return;
+
+    var leadership = data.leadership || [];
+    var topEl = document.getElementById('leadership-top-container');
+    var gridEl = document.getElementById('leadership-grid-container');
+    if (topEl) topEl.innerHTML = leadership.length ? buildMemberCard(leadership[0]) : '';
+    if (gridEl) gridEl.innerHTML = leadership.slice(1).map(buildMemberCard).join('');
+
+    var membersEl = document.getElementById('members-container');
+    if (membersEl) membersEl.innerHTML = (data.members || []).map(buildMemberCard).join('');
+
+    var effective = getEffectiveUpcoming(data.upcomingEvents);
+    var upcomingEl = document.getElementById('upcoming-events-container');
+    if (upcomingEl) {
+      upcomingEl.innerHTML = effective.upcoming.length
+        ? effective.upcoming.map(buildUpcomingCard).join('')
+        : '<p class="no-events-msg">No upcoming events scheduled right now — check back soon!</p>';
+    }
+
+    var activities = data.pastActivities || {};
+    Object.keys(activities).forEach(function(key) {
+      var activity = activities[key];
+      var headerEl = document.getElementById('activity-' + key + '-header');
+      if (headerEl) {
+        headerEl.innerHTML = '<h2>' + escapeHtml(activity.label || '') + '</h2><p>' + escapeHtml(activity.description || '') + '</p>';
+      }
+      var eventsEl = document.getElementById('activity-' + key + '-events');
+      if (eventsEl) {
+        var events = (activity.events || []).concat(effective.archivedByCategory[key] || []);
+        eventsEl.innerHTML = events.length
+          ? events.map(function(ev, i) { return buildEventBlock(ev, i + 1); }).join('')
+          : '<p class="no-events-msg">No events added yet.</p>';
+      }
+    });
+
+    if (!window._gformDelegationBound) {
+      document.addEventListener('click', function(e) {
+        var btn = e.target.closest && e.target.closest('[data-gform-url]');
+        if (btn) openGFormModal(btn.getAttribute('data-gform-url'));
+      });
+      window._gformDelegationBound = true;
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', renderSite);
+
+  /* ── Google Form Modal — opened via data-gform-url click delegation
+     set up inside renderSite() above ── */
+  function openGFormModal(url) {
+    var body = document.getElementById('gformModalBody');
+    if (url) {
+      // Ensure it's an embeddable Google Form URL
+      var embedUrl = url.replace('/viewform', '/viewform?embedded=true');
+      if (!embedUrl.includes('embedded=true')) embedUrl += (embedUrl.includes('?') ? '&' : '?') + 'embedded=true';
+      body.innerHTML = '<iframe src="' + embedUrl + '" frameborder="0" marginheight="0" marginwidth="0" style="width:100%;min-height:520px;border:none;">Loading…</iframe>';
+    } else {
+      body.innerHTML = '<div class="gform-no-url">No sign-up form linked yet.</div>';
+    }
+    document.getElementById('gformModalOverlay').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeGFormModal(e) {
+    if (e && e.target !== document.getElementById('gformModalOverlay')) return;
+    document.getElementById('gformModalOverlay').classList.remove('open');
+    document.getElementById('gformModalBody').innerHTML = '';
+    document.body.style.overflow = '';
+  }
+
+  /* ── Tab Navigation ── */
+  function showTab(tabName, btn) {
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.top-nav button').forEach(b => b.classList.remove('active'));
+    document.getElementById('tab-' + tabName).classList.add('active');
+    btn.classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  /* ── Activity Sub-tab Navigation (scoped to Past Events) ── */
+  function showActivity(actName, btn) {
+    document.querySelectorAll('.activity-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('#past-sub-nav button').forEach(b => b.classList.remove('active'));
+    document.getElementById('activity-' + actName).classList.add('active');
+    btn.classList.add('active');
+  }
+
+  /* ── Sign Up Form ── */
+  function handleSignup(e) {
+    e.preventDefault();
+    document.getElementById('signupSuccess').style.display = 'block';
+    e.target.reset();
+  }
+
+  /* ── Donation Tier Selection ── */
+  function selectTier(el, amount) {
+    document.querySelectorAll('.donate-tier').forEach(t => t.classList.remove('selected'));
+    el.classList.add('selected');
+    const input = document.getElementById('donationAmount');
+    if (amount !== 'custom') {
+      input.value = amount;
+    } else {
+      input.value = '';
+      input.focus();
+    }
+  }
+
+  /* ── Copy Zelle email to clipboard (reduces mistyping/fraud risk) ── */
+  function copyZelleEmail() {
+    var email = document.getElementById('zelleEmail').textContent.trim();
+    var btn = document.getElementById('zelleCopyBtn');
+    function showCopied() {
+      var original = '📋 Copy';
+      btn.textContent = '✓ Copied';
+      btn.classList.add('copied');
+      setTimeout(function () {
+        btn.textContent = original;
+        btn.classList.remove('copied');
+      }, 1800);
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(email).then(showCopied).catch(function () {
+        alert('Copy failed — please select and copy manually: ' + email);
+      });
+    } else {
+      // Fallback for browsers without Clipboard API
+      var ta = document.createElement('textarea');
+      ta.value = email;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand('copy'); showCopied(); }
+      catch (e) { alert('Copy failed — please select and copy manually: ' + email); }
+      document.body.removeChild(ta);
+    }
+  }
+
+  /* ── Notify the club a Zelle gift is coming (opens the donor's own email client; nothing is sent through this site) ── */
+  function emailDonationDetails() {
+    var amount = (document.getElementById('donationAmount').value || '').trim();
+    var name = (document.getElementById('donorName').value || '').trim();
+    var donorEmail = (document.getElementById('donorEmail').value || '').trim();
+    var dedication = (document.getElementById('donorDedication').value || '').trim();
+    var message = (document.getElementById('donorMessage').value || '').trim();
+
+    var subject = 'Zelle Donation Notice' + (amount ? ' - $' + amount : '') + (name ? ' from ' + name : '');
+    var bodyLines = [
+      'Hello The Pointe Circle,',
+      '',
+      "I'm sending (or have sent) a donation via Zelle to thepointecircle@gmail.com.",
+      '',
+      'Amount: ' + (amount ? '$' + amount : 'Not specified'),
+      'Name: ' + (name || 'Not provided'),
+      'Email for receipt: ' + (donorEmail || 'Not provided'),
+      'Dedication: ' + (dedication || 'None'),
+      'Message: ' + (message || 'None'),
+      '',
+      'Thank you!'
+    ];
+    var body = bodyLines.join('\n');
+    var mailtoUrl = 'mailto:thepointecircle@gmail.com'
+      + '?subject=' + encodeURIComponent(subject)
+      + '&body=' + encodeURIComponent(body);
+    window.location.href = mailtoUrl;
+  }
+</script>
+
+</body>
+</html>
