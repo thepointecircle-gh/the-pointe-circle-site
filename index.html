@@ -37,7 +37,7 @@
     /* ─── Header / Hero ─── */
     header {
       position: relative;
-      min-height: 791px;
+      min-height: 836px; /* 760px × 1.1 */
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -98,17 +98,19 @@
       background: linear-gradient(90deg, var(--rose-dark), var(--gold), var(--rose-dark));
       z-index: 2;
     }
-    /* Title block is pinned at roughly a quarter of the way down the header,
-       independent of the cascade/badge group below — they no longer share
-       one centered flow. */
+    /* Title block — text starts at the left 22% mark of the header. Auto-
+       width + text-align:left so "left: X%" is a real, predictable anchor
+       point (same model as the subtitle's "left: X%" below) rather than
+       canceling itself out the way a 100%-wide centered box would.
+       Moved right 2% (20% → 22%). */
     header .hero-content {
       position: absolute;
-      top: calc(25% + 5px);
-      left: 50%;
-      width: 100%;
-      transform: translate(-50%, -50%);
+      top: calc(23% + 5px);
+      left: 22%;
+      transform: translateY(-50%);
       z-index: 3;
-      padding: 0 20px;
+      padding: 0;
+      text-align: left;
     }
     header .logo-icon { font-size: 3.2rem; margin-bottom: 10px; filter: drop-shadow(0 2px 8px rgba(0,0,0,0.45)); }
 
@@ -160,13 +162,11 @@
     }
 
     /* Subtitle — warm gold accent so it reads as a distinct tier under the title.
-       Positioned independently of the title, vertically centered on the
-       header and shifted toward the right side, with its first word
-       ("Where") starting under the title's last word ("Circle"). */
+       Moved up 5% of header height (30% → 25%). */
     header p.hero-subtitle {
       position: absolute;
-      left: 61%;
-      top: 50%;
+      left: 56%;
+      top: calc(25% + 25px);
       transform: translateY(-50%);
       z-index: 3;
       display: block;
@@ -239,9 +239,18 @@
       text-shadow: 0 1px 1px rgba(0,0,0,0.95), 0 1px 3px rgba(0,0,0,0.9), 0 2px 10px rgba(0,0,0,0.75);
     }
     @media (max-width: 600px) {
-      header { min-height: 632px; padding: 46px 16px 36px; }
+      header { min-height: 667px; padding: 46px 16px 36px; } /* 606px × 1.1 */
+      /* On narrow screens, fall back to the centered layout — the new
+         left:25%/auto-width title is tuned for desktop and could run off
+         the right edge of a phone screen otherwise. */
+      header .hero-content {
+        left: 50%;
+        width: 100%;
+        transform: translate(-50%, -50%);
+        text-align: center;
+      }
       header h1 { font-size: 4.8rem; }
-      header p.hero-subtitle { font-size: 1.5rem; letter-spacing: 1.6px; }
+      header p.hero-subtitle { left: 61%; top: 50%; font-size: 1.5rem; letter-spacing: 1.6px; }
       header .hero-bottom-group { bottom: 20px; gap: 16px; }
       header .hero-cascade { gap: 10px; }
       header .cascade-line { font-size: 1.11rem; white-space: normal; padding: 5px 14px; }
@@ -375,7 +384,7 @@
 
     .card-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
       gap: 24px;
       margin-bottom: 40px;
     }
@@ -392,6 +401,8 @@
     }
     @media (max-width: 600px) {
       .two-col-grid { grid-template-columns: 1fr; }
+      .leadership-top { flex-direction: column; align-items: center; gap: 24px; }
+      .leadership-top .card { width: 100%; max-width: 408px; }
     }
     .card {
       background: var(--white);
@@ -408,49 +419,74 @@
     }
     .card:hover { transform: translateY(-5px); box-shadow: 0 8px 28px rgba(200,96,124,0.18); }
 
-    /* ── Member Photo Upload ── */
+    /* ── Member Photo Upload ──
+       408×510px portrait rectangle. width:100% + max-width caps it so it
+       can never overflow narrow cards; aspect-ratio keeps the 408:510
+       (4:5) proportion at any size; margin:auto centers it if the card
+       ends up wider than 408px. */
     .card .member-photo-wrap {
       position: relative;
-      width: 100px; height: 100px;
-      margin-bottom: 14px;
+      width: 100%; max-width: 408px; aspect-ratio: 408 / 510;
+      margin: 0 auto 14px;
       cursor: pointer;
     }
     .card .member-photo-wrap img.member-photo {
-      width: 100px; height: 100px;
-      border-radius: 50%;
+      width: 100%; height: 100%;
+      border-radius: 10px;
       object-fit: cover;
       border: 3px solid var(--rose);
       display: block;
     }
     .card .member-photo-wrap .avatar-placeholder {
-      width: 100px; height: 100px;
-      border-radius: 50%;
+      width: 100%; height: 100%;
+      border-radius: 10px;
       background: linear-gradient(135deg, var(--rose), var(--gold));
       display: flex; align-items: center; justify-content: center;
-      font-size: 2.2rem;
+      font-size: 5.5rem;
       border: 3px solid var(--rose);
     }
     .card .member-photo-wrap .photo-overlay {
       position: absolute;
       inset: 0;
-      border-radius: 50%;
+      border-radius: 10px;
       background: rgba(201, 96, 124, 0.65);
       display: flex; align-items: center; justify-content: center;
       opacity: 0;
       transition: opacity 0.2s;
       color: white;
-      font-size: 0.75rem;
+      font-size: 0.9rem;
       flex-direction: column;
       gap: 3px;
     }
-    .card .member-photo-wrap .photo-overlay span { font-size: 1.3rem; }
+    .card .member-photo-wrap .photo-overlay span { font-size: 2.6rem; }
     .card .member-photo-wrap:hover .photo-overlay { opacity: 1; }
     .card .member-photo-wrap input[type="file"] { display: none; }
 
     .card h3 { font-size: 1.05rem; color: var(--brown); margin-bottom: 3px; font-weight: bold; }
     .card .member-role { font-size: 0.82rem; color: var(--rose-dark); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 14px; }
 
-    /* ── Self-introduction ── */
+    /* ── Bio button: links to the dedicated bio.html detail page ── */
+    .card .bio-btn {
+      display: inline-block;
+      padding: 8px 28px;
+      background: linear-gradient(135deg, var(--rose), var(--rose-dark));
+      color: var(--white);
+      font-size: 0.78rem;
+      font-weight: bold;
+      letter-spacing: 1.5px;
+      text-decoration: none;
+      border-radius: 20px;
+      transition: transform 0.2s, box-shadow 0.2s;
+      box-shadow: 0 2px 8px rgba(200,96,124,0.25);
+    }
+    .card .bio-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 14px rgba(200,96,124,0.35);
+    }
+
+    /* ── Self-introduction (no longer rendered on this page — bios now live
+       on the dedicated bio.html page via the BIO button above. This rule is
+       unused here but left in place in case it's needed again.) ── */
     .card .member-bio {
       width: 100%;
       min-height: 80px;
@@ -1567,7 +1603,7 @@
   <div class="hero-content">
     <h1>The Pointe Circle</h1>
   </div>
-  <p class="hero-subtitle">- Where Movement Meets Community</p>
+  <p class="hero-subtitle">Where Movement Meets Community</p>
   <div class="hero-bottom-group">
     <div class="hero-cascade">
       <span class="cascade-line line-1">Making dance accessible for everyone</span>
@@ -1575,7 +1611,7 @@
       <span class="cascade-line line-3">Creative service projects</span>
       <span class="cascade-line line-4">Community connection through movement</span>
     </div>
-    <span class="hero-badge">© 2024 · A 501(c)(3) nonprofit student organization</span>
+    <span class="hero-badge">501(c)(3) non-profit organization</span>
   </div>
 </header>
 
@@ -1612,13 +1648,13 @@
     </div>
 
     <!-- Leadership (rendered from content.js by renderSite() — see admin.html to edit) -->
-    <h2 class="section-title">Leadership Team</h2>
+    <h2 class="section-title" id="leadership-heading">Leadership Team</h2>
     <div class="section-divider"></div>
     <div class="leadership-top" id="leadership-top-container"></div>
     <div class="card-grid two-col-grid" id="leadership-grid-container"></div>
 
     <!-- Club Members (rendered from content.js by renderSite() — see admin.html to edit) -->
-    <h2 class="section-title">Club Members</h2>
+    <h2 class="section-title" id="members-heading">Club Members</h2>
     <div class="section-divider"></div>
     <div class="card-grid two-col-grid" id="members-container"></div>
 
@@ -1862,7 +1898,7 @@
   <div class="footer-contact-grid">
     <div class="footer-contact-item">
       <span class="fci">📧</span>
-      <a href="mailto:thepointecircle@gmail.com">admin@thepointecircle.org</a>
+      <a href="mailto:admin@thepointecircle.org">admin@thepointecircle.org</a>
     </div>
     <div class="footer-contact-item">
       <span class="fci">📍</span>
@@ -1877,7 +1913,7 @@
       <a href="https://thepointecircle.org" target="_blank">thepointecircle.org</a>
     </div>
   </div>
-  <div class="footer-copy">© 2024 The Pointe Circle · A Nonprofit Student Organization</div>
+  <div class="footer-copy">© 2024 · A 501(c)(3) nonprofit student organization.</div>
 </footer>
 
 <!-- ═══════════════════════════ SCRIPTS ══════════════════════════ -->
@@ -1988,12 +2024,17 @@
       ? '<img class="member-photo" src="' + escapeHtml(m.photo) + '" alt="' + escapeHtml(m.name || m.role || 'Member') + ' photo" style="display:block">'
       : '<div class="avatar-placeholder">' + (m.emoji || '🩰') + '</div>';
     var name = m.name ? escapeHtml(m.name) : '[ Name coming soon ]';
-    var bioHtml = m.bio ? '<div class="member-bio">' + escapeHtml(m.bio) + '</div>' : '';
+    /* "BIO" button opens the dedicated bio.html page for this person — it
+       reads the id from the URL and looks the person up in content.js, so
+       students never need to create a new page when adding someone. */
+    var bioBtn = (m.id !== undefined && m.id !== null && m.id !== '')
+      ? '<a class="bio-btn" href="bio.html?id=' + encodeURIComponent(m.id) + '">BIO</a>'
+      : '';
     return '<div class="card">' +
       '<div class="member-photo-wrap">' + photoHtml + '</div>' +
       '<h3>' + name + '</h3>' +
       '<div class="member-role">' + escapeHtml(m.role || '') + '</div>' +
-      bioHtml +
+      bioBtn +
       '</div>';
   }
 

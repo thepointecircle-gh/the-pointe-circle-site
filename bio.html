@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Bio · The Pointe Circle</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&display=swap" rel="stylesheet">
+<style>
+  /* ─── Design Tokens — kept identical to index.html so this page always
+     matches the main site's look automatically ─── */
+  :root {
+    --rose:      #e8a0b4;
+    --rose-dark: #c9607c;
+    --blush:     #f7dde6;
+    --cream:     #fdf6f0;
+    --sand:      #f0e4d7;
+    --gold:      #c89d6e;
+    --gold-light:#f6cf8e;
+    --gold-bright:#ffd84d;
+    --brown:     #7a4f3a;
+    --text:      #4a3330;
+    --muted:     #9c7b74;
+    --white:     #ffffff;
+    --shadow:    0 2px 16px rgba(200,100,120,0.10);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Georgia', serif;
+    background: var(--cream);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* ─── Simple top bar (not the full hero — this is a detail page) ─── */
+  .topbar {
+    background: var(--rose-dark);
+    border-bottom: 3px solid var(--rose);
+    padding: 18px 20px;
+    text-align: center;
+  }
+  .topbar a {
+    font-family: 'Dancing Script', 'Georgia', serif;
+    font-size: 2.1rem;
+    color: var(--white);
+    text-decoration: none;
+    font-weight: 700;
+  }
+
+  main {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 48px 24px 70px;
+  }
+
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--rose-dark);
+    font-size: 0.92rem;
+    font-weight: bold;
+    text-decoration: none;
+    letter-spacing: 0.3px;
+  }
+  .back-link:hover { text-decoration: underline; }
+  .back-link-top { margin-bottom: 28px; }
+  .back-link-bottom {
+    display: inline-flex;
+    margin-top: 36px;
+    padding: 10px 24px;
+    background: linear-gradient(135deg, var(--rose), var(--rose-dark));
+    color: var(--white);
+    border-radius: 22px;
+    box-shadow: 0 2px 10px rgba(200,96,124,0.25);
+  }
+  .back-link-bottom:hover { text-decoration: none; transform: translateY(-2px); }
+
+  /* ─── Photo sits on the right side of the page ─── */
+  .bio-photo-row {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 28px;
+  }
+  .bio-photo, .bio-avatar-placeholder {
+    width: 100%;
+    max-width: 408px;
+    aspect-ratio: 408 / 510;
+    border-radius: 14px;
+    border: 4px solid var(--rose);
+    box-shadow: var(--shadow);
+    display: block;
+  }
+  .bio-photo { object-fit: cover; }
+  .bio-avatar-placeholder {
+    background: linear-gradient(135deg, var(--rose), var(--gold));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 6rem;
+  }
+
+  /* ─── Name + bio sit below the photo, full width ─── */
+  .bio-text h1 {
+    font-size: 2rem;
+    color: var(--brown);
+    margin-bottom: 4px;
+  }
+  .bio-role {
+    font-size: 0.92rem;
+    color: var(--rose-dark);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    font-weight: bold;
+    margin-bottom: 22px;
+  }
+  .bio-body {
+    font-size: 1.05rem;
+    line-height: 1.75;
+    color: var(--text);
+    background: var(--white);
+    border: 1.5px solid var(--blush);
+    border-radius: 14px;
+    padding: 22px 26px;
+    white-space: pre-wrap;
+  }
+
+  .not-found {
+    text-align: center;
+    padding: 60px 20px;
+    font-size: 1.1rem;
+    color: var(--muted);
+  }
+  .not-found a { color: var(--rose-dark); font-weight: bold; text-decoration: none; }
+  .not-found a:hover { text-decoration: underline; }
+
+  @media (max-width: 600px) {
+    .bio-photo-row { justify-content: center; }
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <a href="index.html">🩰 The Pointe Circle</a>
+</div>
+
+<main id="bio-root">
+  <p class="not-found">Loading…</p>
+</main>
+
+<!-- This page reads window.SITE_CONTENT from content.js (the same file
+     admin.html edits) and looks up whoever matches ?id= in the URL.
+     Students never need to create a new page for a new person — adding
+     someone in admin.html automatically gives them a working bio page. -->
+<script src="content.js"></script>
+<script>
+  function escapeHtml(str) {
+    return String(str == null ? '' : str)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+
+  function getIdFromUrl() {
+    var params = new URLSearchParams(window.location.search);
+    return params.get('id');
+  }
+
+  function findPerson(id) {
+    var data = window.SITE_CONTENT || {};
+    var leadership = data.leadership || [];
+    var members = data.members || [];
+    var match = leadership.find(function (p) { return String(p.id) === String(id); });
+    if (match) return { person: match, listLabel: 'Leadership Team', backHref: 'index.html#leadership-heading' };
+    match = members.find(function (p) { return String(p.id) === String(id); });
+    if (match) return { person: match, listLabel: 'Club Members', backHref: 'index.html#members-heading' };
+    return null;
+  }
+
+  function render() {
+    var root = document.getElementById('bio-root');
+    var id = getIdFromUrl();
+    var found = id ? findPerson(id) : null;
+
+    if (!found) {
+      root.innerHTML =
+        '<p class="not-found">We couldn’t find that person. ' +
+        '<a href="index.html">← Back to the website</a></p>';
+      return;
+    }
+
+    var person = found.person;
+    var name = person.name ? escapeHtml(person.name) : '[ Name coming soon ]';
+    var roleHtml = person.role ? '<div class="bio-role">' + escapeHtml(person.role) + '</div>' : '';
+    var bioText = person.bio ? escapeHtml(person.bio) : 'Bio coming soon!';
+    var photoHtml = person.photo
+      ? '<img class="bio-photo" src="' + escapeHtml(person.photo) + '" alt="' + name + ' photo">'
+      : '<div class="bio-avatar-placeholder">' + (person.emoji || '🩰') + '</div>';
+    var backLabel = '← Back to ' + escapeHtml(found.listLabel);
+
+    document.title = (person.name || 'Bio') + ' · The Pointe Circle';
+
+    root.innerHTML =
+      '<a class="back-link back-link-top" href="' + found.backHref + '">' + backLabel + '</a>' +
+      '<div class="bio-photo-row">' + photoHtml + '</div>' +
+      '<div class="bio-text">' +
+        '<h1>' + name + '</h1>' +
+        roleHtml +
+        '<p class="bio-body">' + bioText + '</p>' +
+      '</div>' +
+      '<a class="back-link back-link-bottom" href="' + found.backHref + '">' + backLabel + '</a>';
+  }
+
+  document.addEventListener('DOMContentLoaded', render);
+</script>
+
+</body>
+</html>
