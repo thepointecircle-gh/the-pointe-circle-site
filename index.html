@@ -826,6 +826,47 @@
     }
     .btn-signup-event:hover { opacity: 0.88; transform: translateY(-2px); }
 
+    /* "Add to Calendar" — secondary/outline style so Sign Up (the button
+       that actually tells the club someone's coming) stays the visually
+       primary action; this one's just a personal-reminder convenience. */
+    .btn-addcal-event {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      background: transparent;
+      color: var(--rose-dark);
+      border: 1.5px solid var(--rose);
+      border-radius: 24px;
+      padding: 9px 22px;
+      font-size: 0.92rem;
+      font-family: 'Georgia', serif;
+      cursor: pointer;
+      letter-spacing: 0.5px;
+      transition: background 0.2s, transform 0.2s;
+      text-decoration: none;
+    }
+    .btn-addcal-event:hover { background: var(--blush); transform: translateY(-2px); }
+
+    /* "Performance Form" — optional, only shown for performance-type events
+       (collects program title/intro/music upload). Kept visually quieter
+       than the always-on Sign Up button since most events won't show it. */
+    .btn-perfform-event {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      background: transparent;
+      color: var(--muted);
+      border: 1.5px dashed var(--muted);
+      border-radius: 24px;
+      padding: 9px 22px;
+      font-size: 0.92rem;
+      font-family: 'Georgia', serif;
+      cursor: pointer;
+      letter-spacing: 0.5px;
+      transition: background 0.2s, transform 0.2s, color 0.2s, border-color 0.2s;
+    }
+    .btn-perfform-event:hover { background: var(--blush); color: var(--rose-dark); border-color: var(--rose); transform: translateY(-2px); }
+
     /* Google Form URL setter */
     .gform-url-wrap {
       display: flex;
@@ -2102,17 +2143,88 @@
     return '<div class="upcoming-meta-item"><label>' + label + '</label><div class="uf">' + escapeHtml(value) + '</div></div>';
   }
 
+  /* Builds a Google Calendar "quick add" link straight from the event's
+     existing fields — no Google account, API, or extra setup needed since
+     this is just a URL template. Uses archiveDate (already entered for
+     auto-archiving) + eventTime/eventEndTime for the real start/end of the
+     event; falls back to an all-day entry if no start time was given, and
+     to a 2-hour block if a start time was given but no end time. Times are
+     written without a trailing "Z" so Google Calendar treats them as the
+     viewer's own local wall-clock time (correct for a one-area community
+     club where attendees and the event share a timezone) rather than
+     converting them. */
+  function pad2(n) { return (n < 10 ? '0' : '') + n; }
+  function fmtLocal(d) {
+    return d.getFullYear() + pad2(d.getMonth() + 1) + pad2(d.getDate()) +
+      'T' + pad2(d.getHours()) + pad2(d.getMinutes()) + '00';
+  }
+  function buildGCalLink(ev) {
+    if (!ev.archiveDate) return ''; // need a real date to build any calendar link
+    var datePart = ev.archiveDate.replace(/-/g, ''); // YYYY-MM-DD -> YYYYMMDD
+    var datesParam;
+    if (ev.eventTime) {
+      var start = new Date(ev.archiveDate + 'T' + ev.eventTime + ':00');
+      var end;
+      if (ev.eventEndTime) {
+        end = new Date(ev.archiveDate + 'T' + ev.eventEndTime + ':00');
+        if (end.getTime() <= start.getTime()) end.setDate(end.getDate() + 1); // end time past midnight
+      } else {
+        end = new Date(start.getTime() + 2 * 60 * 60 * 1000); // no end given — assume 2 hours
+      }
+      datesParam = fmtLocal(start) + '/' + fmtLocal(end);
+    } else {
+      // All-day event — Google's all-day end date is exclusive, so use the next day.
+      var d = new Date(ev.archiveDate + 'T00:00:00');
+      d.setDate(d.getDate() + 1);
+      var nextDay = d.getFullYear() + pad2(d.getMonth() + 1) + pad2(d.getDate());
+      datesParam = datePart + '/' + nextDay;
+    }
+    var params = 'action=TEMPLATE' +
+      '&text=' + encodeURIComponent(ev.title || 'The Pointe Circle Event') +
+      '&dates=' + datesParam +
+      (ev.details ? '&details=' + encodeURIComponent(ev.details) : '') +
+      (ev.location ? '&location=' + encodeURIComponent(ev.location) : '');
+    return 'https://calendar.google.com/calendar/render?' + params;
+  }
+
+  /* ── Required "who's coming" sign-up ──
+     Every event gets a Sign Up link automatically — no per-event admin
+     action needed. It points at our one reusable Google Form (Event
+     Registration template), pre-filled with this event's title via Forms'
+     "entry.<id>=" URL parameter, so participants never have to type or pick
+     which event they're signing up for.
+     CONFIGURED — these point at the club's live Event Registration form.
+     If the form is ever recreated, get a new pre-filled link from
+     Forms → ⋮ → "Get pre-filled link" and update the two values below.
+     If either is ever cleared out, the Sign Up button hides itself rather
+     than pointing at a broken link. */
+  var SIGNUP_FORM_BASE_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSdzz2_gpzP2E70wjxc77DK8j7isHaK1dG_WnJcq_Sj-CxTW4g/viewform';
+  var SIGNUP_FORM_EVENT_ENTRY_ID = '862973379';
+  function buildSignupLink(ev) {
+    if (!SIGNUP_FORM_BASE_URL || !SIGNUP_FORM_EVENT_ENTRY_ID) return '';
+    var sep = SIGNUP_FORM_BASE_URL.indexOf('?') === -1 ? '?' : '&';
+    return SIGNUP_FORM_BASE_URL + sep + 'usp=pp_url&entry.' + SIGNUP_FORM_EVENT_ENTRY_ID +
+      '=' + encodeURIComponent(ev.title || 'The Pointe Circle Event');
+  }
+
   function buildUpcomingCard(ev) {
     var title = ev.title ? escapeHtml(ev.title) : '[ Event Title — coming soon ]';
     var meta = upcomingMetaField('📅 Date &amp; Time', ev.dateText) + upcomingMetaField('📍 Location', ev.location) + upcomingMetaField('📝 Details', ev.details);
-    var signup = ev.gformUrl
-      ? '<div class="upcoming-actions"><button class="btn-signup-event" data-gform-url="' + escapeHtml(ev.gformUrl) + '">📋 Sign Up</button></div>'
-      : '';
+    var gcalUrl = buildGCalLink(ev);
+    var signupUrl = buildSignupLink(ev); // required, always-on "who's coming" form — auto-filled with this event's title
+    var actions = '';
+    if (gcalUrl || signupUrl || ev.gformUrl) {
+      actions = '<div class="upcoming-actions">' +
+        (gcalUrl ? '<a class="btn-addcal-event" href="' + escapeHtml(gcalUrl) + '" target="_blank" rel="noopener">📅 Add to Calendar</a>' : '') +
+        (signupUrl ? '<button class="btn-signup-event" data-gform-url="' + escapeHtml(signupUrl) + '">📋 Sign Up</button>' : '') +
+        (ev.gformUrl ? '<button class="btn-perfform-event" data-gform-url="' + escapeHtml(ev.gformUrl) + '">🎭 Performance Form</button>' : '') +
+        '</div>';
+    }
     return '<div class="upcoming-event-card">' +
       '<div class="upcoming-badge">✦ Upcoming Event</div>' +
       '<div class="upcoming-event-title">' + title + '</div>' +
       (meta ? '<div class="upcoming-meta-grid">' + meta + '</div>' : '') +
-      signup +
+      actions +
       buildMediaSection(ev) +
       '</div>';
   }
@@ -2209,9 +2321,13 @@
   function openGFormModal(url) {
     var body = document.getElementById('gformModalBody');
     if (url) {
-      // Ensure it's an embeddable Google Form URL
-      var embedUrl = url.replace('/viewform', '/viewform?embedded=true');
-      if (!embedUrl.includes('embedded=true')) embedUrl += (embedUrl.includes('?') ? '&' : '?') + 'embedded=true';
+      // Ensure it's an embeddable Google Form URL — append rather than blindly
+      // inserting before any existing query string (a pre-filled signup link
+      // already has its own "?entry.xxx=" params attached).
+      var embedUrl = url;
+      if (embedUrl.indexOf('embedded=true') === -1) {
+        embedUrl += (embedUrl.indexOf('?') === -1 ? '?' : '&') + 'embedded=true';
+      }
       body.innerHTML = '<iframe src="' + embedUrl + '" frameborder="0" marginheight="0" marginwidth="0" style="width:100%;min-height:520px;border:none;">Loading…</iframe>';
     } else {
       body.innerHTML = '<div class="gform-no-url">No sign-up form linked yet.</div>';

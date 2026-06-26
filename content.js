@@ -123,6 +123,8 @@ window.SITE_CONTENT = {
       "photos": [],
       "youtube": "",
       "archiveDate": "",
+      "eventTime": "",
+      "eventEndTime": "",
       "archiveCategory": ""
     },
     {
@@ -136,6 +138,8 @@ window.SITE_CONTENT = {
       "photos": [],
       "youtube": "",
       "archiveDate": "",
+      "eventTime": "",
+      "eventEndTime": "",
       "archiveCategory": ""
     },
     {
@@ -149,6 +153,8 @@ window.SITE_CONTENT = {
       "photos": [],
       "youtube": "",
       "archiveDate": "",
+      "eventTime": "",
+      "eventEndTime": "",
       "archiveCategory": ""
     }
   ],
