@@ -8,7 +8,7 @@
    Open admin.html (in this same folder) instead — it gives you simple
    forms and upload buttons, and it writes this file for you.
 
-   Last saved by admin.html: 6/22/2026, 8:10:03 PM
+   Last saved by admin.html: 6/26/2026, 10:23:36 PM
    ════════════════════════════════════════════════════════════════════ */
 window.SITE_CONTENT = {
   "leadership": [
@@ -114,29 +114,33 @@ window.SITE_CONTENT = {
   "upcomingEvents": [
     {
       "id": "upcoming-1",
-      "title": "",
-      "dateText": "",
-      "location": "",
+      "title": "En Pointe Tales: A Ballerina's Storytime Adventure",
+      "dateText": "June 27, 2026 3:00 - 4:00 pm",
+      "location": "Mire Mesa Branch Library, San Diego",
       "details": "",
       "gformUrl": "",
-      "flyer": "",
+      "flyer": "flyers/upcoming-1-flyer.pdf",
       "photos": [],
       "youtube": "",
-      "archiveDate": "",
-      "archiveCategory": ""
+      "archiveDate": "2026-06-27",
+      "eventTime": "15:00",
+      "eventEndTime": "16:00",
+      "archiveCategory": "storytime"
     },
     {
       "id": "upcoming-2",
-      "title": "",
-      "dateText": "",
-      "location": "",
-      "details": "",
+      "title": "Summer Concert At Your Library ",
+      "dateText": "June 30, 2026 at 5:30 pm",
+      "location": "4S Ranch Library, San Diego",
+      "details": "We’re delighted to present our second Summer Concert at the 4S Ranch Library on Tuesday, June 30th, 2026 at 5:30pm. This family‑friendly program will feature a beautiful mix of performances, including: Piano, Violin, Singing, Classical Ballet and Chinese Dance\n\nIt will be a joyful celebration of music, dance, and culture, and we warmly welcome families, friends, and community members to join us.",
       "gformUrl": "",
-      "flyer": "",
+      "flyer": "flyers/upcoming-2-flyer.jpg",
       "photos": [],
       "youtube": "",
-      "archiveDate": "",
-      "archiveCategory": ""
+      "archiveDate": "2026-06-30",
+      "eventTime": "17:30",
+      "eventEndTime": "18:45",
+      "archiveCategory": "storytime"
     },
     {
       "id": "upcoming-3",
@@ -149,6 +153,8 @@ window.SITE_CONTENT = {
       "photos": [],
       "youtube": "",
       "archiveDate": "",
+      "eventTime": "",
+      "eventEndTime": "",
       "archiveCategory": ""
     }
   ],

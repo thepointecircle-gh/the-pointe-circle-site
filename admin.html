@@ -105,6 +105,8 @@
   .admin-card-fields.full { display: flex; flex-direction: column; gap: 10px; }
   .field-row { display: flex; gap: 10px; flex-wrap: wrap; }
   .field-row label { flex: 1; min-width: 180px; }
+  .field-note { font-size: .8rem; color: #4a8a5e; background: #eaf6ee; border: 1px solid #cdeada;
+    border-radius: 8px; padding: 8px 12px; margin: 0; }
 
   label { display: block; font-size: .8rem; color: var(--muted); font-weight: 600; }
   input[type="text"], input[type="url"], input[type="date"], textarea, select {
@@ -295,7 +297,7 @@ function blankPerson(listName) {
 function blankEvent(scope) {
   if (scope === 'upcoming') {
     return { id: 'upcoming-' + Date.now(), title: '', dateText: '', location: '', details: '',
-      gformUrl: '', flyer: '', photos: [], youtube: '', archiveDate: '', archiveCategory: '' };
+      gformUrl: '', flyer: '', photos: [], youtube: '', archiveDate: '', eventTime: '', eventEndTime: '', archiveCategory: '' };
   }
   return { id: scope + '-ev-' + Date.now(), title: '', date: '', location: '', notes: '',
     flyer: '', photos: [], youtube: '' };
@@ -569,22 +571,33 @@ function eventCardHtml(scope, i, ev) {
             oninput="updateEvent('${scope}',${i},'${isUpcoming ? 'details' : 'notes'}',this.value)">${escapeHtml(isUpcoming ? ev.details : ev.notes)}</textarea>
         </label>
         ${isUpcoming ? `
-        <label>Google Form Sign-Up Link
-          <input type="url" value="${escapeHtml(ev.gformUrl)}" placeholder="Paste the full Google Form URL"
-            oninput="updateEvent('upcoming',${i},'gformUrl',this.value)">
-        </label>
         <div class="field-row archive-row">
-          <label>📦 Auto-archive once this date passes (optional)
+          <label>📦 Event date (auto-archive + powers "Add to Calendar" &amp; Sign Up)
             <input type="date" value="${escapeHtml(ev.archiveDate)}"
               oninput="updateEvent('upcoming',${i},'archiveDate',this.value)">
           </label>
-          <label>Move into this Past Events category
-            <select onchange="updateEvent('upcoming',${i},'archiveCategory',this.value)">
-              <option value="">Don't auto-move</option>
-              ${activityOptions(ev.archiveCategory)}
-            </select>
+          <label>Event start time (optional — leave blank for an all-day calendar entry)
+            <input type="time" value="${escapeHtml(ev.eventTime)}"
+              oninput="updateEvent('upcoming',${i},'eventTime',this.value)">
           </label>
-        </div>` : ''}
+          <label>Event end time (optional — used to size the calendar block accurately)
+            <input type="time" value="${escapeHtml(ev.eventEndTime)}"
+              oninput="updateEvent('upcoming',${i},'eventEndTime',this.value)">
+          </label>
+        </div>
+        <p class="field-note">✅ Sign-up is automatic — the "Sign Up" button on the site always
+          points participants to our Event Registration form, pre-filled with this event's title.
+          Nothing to paste here.</p>
+        <label>Performance Program Form Link (optional — performance events only)
+          <input type="url" value="${escapeHtml(ev.gformUrl)}" placeholder="Paste the Google Form link that collects performance title, program intro &amp; music upload"
+            oninput="updateEvent('upcoming',${i},'gformUrl',this.value)">
+        </label>
+        <label>Move into this Past Events category
+          <select onchange="updateEvent('upcoming',${i},'archiveCategory',this.value)">
+            <option value="">Don't auto-move</option>
+            ${activityOptions(ev.archiveCategory)}
+          </select>
+        </label>` : ''}
         <label>YouTube Video Link (optional)
           <input type="text" value="${escapeHtml(ev.youtube)}" placeholder="Paste the full YouTube URL or just the video ID"
             oninput="updateEventYoutube('${scope}',${i},this.value)">
