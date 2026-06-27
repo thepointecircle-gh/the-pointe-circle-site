@@ -8,7 +8,7 @@
    Open admin.html (in this same folder) instead — it gives you simple
    forms and upload buttons, and it writes this file for you.
 
-   Last saved by admin.html: 6/26/2026, 10:41:15 PM
+   Last saved by admin.html: 6/26/2026, 11:09:13 PM
    ════════════════════════════════════════════════════════════════════ */
 window.SITE_CONTENT = {
   "leadership": [
@@ -134,7 +134,7 @@ window.SITE_CONTENT = {
       "location": "4S Ranch Library, San Diego",
       "details": "We’re delighted to present our Second Summer Concert at the 4S Ranch Library on Tuesday, June 30th, 2026 at 5:30pm. This family‑friendly program will feature a beautiful mix of performances, including: Piano, Violin, Guzheng, Singing, Classical Ballet and Chinese Dance.\n\nIt will be a joyful celebration of music, dance, and culture, and we warmly welcome families, friends, and community members to join us.",
       "gformUrl": "",
-      "flyer": "flyers/upcoming-2-flyer.jpg",
+      "flyer": "flyers/upcoming-2-flyer.png",
       "photos": [],
       "youtube": "",
       "archiveDate": "2026-06-30",
