@@ -142,10 +142,50 @@ function parseLooseDate(text) {
  * double check which questions in your template will be matched as
  * "Date" / "Location" before relying on it live. Check View → Logs (or
  * View → Execution log) after running.
+ *
+ * NOTE: this function only touches FormApp on the form this script is
+ * bound to, which a script can already do without asking permission —
+ * so running this alone will NOT trigger Google's Drive permission
+ * prompt. Run testDriveAccess (below) instead/first if you're trying to
+ * fix a "You do not have permission to call DriveApp.getFileById" error.
  */
 function listTemplateQuestions() {
   var form = FormApp.openById(TEMPLATE_FORM_ID);
   form.getItems().forEach(function (item, i) {
     Logger.log((i + 1) + '. [' + item.getType() + '] ' + item.getTitle());
   });
+}
+
+/**
+ * Run this once manually (select "testDriveAccess" in the function
+ * dropdown, then click ▶ Run) to force Google's Drive permission
+ * prompts. doPost needs TWO separate Drive permissions — reading the
+ * template (getFileById) AND making a copy of it (makeCopy) — and
+ * Google treats those as different scopes. This function deliberately
+ * exercises both, in that order, so both get requested/granted here.
+ * Neither permission can ever be granted from inside the deployed Web
+ * App itself (calls from admin.html never show a popup) — only a
+ * manual run here in the editor can trigger it.
+ *
+ * If you see "Authorization required," click through Review
+ * permissions → (your account) → Advanced → Go to (project name)
+ * (unsafe) → Allow. If you see NO popup and instead get a red error in
+ * the Execution log, read the error message directly: it most often
+ * means you're not logged into the same Google account that owns (or
+ * has edit access to) the template form, or that your account/
+ * organization blocks "unverified app" consent outright — in either
+ * case, check the error text and the troubleshooting section of
+ * MUSIC-FORM-SETUP-GUIDE.md.
+ *
+ * This creates one real test copy of your template in Drive, clearly
+ * named so you can find and delete it afterward — it's only there to
+ * prove the "make a copy" permission actually works end-to-end.
+ */
+function testDriveAccess() {
+  var file = DriveApp.getFileById(TEMPLATE_FORM_ID);
+  Logger.log('✅ Drive read access OK — found file: ' + file.getName());
+
+  var copy = file.makeCopy('TEST COPY — safe to delete (created by testDriveAccess)');
+  Logger.log('✅ Drive write access OK — created test copy: ' + copy.getUrl());
+  Logger.log('You can delete that test copy from Google Drive now — it was only created to test this permission.');
 }

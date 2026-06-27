@@ -30,12 +30,21 @@ When an officer checks the box on an event in admin.html:
 
 The script already has your template form's ID filled in — you don't need to change anything unless you want to.
 
-## Step 3 — (Optional but recommended) Test it once
+## Step 3 — Test it once (do not skip this — it's how Drive access gets granted)
 
-1. In the Apps Script editor, use the function dropdown near the **Run** button and select **`listTemplateQuestions`**.
-2. Click **▶ Run**. The first time, Google will ask you to authorize the script — click through **Review permissions → (your account) → Advanced → Go to (project name) → Allow**. This is normal; it's just Google confirming *you* own this script and the form.
-3. After it finishes, go to **View → Logs** (or **Executions** in the left sidebar) to see a list of every question in your template and its type.
-4. Confirm you see your Date and Location questions listed — if their titles don't contain the words "date" or "location" anywhere, let your developer/admin know so the matching can be adjusted.
+The Web App in Step 4 can only touch your Drive once you've personally clicked through Google's one-time permission screen. The only way to trigger that screen is to manually run a function here in the editor that actually uses Drive — it does **not** happen automatically when admin.html calls the Web App later. Skipping this step is the #1 cause of the error "*You do not have permission to call DriveApp.getFileById*."
+
+1. In the Apps Script editor, use the function dropdown near the **Run** button and select **`testDriveAccess`** (not `listTemplateQuestions` — that one only touches the form itself, which doesn't require this permission, so it won't trigger the popup you need).
+2. Click **▶ Run**. Google should ask you to authorize the script — click through **Review permissions → (your account)**. If you see "Google hasn't verified this app," that's expected for a script you wrote yourself — click **Advanced → Go to (project name) (unsafe) → Allow**.
+   - You may actually see **two separate permission prompts** here, one after another — Google treats "read a file" and "make a copy of a file" as two different permissions, even though both are "Drive access." Click through Allow on both if asked.
+3. Check **View → Logs** (or **Executions** in the left sidebar) — you should see:
+   ```
+   ✅ Drive read access OK — found file: ...
+   ✅ Drive write access OK — created test copy: ...
+   ```
+   If you see a red error instead, read it directly; it usually means you're not logged into the same Google account that has access to the template form.
+4. This test deliberately creates one real copy of your template form in your Drive, named `TEST COPY — safe to delete (created by testDriveAccess)`. Find it in Drive and delete it — it served its purpose once the logs above show both ✅ lines.
+5. Then also run **`listTemplateQuestions`** the same way, and check the logs to confirm you see your Date and Location questions listed — if their titles don't contain the words "date" or "location" anywhere, let your developer/admin know so the matching can be adjusted.
 
 ## Step 4 — Deploy as a Web App
 
@@ -71,7 +80,10 @@ The script already has your template form's ID filled in — you don't need to c
 ## If something goes wrong
 
 - **"Setup needed first" alert in admin.html** → `MUSIC_FORM_SCRIPT_URL` is still blank or wasn't saved — recheck Step 5.
-- **"Could not generate the form" / an error message** → Open the Apps Script editor → **Executions** (left sidebar) to see the actual error from the most recent run; this usually points to a permissions or Form ID issue.
+- **"Could not generate the form: You do not have permission to call DriveApp.getFileById..."** or **"...DriveApp.File.makeCopy..."** → Step 3 was skipped, run incompletely, or you ran `listTemplateQuestions` instead of `testDriveAccess`. These are actually two *separate* Google permissions — "read a file" (`getFileById`) and "make a copy of a file" (`makeCopy`) — and you need both. Go to the Apps Script editor, select `testDriveAccess` in the function dropdown, click ▶ Run, and click Allow through every prompt that appears (there may be more than one). Confirm the log shows **both** "✅ Drive read access OK" and "✅ Drive write access OK" lines before trying the checkbox again — if you only see the first ✅ line, the write permission still hasn't been granted. No redeploy needed once both show up.
+  - **If running `testDriveAccess` shows no popup at all and just errors in red** → read the exact error text in the log. It almost always means the Google account you're currently logged into in the Apps Script editor doesn't have access to the template form itself — switch to the account that owns/edits the template, then run it again.
+  - If it still fails after both ✅ lines show up → redeploy (**Deploy → Manage deployments → ✏️ Edit → Deploy**) while logged into that same account.
+- **"Could not generate the form" with a different error message** → Open the Apps Script editor → **Executions** (left sidebar) to see the actual error from the most recent run; this usually points to a permissions or Form ID issue.
 - **The new form's Date/Location aren't pre-filled, but the form itself was created fine** → the question titles in your template likely don't contain the words "date" or "location." Re-run `listTemplateQuestions` (Step 3) to check exact titles, then ask your developer/admin to adjust the matching keywords in `music-form-apps-script.gs`.
 - **You want forms saved to a specific Drive folder instead of the root** → open `music-form-apps-script.gs`, find `DESTINATION_FOLDER_ID = ''`, and paste a folder's ID between the quotes (the ID is in that folder's own Google Drive URL).
 
