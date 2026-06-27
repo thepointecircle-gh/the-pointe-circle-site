@@ -961,14 +961,14 @@
       display: block;
       width: 100%;
       max-width: 600px;
-      height: 720px;
+      /* US Letter portrait ratio (8.5x11) — matches a typical single-page
+         flyer, so the whole page fits the frame with no inner scrollbars. */
+      aspect-ratio: 8.5 / 11;
+      height: auto;
       border: none;
       border-radius: 10px;
       box-shadow: var(--shadow);
       margin: 0 auto 10px;
-    }
-    @media (max-width: 600px) {
-      .flyer-preview-pdf { height: 480px; }
     }
 
     /* Google Form Modal */
@@ -2126,7 +2126,7 @@
         '<h4>📄 Event Flyer</h4>' +
         '<div class="flyer-preview-link" style="display:flex">' +
         (isImg ? '<img class="flyer-preview-img" src="' + escapeHtml(item.flyer) + '" alt="Flyer">' : '') +
-        (isPdf ? '<iframe class="flyer-preview-pdf" src="' + escapeHtml(item.flyer) + '" title="Event flyer"></iframe>' : '') +
+        (isPdf ? '<iframe class="flyer-preview-pdf" src="' + escapeHtml(item.flyer) + '#toolbar=0&navpanes=0&view=Fit" title="Event flyer"></iframe>' : '') +
         '<div class="flyer-preview-row">📄 <a href="' + escapeHtml(item.flyer) + '" target="_blank">Open full-size flyer</a></div>' +
         '</div></div>';
     }
