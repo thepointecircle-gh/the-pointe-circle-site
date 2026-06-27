@@ -32,10 +32,13 @@
 // /forms/d/ and /edit when you open the template for editing).
 var TEMPLATE_FORM_ID = '1QG2_DOtRe5W6foRmks-fd2B6lvsa8fGlQIVa1XX7WiE';
 
-// Optional: paste a Google Drive folder ID here if you'd like every
-// auto-generated form copy to land in one specific folder instead of
-// your Drive's root. Leave as '' to skip this.
-var DESTINATION_FOLDER_ID = '';
+// Recommended: paste a Google Drive folder ID here so every newly
+// auto-generated form copy lands inside that folder (e.g. your
+// "The Pointe Circle > Activities" folder) instead of your Drive's root.
+// See "Step 7" in MUSIC-FORM-SETUP-GUIDE.md for exactly where to find this
+// ID. Leave as '' to have copies land in Drive's root instead (the old
+// default behavior).
+var DESTINATION_FOLDER_ID = 'https://drive.google.com/drive/folders/1M5J1TL_eoj4EMSoEH0jUFjKYvDVG1YF6';
 // ─────────────────────────────────────────────────────────────────────
 
 function doPost(e) {

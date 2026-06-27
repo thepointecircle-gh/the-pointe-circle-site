@@ -14,6 +14,7 @@ When an officer checks the box on an event in admin.html:
 3. The event's date and location are pre-filled into the new form wherever it finds questions mentioning "date" or "location."
 4. A "📋 Submit Program and Music" button appears on the live site for that event, linking to the new form.
 5. *(if Step 6 below is set up)* The form automatically closes itself — stops accepting new responses — the day after the event happens, with nobody needing to do anything.
+6. *(if Step 7 below is set up)* The new form lands directly inside a Drive folder you choose (e.g. "The Pointe Circle → Activities") instead of loose in your Drive's root.
 
 ---
 
@@ -90,6 +91,30 @@ Without this step, every generated form stays open to responses forever — harm
    - **Select time of day:** any time you like, e.g. midnight to 1am
 4. Click **Save**. You may be asked to authorize permissions again — same as Step 3, this is expected; click through it.
 
+## Step 7 (recommended) — Save generated forms into a specific Drive folder
+
+By default, every auto-generated form lands loose in your Drive's root (the main "My Drive" view) — not inside any folder. If you'd rather they all land inside a specific folder (e.g. **The Pointe Circle → Activities**), here's how:
+
+1. In Google Drive, open the folder you want forms to land in (e.g. navigate into **The Pointe Circle**, then into **Activities**).
+2. Look at the address bar in your browser. The URL will look like:
+   ```
+   https://drive.google.com/drive/folders/1AbCdEfGhIjKlMnOpQrStUvWxYz
+   ```
+3. Copy everything after `/folders/` — that long string of letters/numbers is the folder's ID.
+4. Open `music-form-apps-script.gs` in the Apps Script editor, find this line near the top:
+   ```
+   var DESTINATION_FOLDER_ID = '';
+   ```
+5. Paste the folder ID between the quotes, so it looks like:
+   ```
+   var DESTINATION_FOLDER_ID = '1AbCdEfGhIjKlMnOpQrStUvWxYz';
+   ```
+6. Click **💾 Save**, then redeploy so the live Web App picks up the change: **Deploy → Manage deployments → ✏️ Edit (next to your existing deployment) → Version: New version → Deploy**.
+
+From that point on, every newly generated Program/Music form lands directly in that folder — no extra clicks needed per event.
+
+**Note on moving your existing template form and any already-generated forms:** moving a file to a different Drive folder never changes its ID or its link (edit link, published link, or pre-filled link). So you can freely drag your template form and any past Program/Music forms into **The Pointe Circle → Activities** (or wherever you like) at any time — nothing on the website or in admin.html needs to be updated or relinked because of that move. Step 7 above only controls where *future* auto-generated copies land; it doesn't move anything that already exists.
+
 **That's it.** From now on, anyone checking the box in admin.html will generate a real, ready-to-share form — no further setup ever needed, even for officers in future years, as long as nobody deletes the Apps Script deployment or this trigger.
 
 ---
@@ -102,7 +127,8 @@ Without this step, every generated form stays open to responses forever — harm
   - If it still fails after both ✅ lines show up → redeploy (**Deploy → Manage deployments → ✏️ Edit → Deploy**) while logged into that same account.
 - **"Could not generate the form" with a different error message** → Open the Apps Script editor → **Executions** (left sidebar) to see the actual error from the most recent run; this usually points to a permissions or Form ID issue.
 - **The new form's Date/Location aren't pre-filled, but the form itself was created fine** → the question titles in your template likely don't contain the words "date" or "location." Re-run `listTemplateQuestions` (Step 3) to check exact titles, then ask your developer/admin to adjust the matching keywords in `music-form-apps-script.gs`.
-- **You want forms saved to a specific Drive folder instead of the root** → open `music-form-apps-script.gs`, find `DESTINATION_FOLDER_ID = ''`, and paste a folder's ID between the quotes (the ID is in that folder's own Google Drive URL).
+- **You want forms saved to a specific Drive folder instead of the root** → see Step 7 above.
+- **Newly generated forms are still landing in the Drive root after setting `DESTINATION_FOLDER_ID`** → you saved the script but forgot to redeploy. Code changes only reach the live Web App after **Deploy → Manage deployments → ✏️ Edit → Version: New version → Deploy** (same as any other change to this file).
 - **Old forms aren't closing themselves after their event passed** → make sure Step 6 was completed (check the ⏰ Triggers page in the Apps Script editor — you should see one trigger listed for `closeExpiredForms`). You can also select `closeExpiredForms` in the function dropdown and click ▶ Run any time to immediately close everything that's currently overdue, instead of waiting for the next scheduled run.
 - **A form generated *before* Step 6 was set up never auto-closes** → that's expected; only forms created after the trigger exists get remembered for auto-closing. To close an older one yourself, open it in Google Forms → **Responses** tab → toggle "Accepting responses" off.
 
