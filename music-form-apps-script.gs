@@ -1,8 +1,9 @@
 /**
  * The Pointe Circle — "Submit Program & Music" form auto-generator
  * ------------------------------------------------------------------
- * See MUSIC-FORM-SETUP-GUIDE.md (same folder as admin.html) for the
- * one-time deployment steps. Once deployed, paste the Web App URL into
+ * See MUSIC-FORM-SETUP-GUIDE.md (kept with the project's reference docs,
+ * not in this website folder) for the one-time deployment steps. Once
+ * deployed, paste the Web App URL into
  * admin.html's MUSIC_FORM_SCRIPT_URL constant — nobody needs to touch
  * this file again after that.
  *
@@ -45,12 +46,34 @@ var TEMPLATE_FORM_ID = '1QG2_DOtRe5W6foRmks-fd2B6lvsa8fGlQIVa1XX7WiE';
 // See "Step 7" in MUSIC-FORM-SETUP-GUIDE.md. Leave as '' to have copies land
 // in Drive's root instead (the old default behavior).
 var DESTINATION_FOLDER_ID = 'https://drive.google.com/drive/folders/1M5J1TL_eoj4EMSoEH0jUFjKYvDVG1YF6';
+
+// Security: the deployed Web App URL is unavoidably public (admin.html has
+// to call it from any visitor's browser), which means anyone who finds that
+// URL could otherwise call it directly, skipping admin.html entirely. This
+// shared secret closes that gap — admin.html sends it with every request,
+// and this script silently refuses any request that doesn't include the
+// exact same value. This already matches the copy in admin.html's
+// MUSIC_FORM_SHARED_SECRET constant, so there's nothing to set up here — it
+// just needs to travel with this file every time it's pasted into the Apps
+// Script editor and redeployed. See "Step 3b" in MUSIC-FORM-SETUP-GUIDE.md
+// if you ever want to rotate it (you'd change BOTH this value and
+// admin.html's to the same new string — changing only one breaks it).
+var SHARED_SECRET = 'UfzvZhI4JaAUS5u7E-Yzj-OlTjuh_rFC';
 // ─────────────────────────────────────────────────────────────────────
 
 function doPost(e) {
   var result;
   try {
     var body = JSON.parse(e.postData.contents);
+
+    // Reject anything that doesn't carry the matching shared secret, before
+    // touching Drive/Forms at all. (If SHARED_SECRET is ever blanked out on
+    // purpose, this check is skipped entirely — restoring the old,
+    // unprotected behavior.)
+    if (SHARED_SECRET && body.secret !== SHARED_SECRET) {
+      throw new Error('Unauthorized: missing or incorrect shared secret. If you just edited SHARED_SECRET or MUSIC_FORM_SHARED_SECRET, make sure both files have the exact same value, then redeploy.');
+    }
+
     var eventTitle = (body.title || '').trim();
     var eventDate = (body.date || '').trim();
     var eventLocation = (body.location || '').trim();

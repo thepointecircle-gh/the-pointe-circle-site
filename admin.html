@@ -274,11 +274,23 @@ const ACTIVITY_META = {
 /* ── Auto-generate "Submit Program & Music" Google Form ──
    ONE-TIME SETUP (an officer does this once, then no one ever needs to
    touch it again): deploy music-form-apps-script.gs as a Web App — see
-   MUSIC-FORM-SETUP-GUIDE.md (same folder as this file) for the
-   step-by-step instructions — and paste its Web App URL below. Until
+   MUSIC-FORM-SETUP-GUIDE.md (kept with the project's reference docs, not
+   in this website folder) for the step-by-step instructions — and paste
+   its Web App URL below. Until
    this is filled in, the checkbox in each event still works — it just
    tells the student setup isn't finished yet instead of silently failing. */
 const MUSIC_FORM_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby3a1xZXJJdnwBIV0Z49_6I2fkvI7rBYLq3uPpdurR1L0bx_axBo4ANkl1c7mMETWaU/exec'; // <-- paste your deployed Apps Script Web App URL here
+
+/* Security: the Web App URL above is unavoidably public (it has to be, so
+   this page can call it from any visitor's browser) — anyone who finds that
+   URL could otherwise call it directly, bypassing this page entirely. This
+   value travels along with every request and must exactly match the
+   SHARED_SECRET constant near the top of music-form-apps-script.gs, or the
+   Apps Script will reject the request as "Unauthorized." Already set up to
+   match — nothing to do here unless you intentionally rotate it (see "Step
+   3b" in MUSIC-FORM-SETUP-GUIDE.md), in which case update BOTH this value
+   and the .gs file's to the same new string. */
+const MUSIC_FORM_SHARED_SECRET = 'UfzvZhI4JaAUS5u7E-Yzj-OlTjuh_rFC';
 
 /* ── Blank starting content (used by "Start Brand-New Content") ── */
 function blankSite() {
@@ -726,7 +738,7 @@ async function toggleMusicForm(scope, i, checked) {
     return;
   }
   if (!MUSIC_FORM_SCRIPT_URL) {
-    alert('Setup needed first: an officer needs to finish the one-time Apps Script setup and paste its Web App URL into admin.html (MUSIC_FORM_SCRIPT_URL) before this checkbox can work. See MUSIC-FORM-SETUP-GUIDE.md in this same folder.');
+    alert('Setup needed first: an officer needs to finish the one-time Apps Script setup and paste its Web App URL into admin.html (MUSIC_FORM_SCRIPT_URL) before this checkbox can work. See MUSIC-FORM-SETUP-GUIDE.md (kept with the project\'s reference docs).');
     renderScope(scope);
     return;
   }
@@ -741,7 +753,7 @@ async function toggleMusicForm(scope, i, checked) {
     const resp = await fetch(MUSIC_FORM_SCRIPT_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'text/plain' }, // text/plain avoids an extra CORS preflight against Apps Script Web Apps
-      body: JSON.stringify({ title: ev.title, date: ev.archiveDate || ev.dateText || '', location: ev.location || '' })
+      body: JSON.stringify({ secret: MUSIC_FORM_SHARED_SECRET, title: ev.title, date: ev.archiveDate || ev.dateText || '', location: ev.location || '' })
     });
     const data = await resp.json();
     if (data && data.url) {
