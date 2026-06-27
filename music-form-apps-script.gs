@@ -20,7 +20,12 @@
  *      already filled in, so respondents never retype them.
  *   5. Sends that link back to admin.html, which saves it on the event
  *      and shows a "Submit Program and Music" button on the live site.
- *   6. Remembers the new form's event date so it can close itself —
+ *   6. Explicitly publishes the new copy through Google's newer Forms
+ *      API, since Google added a separate "Publish" gate that the
+ *      older form-editing tools this script otherwise uses can't set —
+ *      skipping this step is what causes visitors to see "We're sorry.
+ *      This document is not published." on an otherwise-working form.
+ *   7. Remembers the new form's event date so it can close itself —
  *      stop accepting responses — automatically once that date has
  *      passed, with no one needing to open admin.html or visit the site.
  *      This part needs one extra one-time setup step: see "Step 6" in
@@ -32,12 +37,13 @@
 // /forms/d/ and /edit when you open the template for editing).
 var TEMPLATE_FORM_ID = '1QG2_DOtRe5W6foRmks-fd2B6lvsa8fGlQIVa1XX7WiE';
 
-// Recommended: paste a Google Drive folder ID here so every newly
-// auto-generated form copy lands inside that folder (e.g. your
+// Recommended: paste a Google Drive folder link OR just its ID here so every
+// newly auto-generated form copy lands inside that folder (e.g. your
 // "The Pointe Circle > Activities" folder) instead of your Drive's root.
-// See "Step 7" in MUSIC-FORM-SETUP-GUIDE.md for exactly where to find this
-// ID. Leave as '' to have copies land in Drive's root instead (the old
-// default behavior).
+// You can paste the WHOLE address-bar URL of the folder (the script figures
+// out the ID on its own) or just the ID part — either works.
+// See "Step 7" in MUSIC-FORM-SETUP-GUIDE.md. Leave as '' to have copies land
+// in Drive's root instead (the old default behavior).
 var DESTINATION_FOLDER_ID = 'https://drive.google.com/drive/folders/1M5J1TL_eoj4EMSoEH0jUFjKYvDVG1YF6';
 // ─────────────────────────────────────────────────────────────────────
 
@@ -55,8 +61,9 @@ function doPost(e) {
 
     // 1) Duplicate the template.
     var templateFile = DriveApp.getFileById(TEMPLATE_FORM_ID);
-    var copy = DESTINATION_FOLDER_ID
-      ? templateFile.makeCopy(newFormName, DriveApp.getFolderById(DESTINATION_FOLDER_ID))
+    var destFolderId = extractDriveId(DESTINATION_FOLDER_ID);
+    var copy = destFolderId
+      ? templateFile.makeCopy(newFormName, DriveApp.getFolderById(destFolderId))
       : templateFile.makeCopy(newFormName);
 
     // 2) Open the new copy and make sure its internal title matches too
@@ -77,7 +84,18 @@ function doPost(e) {
     newForm.setAcceptingResponses(true);
     newForm.setRequireLogin(false);
 
-    // 2c) Remember this form's event date so closeExpiredForms (below) can
+    // 2c) Google now has a SEPARATE "Publish" gate on forms (independent of
+    //     "Accepting responses" above) — newly created/copied forms can
+    //     come out of makeCopy() in an unpublished state, which shows
+    //     visitors "We're sorry. This document is not published." even
+    //     though setAcceptingResponses(true) succeeded. There's no FormApp
+    //     method for this yet, so this calls the newer Forms REST API
+    //     directly to publish the copy. See "Step 3" in
+    //     MUSIC-FORM-SETUP-GUIDE.md — this needs one extra one-time
+    //     authorization click, same idea as the Drive permission prompts.
+    publishFormViaApi(copy.getId());
+
+    // 2d) Remember this form's event date so closeExpiredForms (below) can
     //     automatically stop it from accepting responses once that date
     //     has passed — entirely automatic, no manual step needed each
     //     time (only the one-time trigger setup in Step 6 of the guide).
@@ -135,6 +153,18 @@ function doPost(e) {
     .setMimeType(ContentService.MimeType.JSON);
 }
 
+// Lets DESTINATION_FOLDER_ID (and similar settings) be filled in as either
+// a bare Drive ID or a full address-bar URL pasted straight from the
+// browser — pulls out just the ID either way, so there's no precise
+// copy-pasting that can be gotten wrong. Drive IDs are always a long run
+// of letters/digits/_/- (25+ characters), which is distinctive enough to
+// find inside a URL reliably.
+function extractDriveId(idOrUrl) {
+  if (!idOrUrl) return '';
+  var match = /[-\w]{25,}/.exec(idOrUrl);
+  return match ? match[0] : idOrUrl.trim();
+}
+
 // "MM.DD.YY <Event Title>" — date prefix, then the event title, nothing else.
 function buildFormTitle(eventTitle, eventDateText) {
   var datePrefix = formatDatePrefix(eventDateText);
@@ -149,6 +179,39 @@ function formatDatePrefix(eventDateText) {
   var dd = ('0' + d.getDate()).slice(-2);
   var yy = ('' + d.getFullYear()).slice(-2);
   return mm + '.' + dd + '.' + yy;
+}
+
+// Publishes a form via the newer Forms REST API (forms.googleapis.com).
+// Google added a "Publish" state to Forms that's separate from
+// "Accepting responses" and has no equivalent in the older FormApp
+// service that the rest of this script uses — without this call, a
+// freshly-copied form can sit unpublished and show visitors "We're sorry.
+// This document is not published." even though everything else worked.
+// Uses the same Drive authorization this script already has (Google's
+// docs list the "drive" scope as one of the accepted ways to call this
+// endpoint), plus the generic "make an outside web request" permission
+// that Apps Script adds automatically for any UrlFetchApp call.
+function publishFormViaApi(formId) {
+  var url = 'https://forms.googleapis.com/v1/forms/' + formId + ':setPublishSettings';
+  var payload = {
+    publishSettings: {
+      publishState: {
+        isPublished: true,
+        isAcceptingResponses: true
+      }
+    }
+  };
+  var response = UrlFetchApp.fetch(url, {
+    method: 'post',
+    contentType: 'application/json',
+    headers: { Authorization: 'Bearer ' + ScriptApp.getOAuthToken() },
+    payload: JSON.stringify(payload),
+    muteHttpExceptions: true
+  });
+  var code = response.getResponseCode();
+  if (code < 200 || code >= 300) {
+    throw new Error('Could not publish the new form via the Forms API (HTTP ' + code + '): ' + response.getContentText());
+  }
 }
 
 // admin.html sends either a raw "YYYY-MM-DD" (archiveDate) or the
@@ -274,5 +337,14 @@ function testDriveAccess() {
 
   var copy = file.makeCopy('TEST COPY — safe to delete (created by testDriveAccess)');
   Logger.log('✅ Drive write access OK — created test copy: ' + copy.getUrl());
-  Logger.log('You can delete that test copy from Google Drive now — it was only created to test this permission.');
+
+  try {
+    publishFormViaApi(copy.getId());
+    Logger.log('✅ Form-publish access OK — successfully published the test copy.');
+  } catch (err) {
+    Logger.log('⚠️ Form-publish access FAILED: ' + err.message);
+    Logger.log('   Generated forms may keep showing "We\'re sorry. This document is not published." until this is fixed — see the troubleshooting section of MUSIC-FORM-SETUP-GUIDE.md.');
+  }
+
+  Logger.log('You can delete that test copy from Google Drive now — it was only created to test these permissions.');
 }

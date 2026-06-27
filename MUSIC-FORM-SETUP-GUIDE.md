@@ -13,8 +13,9 @@ When an officer checks the box on an event in admin.html:
 2. The new form is renamed to something like `06.30.26 Summer Concert` (date prefix + the event's title, nothing else).
 3. The event's date and location are pre-filled into the new form wherever it finds questions mentioning "date" or "location."
 4. A "📋 Submit Program and Music" button appears on the live site for that event, linking to the new form.
-5. *(if Step 6 below is set up)* The form automatically closes itself — stops accepting new responses — the day after the event happens, with nobody needing to do anything.
-6. *(if Step 7 below is set up)* The new form lands directly inside a Drive folder you choose (e.g. "The Pointe Circle → Activities") instead of loose in your Drive's root.
+5. The new form is explicitly **published** through Google's Forms system, so it's actually reachable by the public the moment it's created (Google added a separate "Publish" switch to Forms that, if skipped, shows visitors "We're sorry. This document is not published." even on an otherwise-working form — this step prevents that).
+6. *(if Step 6 below is set up)* The form automatically closes itself — stops accepting new responses — the day after the event happens, with nobody needing to do anything.
+7. *(if Step 7 below is set up)* The new form lands directly inside a Drive folder you choose (e.g. "The Pointe Circle → Activities") instead of loose in your Drive's root.
 
 ---
 
@@ -38,14 +39,15 @@ The Web App in Step 4 can only touch your Drive once you've personally clicked t
 
 1. In the Apps Script editor, use the function dropdown near the **Run** button and select **`testDriveAccess`** (not `listTemplateQuestions` — that one only touches the form itself, which doesn't require this permission, so it won't trigger the popup you need).
 2. Click **▶ Run**. Google should ask you to authorize the script — click through **Review permissions → (your account)**. If you see "Google hasn't verified this app," that's expected for a script you wrote yourself — click **Advanced → Go to (project name) (unsafe) → Allow**.
-   - You may actually see **two separate permission prompts** here, one after another — Google treats "read a file" and "make a copy of a file" as two different permissions, even though both are "Drive access." Click through Allow on both if asked.
+   - You may actually see **several separate permission prompts** here, one after another — Google treats "read a file," "make a copy of a file," and "make a web request to publish the form" as different permissions, even though they're all part of the same feature. Click through Allow on all of them if asked.
 3. Check **View → Logs** (or **Executions** in the left sidebar) — you should see:
    ```
    ✅ Drive read access OK — found file: ...
    ✅ Drive write access OK — created test copy: ...
+   ✅ Form-publish access OK — successfully published the test copy.
    ```
-   If you see a red error instead, read it directly; it usually means you're not logged into the same Google account that has access to the template form.
-4. This test deliberately creates one real copy of your template form in your Drive, named `TEST COPY — safe to delete (created by testDriveAccess)`. Find it in Drive and delete it — it served its purpose once the logs above show both ✅ lines.
+   If you see a red error instead, read it directly; it usually means you're not logged into the same Google account that has access to the template form. A red **"⚠️ Form-publish access FAILED"** line specifically means the "Submit Program and Music" button will keep showing visitors "This document is not published" until that one gets fixed — re-run this step after addressing whatever the error text says.
+4. This test deliberately creates one real copy of your template form in your Drive, named `TEST COPY — safe to delete (created by testDriveAccess)`. Find it in Drive and delete it — it served its purpose once the logs above show all three ✅ lines.
 5. Then also run **`listTemplateQuestions`** the same way, and check the logs to confirm you see your Date and Location questions listed — if their titles don't contain the words "date" or "location" anywhere, let your developer/admin know so the matching can be adjusted.
 
 ## Step 4 — Deploy as a Web App
@@ -100,14 +102,14 @@ By default, every auto-generated form lands loose in your Drive's root (the main
    ```
    https://drive.google.com/drive/folders/1AbCdEfGhIjKlMnOpQrStUvWxYz
    ```
-3. Copy everything after `/folders/` — that long string of letters/numbers is the folder's ID.
+3. Copy the **whole address bar URL** — you don't need to trim it down to just the ID; the script figures that part out on its own.
 4. Open `music-form-apps-script.gs` in the Apps Script editor, find this line near the top:
    ```
    var DESTINATION_FOLDER_ID = '';
    ```
-5. Paste the folder ID between the quotes, so it looks like:
+5. Paste what you copied between the quotes — either the full link or just the ID both work, so this is hard to get wrong:
    ```
-   var DESTINATION_FOLDER_ID = '1AbCdEfGhIjKlMnOpQrStUvWxYz';
+   var DESTINATION_FOLDER_ID = 'https://drive.google.com/drive/folders/1AbCdEfGhIjKlMnOpQrStUvWxYz';
    ```
 6. Click **💾 Save**, then redeploy so the live Web App picks up the change: **Deploy → Manage deployments → ✏️ Edit (next to your existing deployment) → Version: New version → Deploy**.
 
@@ -125,6 +127,7 @@ From that point on, every newly generated Program/Music form lands directly in t
 - **"Could not generate the form: You do not have permission to call DriveApp.getFileById..."** or **"...DriveApp.File.makeCopy..."** → Step 3 was skipped, run incompletely, or you ran `listTemplateQuestions` instead of `testDriveAccess`. These are actually two *separate* Google permissions — "read a file" (`getFileById`) and "make a copy of a file" (`makeCopy`) — and you need both. Go to the Apps Script editor, select `testDriveAccess` in the function dropdown, click ▶ Run, and click Allow through every prompt that appears (there may be more than one). Confirm the log shows **both** "✅ Drive read access OK" and "✅ Drive write access OK" lines before trying the checkbox again — if you only see the first ✅ line, the write permission still hasn't been granted. No redeploy needed once both show up.
   - **If running `testDriveAccess` shows no popup at all and just errors in red** → read the exact error text in the log. It almost always means the Google account you're currently logged into in the Apps Script editor doesn't have access to the template form itself — switch to the account that owns/edits the template, then run it again.
   - If it still fails after both ✅ lines show up → redeploy (**Deploy → Manage deployments → ✏️ Edit → Deploy**) while logged into that same account.
+- **The generated form/button shows visitors "We're sorry. This document is not published."** → Google added a separate "Publish" switch to Forms, on top of the older "Accepting responses" setting — a form can be open to responses yet still unpublished, and only this specific switch controls whether outside visitors can open the link at all. Go to the Apps Script editor, select `testDriveAccess` in the function dropdown, click ▶ Run, click Allow on any new permission prompt (there's a third one now, specifically for this), and confirm the log shows **"✅ Form-publish access OK."** Any *future* generated forms will publish themselves automatically from then on. Forms generated *before* this fix was set up need to be published once by hand: open the form itself in Google Forms → click **Publish** (top right) → **Publish** in the dialog that appears.
 - **"Could not generate the form" with a different error message** → Open the Apps Script editor → **Executions** (left sidebar) to see the actual error from the most recent run; this usually points to a permissions or Form ID issue.
 - **The new form's Date/Location aren't pre-filled, but the form itself was created fine** → the question titles in your template likely don't contain the words "date" or "location." Re-run `listTemplateQuestions` (Step 3) to check exact titles, then ask your developer/admin to adjust the matching keywords in `music-form-apps-script.gs`.
 - **You want forms saved to a specific Drive folder instead of the root** → see Step 7 above.
