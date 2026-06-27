@@ -741,7 +741,7 @@ async function toggleMusicForm(scope, i, checked) {
     const resp = await fetch(MUSIC_FORM_SCRIPT_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'text/plain' }, // text/plain avoids an extra CORS preflight against Apps Script Web Apps
-      body: JSON.stringify({ title: ev.title, date: ev.dateText || ev.archiveDate || '', location: ev.location || '' })
+      body: JSON.stringify({ title: ev.title, date: ev.archiveDate || ev.dateText || '', location: ev.location || '' })
     });
     const data = await resp.json();
     if (data && data.url) {

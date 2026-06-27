@@ -10,7 +10,8 @@
  * Music" box on an event in admin.html:
  *   1. Makes a fresh copy of the template form (so events never share
  *      or overwrite each other's forms).
- *   2. Renames the copy: "MM.DD.YY The Pointe Circle <Event Title>".
+ *   2. Renames the copy: "MM.DD.YY <Event Title>" — date prefix, then the
+ *      event's title, nothing else.
  *   3. Looks at the new copy's own questions and finds whichever ones
  *      mention "date" or "location" in their titles (this works even
  *      if the exact wording is tweaked later — it just needs those
@@ -54,6 +55,19 @@ function doPost(e) {
     //    (makeCopy sets the Drive file name; this sets the Form's own title).
     var newForm = FormApp.openById(copy.getId());
     newForm.setTitle(newFormName);
+
+    // 2b) Auto-publish the new copy so the live website can open it
+    //     immediately, with no manual step needed in Google Forms:
+    //       - setAcceptingResponses(true): guarantees the copy is actually
+    //         open for responses, even if the template itself was ever
+    //         left paused/closed.
+    //       - setRequireLogin(false): makes sure the copy is reachable by
+    //         any visitor to the website, not just people signed into your
+    //         club's Google account/organization (some Google Workspace
+    //         setups default new forms to "restricted to my organization,"
+    //         which the public can't open — this explicitly turns that off).
+    newForm.setAcceptingResponses(true);
+    newForm.setRequireLogin(false);
 
     // 3) Find "Date" / "Location" questions by keyword match (case-insensitive,
     //    matches "Date", "Event Date", "What date...", etc. without needing
@@ -107,11 +121,10 @@ function doPost(e) {
     .setMimeType(ContentService.MimeType.JSON);
 }
 
-// "MM.DD.YY The Pointe Circle <Event Title>" — matches the convention:
-// "Date: Mon.Day.XX(year) The Pointe Circle + Title"
+// "MM.DD.YY <Event Title>" — date prefix, then the event title, nothing else.
 function buildFormTitle(eventTitle, eventDateText) {
   var datePrefix = formatDatePrefix(eventDateText);
-  return (datePrefix ? datePrefix + ' ' : '') + 'The Pointe Circle ' + eventTitle;
+  return (datePrefix ? datePrefix + ' ' : '') + eventTitle;
 }
 
 function formatDatePrefix(eventDateText) {

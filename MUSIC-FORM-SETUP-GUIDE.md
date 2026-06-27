@@ -10,7 +10,7 @@ You do **not** need to know how to code. You're just copying and pasting a few t
 
 When an officer checks the box on an event in admin.html:
 1. A brand-new copy of your music/program template form is created automatically.
-2. The new form is renamed to something like `06.30.26 The Pointe Circle Summer Concert`.
+2. The new form is renamed to something like `06.30.26 Summer Concert` (date prefix + the event's title, nothing else).
 3. The event's date and location are pre-filled into the new form wherever it finds questions mentioning "date" or "location."
 4. A "📋 Submit Program and Music" button appears on the live site for that event, linking to the new form.
 
