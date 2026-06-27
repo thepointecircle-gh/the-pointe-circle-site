@@ -20,6 +20,11 @@
  *      already filled in, so respondents never retype them.
  *   5. Sends that link back to admin.html, which saves it on the event
  *      and shows a "Submit Program and Music" button on the live site.
+ *   6. Remembers the new form's event date so it can close itself —
+ *      stop accepting responses — automatically once that date has
+ *      passed, with no one needing to open admin.html or visit the site.
+ *      This part needs one extra one-time setup step: see "Step 6" in
+ *      MUSIC-FORM-SETUP-GUIDE.md to turn on the daily automatic check.
  */
 
 // ── ONE-TIME SETUP ──────────────────────────────────────────────────
@@ -68,6 +73,12 @@ function doPost(e) {
     //         which the public can't open — this explicitly turns that off).
     newForm.setAcceptingResponses(true);
     newForm.setRequireLogin(false);
+
+    // 2c) Remember this form's event date so closeExpiredForms (below) can
+    //     automatically stop it from accepting responses once that date
+    //     has passed — entirely automatic, no manual step needed each
+    //     time (only the one-time trigger setup in Step 6 of the guide).
+    rememberFormForAutoClose(copy.getId(), parseLooseDate(eventDate));
 
     // 3) Find "Date" / "Location" questions by keyword match (case-insensitive,
     //    matches "Date", "Event Date", "What date...", etc. without needing
@@ -147,6 +158,66 @@ function parseLooseDate(text) {
   }
   var d = new Date(text);
   return isNaN(d.getTime()) ? null : d;
+}
+
+// ── Auto-close: stop accepting responses once the event date has passed ──
+// See "Step 6" in MUSIC-FORM-SETUP-GUIDE.md to turn this on — it's a
+// one-time setup step (adding a daily trigger), same idea as Step 3/4.
+// Until that trigger is set up, generated forms simply stay open forever
+// (same as before this feature existed) — nothing breaks either way.
+var AUTO_CLOSE_PROPERTY_KEY = 'PENDING_FORM_CLOSE';
+
+// Called from doPost right after a form is created. Does nothing if there's
+// no usable event date — that form just stays open indefinitely, same as
+// before this feature existed.
+function rememberFormForAutoClose(formId, eventDateObj) {
+  if (!eventDateObj) return;
+  var props = PropertiesService.getScriptProperties();
+  var pending = JSON.parse(props.getProperty(AUTO_CLOSE_PROPERTY_KEY) || '{}');
+  pending[formId] = dateOnlyString(eventDateObj);
+  props.setProperty(AUTO_CLOSE_PROPERTY_KEY, JSON.stringify(pending));
+}
+
+function dateOnlyString(d) {
+  return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2);
+}
+
+/**
+ * Closes (stops accepting responses on) every auto-generated form whose
+ * event date has already passed, then forgets about it so it's never
+ * checked again. Forms that were created before this feature existed, that
+ * have no recorded date, or that get manually deleted before this runs are
+ * silently skipped rather than causing an error.
+ *
+ * This function does nothing by itself — it only runs when something
+ * triggers it. To make it run automatically every day with no manual
+ * action ever needed, follow "Step 6" in MUSIC-FORM-SETUP-GUIDE.md (adding
+ * a time-driven trigger). You can also select this function in the
+ * function dropdown and click ▶ Run any time to close everything that's
+ * currently overdue right away.
+ */
+function closeExpiredForms() {
+  var props = PropertiesService.getScriptProperties();
+  var pending = JSON.parse(props.getProperty(AUTO_CLOSE_PROPERTY_KEY) || '{}');
+  var today = dateOnlyString(new Date());
+  var stillPending = {};
+
+  Object.keys(pending).forEach(function (formId) {
+    var eventDate = pending[formId];
+    if (eventDate >= today) {
+      stillPending[formId] = eventDate; // event hasn't happened yet — check again tomorrow
+      return;
+    }
+    try {
+      FormApp.openById(formId).setAcceptingResponses(false);
+      Logger.log('✅ Closed expired form (event date ' + eventDate + '): ' + formId);
+    } catch (err) {
+      Logger.log('⚠️ Could not close form ' + formId + ' (' + err.message + ') — forgetting it.');
+    }
+    // Either way (closed or errored), don't keep checking this one again.
+  });
+
+  props.setProperty(AUTO_CLOSE_PROPERTY_KEY, JSON.stringify(stillPending));
 }
 
 /**

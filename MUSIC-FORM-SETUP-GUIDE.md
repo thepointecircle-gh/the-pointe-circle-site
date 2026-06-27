@@ -13,6 +13,7 @@ When an officer checks the box on an event in admin.html:
 2. The new form is renamed to something like `06.30.26 Summer Concert` (date prefix + the event's title, nothing else).
 3. The event's date and location are pre-filled into the new form wherever it finds questions mentioning "date" or "location."
 4. A "📋 Submit Program and Music" button appears on the live site for that event, linking to the new form.
+5. *(if Step 6 below is set up)* The form automatically closes itself — stops accepting new responses — the day after the event happens, with nobody needing to do anything.
 
 ---
 
@@ -73,7 +74,23 @@ The Web App in Step 4 can only touch your Drive once you've personally clicked t
    ```
 5. Save the file, and re-upload/save it the same way you normally publish site changes (e.g. through GitHub).
 
-**That's it.** From now on, anyone checking the box in admin.html will generate a real, ready-to-share form — no further setup ever needed, even for officers in future years, as long as nobody deletes the Apps Script deployment.
+**The core feature is done at this point.** Step 6 below is optional but recommended — it makes old forms close themselves automatically so people can't submit late responses to a past event.
+
+## Step 6 (optional but recommended) — Make forms auto-close after their event
+
+Without this step, every generated form stays open to responses forever — harmless, but it means someone could still submit to a form for an event that already happened. This step makes that close itself automatically, with nobody needing to remember to do it.
+
+1. In the Apps Script editor, click the **⏰ clock icon** in the left sidebar (this is "Triggers").
+2. Click **+ Add Trigger** (bottom right).
+3. Fill in:
+   - **Choose which function to run:** `closeExpiredForms`
+   - **Choose which deployment should run:** Head
+   - **Select event source:** Time-driven
+   - **Select type of time based trigger:** Day timer
+   - **Select time of day:** any time you like, e.g. midnight to 1am
+4. Click **Save**. You may be asked to authorize permissions again — same as Step 3, this is expected; click through it.
+
+**That's it.** From now on, anyone checking the box in admin.html will generate a real, ready-to-share form — no further setup ever needed, even for officers in future years, as long as nobody deletes the Apps Script deployment or this trigger.
 
 ---
 
@@ -86,5 +103,7 @@ The Web App in Step 4 can only touch your Drive once you've personally clicked t
 - **"Could not generate the form" with a different error message** → Open the Apps Script editor → **Executions** (left sidebar) to see the actual error from the most recent run; this usually points to a permissions or Form ID issue.
 - **The new form's Date/Location aren't pre-filled, but the form itself was created fine** → the question titles in your template likely don't contain the words "date" or "location." Re-run `listTemplateQuestions` (Step 3) to check exact titles, then ask your developer/admin to adjust the matching keywords in `music-form-apps-script.gs`.
 - **You want forms saved to a specific Drive folder instead of the root** → open `music-form-apps-script.gs`, find `DESTINATION_FOLDER_ID = ''`, and paste a folder's ID between the quotes (the ID is in that folder's own Google Drive URL).
+- **Old forms aren't closing themselves after their event passed** → make sure Step 6 was completed (check the ⏰ Triggers page in the Apps Script editor — you should see one trigger listed for `closeExpiredForms`). You can also select `closeExpiredForms` in the function dropdown and click ▶ Run any time to immediately close everything that's currently overdue, instead of waiting for the next scheduled run.
+- **A form generated *before* Step 6 was set up never auto-closes** → that's expected; only forms created after the trigger exists get remembered for auto-closing. To close an older one yourself, open it in Google Forms → **Responses** tab → toggle "Accepting responses" off.
 
 If you ever want to retire this feature, you can simply leave `MUSIC_FORM_SCRIPT_URL` blank again — the checkbox will go back to telling people setup isn't finished, and no existing forms are deleted.
