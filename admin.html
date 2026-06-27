@@ -107,6 +107,9 @@
   .field-row label { flex: 1; min-width: 180px; }
   .field-note { font-size: .8rem; color: #4a8a5e; background: #eaf6ee; border: 1px solid #cdeada;
     border-radius: 8px; padding: 8px 12px; margin: 0; }
+  .checkbox-label { display: flex; align-items: center; gap: 8px; font-weight: 600;
+    color: #3a2c2c; cursor: pointer; }
+  .checkbox-label input[type="checkbox"] { width: auto; margin: 0; flex-shrink: 0; }
 
   label { display: block; font-size: .8rem; color: var(--muted); font-weight: 600; }
   input[type="text"], input[type="url"], input[type="date"], textarea, select {
@@ -268,6 +271,15 @@ const ACTIVITY_META = {
   drive:     { emoji: '🤲', title: 'Drive for Dancewear, Books & Toys' }
 };
 
+/* ── Auto-generate "Submit Program & Music" Google Form ──
+   ONE-TIME SETUP (an officer does this once, then no one ever needs to
+   touch it again): deploy music-form-apps-script.gs as a Web App — see
+   MUSIC-FORM-SETUP-GUIDE.md (same folder as this file) for the
+   step-by-step instructions — and paste its Web App URL below. Until
+   this is filled in, the checkbox in each event still works — it just
+   tells the student setup isn't finished yet instead of silently failing. */
+const MUSIC_FORM_SCRIPT_URL = ''; // <-- paste your deployed Apps Script Web App URL here
+
 /* ── Blank starting content (used by "Start Brand-New Content") ── */
 function blankSite() {
   const blankActivities = {};
@@ -297,7 +309,7 @@ function blankPerson(listName) {
 function blankEvent(scope) {
   if (scope === 'upcoming') {
     return { id: 'upcoming-' + Date.now(), title: '', dateText: '', location: '', details: '',
-      gformUrl: '', flyer: '', photos: [], youtube: '', archiveDate: '', eventTime: '', eventEndTime: '', archiveCategory: '' };
+      gformUrl: '', musicFormUrl: '', flyer: '', photos: [], youtube: '', archiveDate: '', eventTime: '', eventEndTime: '', archiveCategory: '' };
   }
   return { id: scope + '-ev-' + Date.now(), title: '', date: '', location: '', notes: '',
     flyer: '', photos: [], youtube: '' };
@@ -555,36 +567,45 @@ function eventCardHtml(scope, i, ev) {
           <input type="text" value="${escapeHtml(ev.title)}" placeholder="e.g. Spring Storytime at Lincoln Library"
             oninput="updateEvent('${scope}',${i},'title',this.value)">
         </label>
+        ${isUpcoming ? `
+        <div class="field-row archive-row">
+          <label>📅 Event Date
+            <input type="date" value="${escapeHtml(ev.archiveDate)}"
+              oninput="updateEventDateTime('upcoming',${i},'archiveDate',this.value)">
+          </label>
+          <label>Start Time (optional — leave blank for an all-day event)
+            <input type="time" value="${escapeHtml(ev.eventTime)}"
+              oninput="updateEventDateTime('upcoming',${i},'eventTime',this.value)">
+          </label>
+          <label>End Time (optional — used to size the calendar block accurately)
+            <input type="time" value="${escapeHtml(ev.eventEndTime)}"
+              oninput="updateEventDateTime('upcoming',${i},'eventEndTime',this.value)">
+          </label>
+        </div>
+        <p class="field-note" id="dt-preview-upcoming-${i}">🗓️ Shown on site as: <strong>${escapeHtml(ev.dateText) || '(pick a date above)'}</strong></p>
         <div class="field-row">
-          <label>${isUpcoming ? 'Date / Time (shown on site)' : 'Date'}
-            <input type="text" value="${escapeHtml(isUpcoming ? ev.dateText : ev.date)}"
-              placeholder="${isUpcoming ? 'e.g. June 14, 2026 · 2:00 PM' : 'e.g. March 15, 2026'}"
-              oninput="updateEvent('${scope}',${i},'${isUpcoming ? 'dateText' : 'date'}',this.value)">
+          <label>Location
+            <input type="text" value="${escapeHtml(ev.location)}" placeholder="e.g. Lincoln Public Library"
+              oninput="updateEvent('upcoming',${i},'location',this.value)">
+          </label>
+        </div>
+        ` : `
+        <div class="field-row">
+          <label>Date
+            <input type="text" value="${escapeHtml(ev.date)}" placeholder="e.g. March 15, 2026"
+              oninput="updateEvent('${scope}',${i},'date',this.value)">
           </label>
           <label>Location
             <input type="text" value="${escapeHtml(ev.location)}" placeholder="e.g. Lincoln Public Library"
               oninput="updateEvent('${scope}',${i},'location',this.value)">
           </label>
         </div>
+        `}
         <label>${isUpcoming ? 'Details' : 'Notes'}
           <textarea placeholder="Optional info…"
             oninput="updateEvent('${scope}',${i},'${isUpcoming ? 'details' : 'notes'}',this.value)">${escapeHtml(isUpcoming ? ev.details : ev.notes)}</textarea>
         </label>
         ${isUpcoming ? `
-        <div class="field-row archive-row">
-          <label>📦 Event date (auto-archive + powers "Add to Calendar" &amp; Sign Up)
-            <input type="date" value="${escapeHtml(ev.archiveDate)}"
-              oninput="updateEvent('upcoming',${i},'archiveDate',this.value)">
-          </label>
-          <label>Event start time (optional — leave blank for an all-day calendar entry)
-            <input type="time" value="${escapeHtml(ev.eventTime)}"
-              oninput="updateEvent('upcoming',${i},'eventTime',this.value)">
-          </label>
-          <label>Event end time (optional — used to size the calendar block accurately)
-            <input type="time" value="${escapeHtml(ev.eventEndTime)}"
-              oninput="updateEvent('upcoming',${i},'eventEndTime',this.value)">
-          </label>
-        </div>
         <p class="field-note">✅ Sign-up is automatic — the "Sign Up" button on the site always
           points participants to our Event Registration form, pre-filled with this event's title.
           Nothing to paste here.</p>
@@ -592,6 +613,16 @@ function eventCardHtml(scope, i, ev) {
           <input type="url" value="${escapeHtml(ev.gformUrl)}" placeholder="Paste the Google Form link that collects performance title, program intro &amp; music upload"
             oninput="updateEvent('upcoming',${i},'gformUrl',this.value)">
         </label>
+        <label class="checkbox-label">
+          <input type="checkbox" ${ev.musicFormUrl ? 'checked' : ''} ${ev._musicFormGenerating ? 'disabled' : ''}
+            onchange="toggleMusicForm('upcoming',${i},this.checked)">
+          🎵 Auto-generate a "Submit Program &amp; Music" form for this event
+        </label>
+        <p class="field-note">${
+          ev._musicFormGenerating ? '⏳ Creating your form — one moment…' :
+          ev.musicFormUrl ? '✅ Form ready: <a href="' + escapeHtml(ev.musicFormUrl) + '" target="_blank">open it</a> — it now also appears as a button on the live site.' :
+          'Unchecked — no form created yet for this event.'
+        }</p>
         <label>Move into this Past Events category
           <select onchange="updateEvent('upcoming',${i},'archiveCategory',this.value)">
             <option value="">Don't auto-move</option>
@@ -643,6 +674,87 @@ function renderScope(scope) {
   if (scope === 'upcoming') renderUpcoming(); else renderActivityEvents(scope);
 }
 function updateEvent(scope, i, field, value) { eventsArray(scope)[i][field] = value; }
+
+/* Calendar-picker → "shown on site" text. Whenever a student picks the
+   event date/start/end time, we auto-build the human-readable date/time
+   line that appears on the live site (e.g. "June 27, 2026 · 3:00 - 4:00 PM")
+   instead of having them type it by hand — one less thing to keep in sync. */
+function formatTimeAmPm(t) {
+  if (!t) return '';
+  const parts = t.split(':');
+  let h = parseInt(parts[0], 10);
+  const m = parts[1];
+  const ampm = h >= 12 ? 'PM' : 'AM';
+  let h12 = h % 12; if (h12 === 0) h12 = 12;
+  return h12 + ':' + m + ' ' + ampm;
+}
+function formatDateTimeDisplay(dateStr, startStr, endStr) {
+  if (!dateStr) return '';
+  const d = new Date(dateStr + 'T00:00:00');
+  const dateFmt = d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+  let timePart = '';
+  if (startStr && endStr) {
+    const startFmt = formatTimeAmPm(startStr), endFmt = formatTimeAmPm(endStr);
+    const startAp = startFmt.split(' ')[1], endAp = endFmt.split(' ')[1];
+    timePart = (startAp === endAp ? startFmt.split(' ')[0] : startFmt) + ' - ' + endFmt;
+  } else if (startStr) {
+    timePart = formatTimeAmPm(startStr);
+  }
+  return dateFmt + (timePart ? ' · ' + timePart : '');
+}
+function updateEventDateTime(scope, i, field, value) {
+  const ev = eventsArray(scope)[i];
+  ev[field] = value;
+  ev.dateText = formatDateTimeDisplay(ev.archiveDate, ev.eventTime, ev.eventEndTime);
+  const preview = document.getElementById('dt-preview-' + scope + '-' + i);
+  if (preview) preview.innerHTML = '🗓️ Shown on site as: <strong>' + (escapeHtml(ev.dateText) || '(pick a date above)') + '</strong>';
+}
+/* Checking the box duplicates the music/program template form for this
+   specific event (real title + date + location filled in automatically)
+   via the one-time Apps Script Web App set up above, and saves the new
+   form's link. Unchecking just clears the saved link — it does not
+   delete the actual Google Form, so nothing is ever lost by accident. */
+async function toggleMusicForm(scope, i, checked) {
+  const ev = eventsArray(scope)[i];
+  if (!checked) {
+    if (ev.musicFormUrl && !confirm('Remove the saved "Submit Program & Music" form link for this event? (The Google Form itself is not deleted.)')) {
+      renderScope(scope);
+      return;
+    }
+    ev.musicFormUrl = '';
+    renderScope(scope);
+    return;
+  }
+  if (!MUSIC_FORM_SCRIPT_URL) {
+    alert('Setup needed first: an officer needs to finish the one-time Apps Script setup and paste its Web App URL into admin.html (MUSIC_FORM_SCRIPT_URL) before this checkbox can work. See MUSIC-FORM-SETUP-GUIDE.md in this same folder.');
+    renderScope(scope);
+    return;
+  }
+  if (!ev.title) {
+    alert('Add an Event Title above first, so the new form can be named after it.');
+    renderScope(scope);
+    return;
+  }
+  ev._musicFormGenerating = true;
+  renderScope(scope);
+  try {
+    const resp = await fetch(MUSIC_FORM_SCRIPT_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain' }, // text/plain avoids an extra CORS preflight against Apps Script Web Apps
+      body: JSON.stringify({ title: ev.title, date: ev.dateText || ev.archiveDate || '', location: ev.location || '' })
+    });
+    const data = await resp.json();
+    if (data && data.url) {
+      ev.musicFormUrl = data.url;
+    } else {
+      alert('Could not generate the form: ' + (data && data.error ? data.error : 'unknown error'));
+    }
+  } catch (err) {
+    alert('Could not reach the form-generator script: ' + err.message);
+  }
+  delete ev._musicFormGenerating;
+  renderScope(scope);
+}
 function updateEventYoutube(scope, i, raw) { eventsArray(scope)[i].youtube = extractYouTubeId(raw); }
 function setFlyer(scope, i, input) {
   const f = input.files[0];

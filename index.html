@@ -735,10 +735,11 @@
     }
     .upcoming-meta-grid {
       display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
+      grid-template-columns: 1fr 1fr;
       gap: 14px;
       margin-bottom: 22px;
     }
+    .upcoming-meta-item.wide { grid-column: 1 / -1; }
     @media (max-width: 600px) { .upcoming-meta-grid { grid-template-columns: 1fr; } }
     .upcoming-meta-item label {
       display: block;
@@ -846,6 +847,27 @@
       text-decoration: none;
     }
     .btn-addcal-event:hover { background: var(--blush); transform: translateY(-2px); }
+
+    /* "Submit Program and Music" — optional, only shown once an admin checks
+       the music-form box for that event (auto-generated from the club's
+       template). Sits right next to Sign Up, styled a step quieter than it
+       since Sign Up remains the one always-on, primary action. */
+    .btn-musicform-event {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      background: transparent;
+      color: var(--rose-dark);
+      border: 1.5px solid var(--rose);
+      border-radius: 24px;
+      padding: 9px 22px;
+      font-size: 0.92rem;
+      font-family: 'Georgia', serif;
+      cursor: pointer;
+      letter-spacing: 0.5px;
+      transition: background 0.2s, transform 0.2s;
+    }
+    .btn-musicform-event:hover { background: var(--blush); transform: translateY(-2px); }
 
     /* "Performance Form" — optional, only shown for performance-type events
        (collects program title/intro/music upload). Kept visually quieter
@@ -2154,9 +2176,9 @@
       '</div>';
   }
 
-  function upcomingMetaField(label, value) {
+  function upcomingMetaField(label, value, wide) {
     if (!value) return '';
-    return '<div class="upcoming-meta-item"><label>' + label + '</label><div class="uf">' + escapeHtml(value) + '</div></div>';
+    return '<div class="upcoming-meta-item' + (wide ? ' wide' : '') + '"><label>' + label + '</label><div class="uf">' + escapeHtml(value) + '</div></div>';
   }
 
   /* Builds a Google Calendar "quick add" link straight from the event's
@@ -2225,14 +2247,15 @@
 
   function buildUpcomingCard(ev) {
     var title = ev.title ? escapeHtml(ev.title) : '[ Event Title — coming soon ]';
-    var meta = upcomingMetaField('📅 Date &amp; Time', ev.dateText) + upcomingMetaField('📍 Location', ev.location) + upcomingMetaField('📝 Details', ev.details);
+    var meta = upcomingMetaField('📅 Date &amp; Time', ev.dateText) + upcomingMetaField('📍 Location', ev.location) + upcomingMetaField('📝 Details', ev.details, true);
     var gcalUrl = buildGCalLink(ev);
     var signupUrl = buildSignupLink(ev); // required, always-on "who's coming" form — auto-filled with this event's title
     var actions = '';
-    if (gcalUrl || signupUrl || ev.gformUrl) {
+    if (gcalUrl || signupUrl || ev.gformUrl || ev.musicFormUrl) {
       actions = '<div class="upcoming-actions">' +
         (gcalUrl ? '<a class="btn-addcal-event" href="' + escapeHtml(gcalUrl) + '" target="_blank" rel="noopener">📅 Add to Calendar</a>' : '') +
         (signupUrl ? '<button class="btn-signup-event" data-gform-url="' + escapeHtml(signupUrl) + '">📋 Sign Up</button>' : '') +
+        (ev.musicFormUrl ? '<button class="btn-musicform-event" data-gform-url="' + escapeHtml(ev.musicFormUrl) + '">📋 Submit Program and Music</button>' : '') +
         (ev.gformUrl ? '<button class="btn-perfform-event" data-gform-url="' + escapeHtml(ev.gformUrl) + '">🎭 Performance Form</button>' : '') +
         '</div>';
     }

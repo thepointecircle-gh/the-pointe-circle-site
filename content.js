@@ -8,7 +8,7 @@
    Open admin.html (in this same folder) instead — it gives you simple
    forms and upload buttons, and it writes this file for you.
 
-   Last saved by admin.html: 6/26/2026, 11:12:34 PM
+   Last saved by admin.html: 6/26/2026, 11:41:03 PM
    ════════════════════════════════════════════════════════════════════ */
 window.SITE_CONTENT = {
   "leadership": [
@@ -119,6 +119,7 @@ window.SITE_CONTENT = {
       "location": "Mire Mesa Branch Library, San Diego",
       "details": "",
       "gformUrl": "",
+      "musicFormUrl": "",
       "flyer": "flyers/upcoming-1-flyer.png",
       "photos": [],
       "youtube": "",
@@ -134,6 +135,7 @@ window.SITE_CONTENT = {
       "location": "4S Ranch Library, San Diego",
       "details": "We’re delighted to present our Second Summer Concert at the 4S Ranch Library on Tuesday, June 30th, 2026 at 5:30pm. This family‑friendly program will feature a beautiful mix of performances, including: Piano, Violin, Guzheng, Singing, Classical Ballet and Chinese Dance.\n\nIt will be a joyful celebration of music, dance, and culture, and we warmly welcome families, friends, and community members to join us.",
       "gformUrl": "",
+      "musicFormUrl": "",
       "flyer": "flyers/upcoming-2-flyer.jpg",
       "photos": [],
       "youtube": "",
@@ -149,6 +151,7 @@ window.SITE_CONTENT = {
       "location": "",
       "details": "",
       "gformUrl": "",
+      "musicFormUrl": "",
       "flyer": "",
       "photos": [],
       "youtube": "",
