@@ -946,15 +946,29 @@
       background: none; border: none; color: var(--muted);
       cursor: pointer; font-size: 0.8rem;
     }
-    /* Inline flyer image preview — auto-fits and centers, only shown when
-       the uploaded flyer file is an image (JPG/PNG); PDFs stay link-only. */
+    /* Inline flyer preview — shown directly on the page at a comfortable
+       reading size instead of requiring a click. Images render as <img>;
+       PDFs render inline in a tall embedded viewer (.flyer-preview-pdf). */
     .flyer-preview-img {
-      display: none;
+      display: block;
       width: 100%;
-      max-width: 420px;
+      max-width: 600px;
       border-radius: 10px;
       box-shadow: var(--shadow);
-      margin: 0 auto;
+      margin: 0 auto 10px;
+    }
+    .flyer-preview-pdf {
+      display: block;
+      width: 100%;
+      max-width: 600px;
+      height: 720px;
+      border: none;
+      border-radius: 10px;
+      box-shadow: var(--shadow);
+      margin: 0 auto 10px;
+    }
+    @media (max-width: 600px) {
+      .flyer-preview-pdf { height: 480px; }
     }
 
     /* Google Form Modal */
@@ -1647,8 +1661,9 @@
     <div class="hero-slide" data-src="images/header-slide-3.jpg" aria-label="Dancers in recital costumes"></div>
     <div class="hero-slide" data-src="images/header-slide-4.jpg" aria-label="Dancers backstage in performance dress"></div>
     <div class="hero-slide" data-src="images/header-slide-8.jpg" aria-label="Club families celebrating the holidays together"></div>
-    <!-- Slides 9 & 10 disabled per request — images kept on disk in case they're wanted again later. -->
-    <div class="hero-slide" data-src="images/header-slide-11.jpg" aria-label="Club members at a holiday celebration"></div>
+    <div class="hero-slide" data-src="images/header-slide-9.jpg" aria-label="Club members and volunteers at a community gathering"></div>
+    <!-- Slide 10 disabled per request — image kept on disk in case it's wanted again later. -->
+    <!-- Slide 11 disabled per request — image kept on disk in case it's wanted again later. -->
     <div class="hero-slide" data-src="images/header-slide-12.jpg" aria-label="Dancers in matching club t-shirts at a holiday event"></div>
   </div>
   <button type="button" class="hero-photo-nav" id="heroPhotoNav" aria-label="Show next header photo" title="Show next photo">›</button>
@@ -1721,11 +1736,11 @@
 
     <!-- ── Accordion: Upcoming Events ── -->
     <div class="accordion-section">
-      <div class="accordion-header" id="acc-header-upcoming" onclick="toggleAccordion('upcoming')">
+      <div class="accordion-header open" id="acc-header-upcoming" onclick="toggleAccordion('upcoming')">
         <span>🌟 Upcoming Events</span>
         <span class="accordion-chevron">▼</span>
       </div>
-      <div class="accordion-body" id="accordion-body-upcoming">
+      <div class="accordion-body open" id="accordion-body-upcoming">
 
       <!-- Rendered from content.js by renderSite() — see admin.html to edit -->
       <div id="upcoming-events-container"></div>
@@ -1735,11 +1750,11 @@
 
     <!-- ── Accordion: Past Events ── -->
     <div class="accordion-section">
-      <div class="accordion-header open" id="acc-header-past" onclick="toggleAccordion('past')">
+      <div class="accordion-header" id="acc-header-past" onclick="toggleAccordion('past')">
         <span>📖 Past Events</span>
         <span class="accordion-chevron">▼</span>
       </div>
-      <div class="accordion-body open" id="accordion-body-past">
+      <div class="accordion-body" id="accordion-body-past">
 
     <!-- Sub-nav (one row) -->
     <nav class="sub-nav" id="past-sub-nav">
@@ -2106,11 +2121,13 @@
     var flyerHtml = '';
     if (item.flyer) {
       var isImg = /\.(jpe?g|png|gif|webp)$/i.test(item.flyer);
+      var isPdf = /\.pdf$/i.test(item.flyer);
       flyerHtml = '<div class="evt-media-section">' +
         '<h4>📄 Event Flyer</h4>' +
         '<div class="flyer-preview-link" style="display:flex">' +
         (isImg ? '<img class="flyer-preview-img" src="' + escapeHtml(item.flyer) + '" alt="Flyer">' : '') +
-        '<div class="flyer-preview-row">📄 <a href="' + escapeHtml(item.flyer) + '" target="_blank">View flyer</a></div>' +
+        (isPdf ? '<iframe class="flyer-preview-pdf" src="' + escapeHtml(item.flyer) + '" title="Event flyer"></iframe>' : '') +
+        '<div class="flyer-preview-row">📄 <a href="' + escapeHtml(item.flyer) + '" target="_blank">Open full-size flyer</a></div>' +
         '</div></div>';
     }
     if (!photoHtml && !videoHtml && !flyerHtml) return '';
