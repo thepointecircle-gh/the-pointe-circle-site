@@ -2002,13 +2002,25 @@
       <a href="https://thepointecircle.org" target="_blank">thepointecircle.org</a>
     </div>
   </div>
-  <div class="footer-copy">© 2024 · A 501(c)(3) nonprofit student organization.</div>
+  <div class="footer-copy">© 2024 · A 501(c)(3) nonprofit student organization. Photos may not be reproduced without permission.</div>
 </footer>
 
 <!-- ═══════════════════════════ SCRIPTS ══════════════════════════ -->
 <!-- content.js holds all the text/photos/links that change often. Edit it
      via admin.html (in this same folder) — never need to touch this HTML. -->
 <script src="content.js"></script>
+<script>
+  /* ── Block right-click "Save image as" on photos ──
+     This is a minor deterrent, not real protection — anyone can still get
+     to an image via the browser's own menu, dev tools, or a screenshot.
+     It just removes the single most casual way someone might grab a photo
+     by accident while right-clicking around the page. */
+  document.addEventListener('contextmenu', function (e) {
+    if (e.target && e.target.tagName === 'IMG') {
+      e.preventDefault();
+    }
+  });
+</script>
 <script>
   /* ── Header Photo Slideshow ── */
   /* Cycles through the .hero-slide photos behind the header text. Always

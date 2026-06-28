@@ -158,6 +158,18 @@
      someone in admin.html automatically gives them a working bio page. -->
 <script src="content.js"></script>
 <script>
+  /* ── Block right-click "Save image as" on photos ──
+     This is a minor deterrent, not real protection — anyone can still get
+     to an image via the browser's own menu, dev tools, or a screenshot.
+     It just removes the single most casual way someone might grab a photo
+     by accident while right-clicking around the page. */
+  document.addEventListener('contextmenu', function (e) {
+    if (e.target && e.target.tagName === 'IMG') {
+      e.preventDefault();
+    }
+  });
+</script>
+<script>
   function escapeHtml(str) {
     return String(str == null ? '' : str)
       .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
