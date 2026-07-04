@@ -2562,6 +2562,25 @@
       '</div>' + flyerHtml;
   }
 
+  /* Returns a YYYY-MM-DD string for any event so we can sort descending.
+     Upcoming / auto-archived events already have archiveDate in that format.
+     Manually-entered past events have a free-text date field that we parse
+     with Date() — handles "June 27, 2026", "2026-06-27", etc.
+     Events with no parseable date sort to the very bottom. */
+  function eventSortDate(ev) {
+    var raw = ev.archiveDate || ev.date || '';
+    if (!raw) return '0000-00-00';
+    // Already YYYY-MM-DD?
+    if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) return raw;
+    var d = new Date(raw);
+    if (!isNaN(d.getTime())) {
+      return d.getFullYear() + '-' +
+        ('0' + (d.getMonth() + 1)).slice(-2) + '-' +
+        ('0' + d.getDate()).slice(-2);
+    }
+    return raw; // unparseable — keep as-is, sorts alphabetically
+  }
+
   function metaField(label, value) {
     if (!value) return '';
     return '<div class="event-meta-field"><label>' + label + '</label><div class="editable-field">' + escapeHtml(value) + '</div></div>';
@@ -2729,8 +2748,11 @@
     var effective = getEffectiveUpcoming(data.upcomingEvents);
     var upcomingEl = document.getElementById('upcoming-events-container');
     if (upcomingEl) {
-      upcomingEl.innerHTML = effective.upcoming.length
-        ? effective.upcoming.map(buildUpcomingCard).join('')
+      var sortedUpcoming = effective.upcoming.slice().sort(function(a, b) {
+        return eventSortDate(b).localeCompare(eventSortDate(a));
+      });
+      upcomingEl.innerHTML = sortedUpcoming.length
+        ? sortedUpcoming.map(buildUpcomingCard).join('')
         : '<p class="no-events-msg">No upcoming events scheduled right now — check back soon!</p>';
     }
 
@@ -2744,6 +2766,9 @@
       var eventsEl = document.getElementById('activity-' + key + '-events');
       if (eventsEl) {
         var events = (activity.events || []).concat(effective.archivedByCategory[key] || []);
+        events = events.slice().sort(function(a, b) {
+          return eventSortDate(b).localeCompare(eventSortDate(a));
+        });
         eventsEl.innerHTML = events.length
           ? events.map(function(ev, i) { return buildEventBlock(ev, i + 1); }).join('')
           : '<p class="no-events-msg">No events added yet.</p>';
