@@ -2567,18 +2567,46 @@
      Manually-entered past events have a free-text date field that we parse
      with Date() — handles "June 27, 2026", "2026-06-27", etc.
      Events with no parseable date sort to the very bottom. */
+  /* Converts any event's date into a sortable YYYY-MM-DD string.
+     Uses a manual month-name parser first so Safari (Mac) never needs
+     to rely on its non-standard Date() string parsing behaviour. */
+  var _MONTH_MAP = {
+    january:1,february:2,march:3,april:4,may:5,june:6,
+    july:7,august:8,september:9,october:10,november:11,december:12,
+    jan:1,feb:2,mar:3,apr:4,jun:6,jul:7,aug:8,sep:9,oct:10,nov:11,dec:12
+  };
+  function _pad2(n) { return ('0' + n).slice(-2); }
   function eventSortDate(ev) {
-    var raw = ev.archiveDate || ev.date || '';
+    var raw = (ev.archiveDate || ev.date || '').trim();
     if (!raw) return '0000-00-00';
-    // Already YYYY-MM-DD?
-    if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) return raw;
+
+    // 1. Already YYYY-MM-DD (upcoming / auto-archived events)
+    if (/^\d{4}-\d{2}-\d{2}/.test(raw)) return raw.slice(0, 10);
+
+    // 2. "June 27, 2026" or "Jun 27 2026" (most common in past event date field)
+    var m = raw.match(/([A-Za-z]+)\s+(\d{1,2}),?\s*(\d{4})/);
+    if (m) {
+      var mon = _MONTH_MAP[m[1].toLowerCase()];
+      if (mon) return m[3] + '-' + _pad2(mon) + '-' + _pad2(parseInt(m[2], 10));
+    }
+
+    // 3. "2026 June 27" or "2026 Jun 27"
+    var m2 = raw.match(/(\d{4})\s+([A-Za-z]+)\s+(\d{1,2})/);
+    if (m2) {
+      var mon2 = _MONTH_MAP[m2[2].toLowerCase()];
+      if (mon2) return m2[1] + '-' + _pad2(mon2) + '-' + _pad2(parseInt(m2[3], 10));
+    }
+
+    // 4. MM/DD/YYYY
+    var m3 = raw.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+    if (m3) return m3[3] + '-' + _pad2(parseInt(m3[1], 10)) + '-' + _pad2(parseInt(m3[2], 10));
+
+    // 5. Last resort: native Date (Chrome/Firefox only — already excluded Safari)
     var d = new Date(raw);
     if (!isNaN(d.getTime())) {
-      return d.getFullYear() + '-' +
-        ('0' + (d.getMonth() + 1)).slice(-2) + '-' +
-        ('0' + d.getDate()).slice(-2);
+      return d.getFullYear() + '-' + _pad2(d.getMonth() + 1) + '-' + _pad2(d.getDate());
     }
-    return raw; // unparseable — keep as-is, sorts alphabetically
+    return '0000-00-00';
   }
 
   function metaField(label, value) {
@@ -2778,7 +2806,12 @@
     /* ── Smart default accordion: if there are no real upcoming events,
        automatically collapse "Upcoming Events" and expand "Past Activities"
        so visitors don't land on an empty panel. ── */
-    var hasUpcoming = effective.upcoming.length > 0;
+    /* An upcoming event only counts as "real" if it has a title — blank
+       placeholder rows added via admin.html should not trigger the
+       Upcoming accordion to stay open. */
+    var hasUpcoming = effective.upcoming.some(function(ev) {
+      return ev.title && ev.title.trim().length > 0;
+    });
     var upcomingHeader = document.getElementById('acc-header-upcoming');
     var upcomingBody   = document.getElementById('accordion-body-upcoming');
     var pastHeader     = document.getElementById('acc-header-past');
