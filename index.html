@@ -793,14 +793,6 @@
     .archived-event-card .upcoming-badge {
       background: var(--muted);
     }
-    .archived-event-note {
-      font-size: 0.78rem;
-      color: var(--muted);
-      font-style: italic;
-      margin: -6px 0 16px;
-      text-align: center;
-    }
-
     .upcoming-actions {
       display: flex;
       flex-wrap: wrap;
@@ -1161,6 +1153,79 @@
       font-style: italic;
       pointer-events: none;
     }
+    /* "Share Your Photos & Videos" button on past event cards */
+    .event-block-actions {
+      margin-bottom: 18px;
+    }
+    .btn-submit-photos-event {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      background: linear-gradient(135deg, #3a7d6e, #2d6a5c);
+      color: white;
+      border: none;
+      border-radius: 22px;
+      padding: 9px 20px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      cursor: pointer;
+      text-decoration: none;
+      letter-spacing: 0.01em;
+      transition: opacity 0.2s, transform 0.2s;
+    }
+    .btn-submit-photos-event:hover { opacity: 0.88; transform: translateY(-2px); }
+
+    /* ── Photo view toggle (Grid / Slideshow) ── */
+    .photo-view-toggle {
+      display: flex; align-items: center; gap: 6px; margin-bottom: 12px;
+    }
+    .photo-view-btn {
+      padding: 4px 14px; font-size: .78rem; font-weight: 700; border-radius: 20px;
+      border: 1.5px solid var(--blush); background: transparent;
+      color: var(--muted); cursor: pointer;
+      transition: background 0.18s, color 0.18s, border-color 0.18s;
+    }
+    .photo-view-btn.active {
+      background: var(--rose-dark); color: white; border-color: var(--rose-dark);
+    }
+    .photo-view-btn:not(.active):hover {
+      border-color: var(--rose-dark); color: var(--rose-dark);
+    }
+
+    /* ── Photo carousel ── */
+    .photo-carousel { display: none; }
+    .carousel-main-img {
+      width: 100%; border-radius: 12px; display: block;
+      max-height: 480px; object-fit: contain; background: #111;
+      transition: opacity 0.18s ease;
+    }
+    .carousel-controls {
+      display: flex; align-items: center; justify-content: center;
+      gap: 16px; margin-top: 10px;
+    }
+    .carousel-nav-btn {
+      width: 36px; height: 36px; border-radius: 50%; border: none;
+      background: var(--rose-dark); color: white; font-size: 1.5rem; line-height: 1;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; transition: opacity 0.2s, transform 0.2s;
+    }
+    .carousel-nav-btn:hover { opacity: 0.8; transform: scale(1.1); }
+    .carousel-counter {
+      font-size: .85rem; color: var(--muted); font-weight: 600;
+      min-width: 52px; text-align: center;
+    }
+    .carousel-dots {
+      display: flex; gap: 7px; justify-content: center;
+      margin-top: 10px; flex-wrap: wrap;
+    }
+    .carousel-dot {
+      width: 9px; height: 9px; border-radius: 50%;
+      background: var(--blush); cursor: pointer;
+      transition: background 0.2s, transform 0.2s;
+      flex-shrink: 0;
+    }
+    .carousel-dot.active { background: var(--rose-dark); transform: scale(1.25); }
+
     .event-media-row {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -1407,6 +1472,227 @@
       margin-top: 14px;
     }
     .gform-fallback-note a { color: var(--rose-dark); font-weight: bold; }
+
+    /* ─── Join Us: Apply button (replaces embedded iframe) ─── */
+    .btn-joinus-apply {
+      display: inline-block;
+      background: linear-gradient(135deg, var(--rose-dark), var(--gold));
+      color: var(--white);
+      text-decoration: none;
+      border-radius: 32px;
+      padding: 16px 48px;
+      font-size: 1.05rem;
+      font-family: 'Georgia', serif;
+      font-weight: bold;
+      letter-spacing: 0.5px;
+      box-shadow: 0 4px 18px rgba(200,96,124,0.30);
+      transition: opacity 0.2s, transform 0.2s, box-shadow 0.2s;
+    }
+    .btn-joinus-apply:hover {
+      opacity: 0.92;
+      transform: translateY(-2px);
+      box-shadow: 0 7px 24px rgba(200,96,124,0.38);
+      text-decoration: none;
+    }
+
+    /* ─── Waivers & Documents section (under Join Us) ─── */
+    .waiver-section {
+      margin-top: 52px;
+      padding-top: 36px;
+      border-top: 2px solid var(--blush);
+    }
+    .waiver-section-title {
+      text-align: center;
+      color: var(--brown);
+      font-size: 1.35rem;
+      margin-bottom: 28px;
+    }
+
+    /* Steps instruction card */
+    .waiver-steps-card {
+      background: var(--white);
+      border: 1px solid #e0d4c8;
+      border-radius: 14px;
+      padding: 28px 32px;
+      margin-bottom: 32px;
+      box-shadow: var(--shadow);
+    }
+    .waiver-steps-heading {
+      font-size: 1rem;
+      font-weight: bold;
+      color: var(--text);
+      margin-bottom: 14px;
+    }
+    .waiver-steps-ol {
+      margin: 0;
+      padding-left: 22px;
+      color: var(--text);
+      font-size: 0.92rem;
+      line-height: 1.9;
+    }
+    .waiver-steps-ol > li { font-weight: bold; }
+    .waiver-steps-ol > li > ol {
+      font-weight: normal;
+      padding-left: 22px;
+      list-style-type: lower-alpha;
+      margin-top: 2px;
+    }
+    .waiver-steps-ol a {
+      color: var(--rose-dark);
+      text-decoration: underline;
+    }
+    .waiver-steps-ol a:hover { color: var(--brown); }
+    .waiver-steps-coming-soon {
+      color: var(--muted);
+      font-style: italic;
+      font-size: 0.85rem;
+    }
+
+    /* Form wrapper */
+    .waiver-form-wrap {
+      background: var(--white);
+      border: 1px solid #e0d4c8;
+      border-radius: 14px;
+      padding: 32px 36px;
+      box-shadow: var(--shadow);
+    }
+    .waiver-form-row { display: flex; gap: 24px; margin-bottom: 22px; }
+    .waiver-field { flex: 1; display: flex; flex-direction: column; gap: 7px; }
+    .waiver-field label {
+      font-size: 0.88rem;
+      font-weight: bold;
+      color: var(--text);
+    }
+    .waiver-field .req { color: #c0392b; margin-left: 2px; }
+    .waiver-field input[type="text"],
+    .waiver-field select {
+      padding: 11px 14px;
+      border: 1.5px solid #d4c4b8;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      font-family: 'Georgia', serif;
+      background: var(--white);
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.2s;
+      width: 100%;
+    }
+    .waiver-field input[type="text"]:focus,
+    .waiver-field select:focus { border-color: var(--rose-dark); }
+
+    /* Drag-and-drop upload zone */
+    .waiver-upload-zone {
+      border: 1.5px solid #d4c4b8;
+      border-radius: 8px;
+      padding: 28px 20px;
+      text-align: center;
+      cursor: pointer;
+      background: var(--white);
+      transition: background 0.2s, border-color 0.2s;
+      position: relative;
+      margin-bottom: 22px;
+    }
+    .waiver-upload-zone:hover,
+    .waiver-upload-zone.drag-over { background: var(--blush); border-color: var(--rose-dark); }
+    .waiver-upload-zone input[type="file"] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      width: 100%;
+      height: 100%;
+      cursor: pointer;
+    }
+    .waiver-upload-zone-inner {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 0.92rem;
+      pointer-events: none;
+    }
+    .waiver-upload-zone-inner svg {
+      flex-shrink: 0;
+    }
+    .waiver-upload-chosen {
+      margin-top: 8px;
+      font-size: 0.85rem;
+      color: var(--rose-dark);
+      font-weight: bold;
+      display: none;
+    }
+
+    /* Form action row */
+    .waiver-form-actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 28px;
+      padding-top: 20px;
+      border-top: 1px solid #eee;
+    }
+    .btn-waiver-clear {
+      background: none;
+      border: none;
+      color: var(--rose-dark);
+      font-size: 0.88rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 0;
+      font-family: 'Georgia', serif;
+      text-decoration: none;
+    }
+    .btn-waiver-clear:hover { text-decoration: underline; }
+    .btn-waiver-submit {
+      background: var(--brown);
+      color: var(--white);
+      border: none;
+      border-radius: 8px;
+      padding: 12px 36px;
+      font-size: 0.95rem;
+      font-family: 'Georgia', serif;
+      font-weight: bold;
+      cursor: pointer;
+      letter-spacing: 0.5px;
+      transition: background 0.2s, transform 0.15s;
+    }
+    .btn-waiver-submit:hover { background: #5a3828; transform: translateY(-1px); }
+
+    .waiver-no-url {
+      background: linear-gradient(135deg, var(--blush), var(--sand));
+      border: 1.5px solid var(--rose);
+      border-radius: 14px;
+      padding: 24px 28px;
+      text-align: center;
+      color: var(--brown);
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+    .waiver-error-msg {
+      display: none;
+      background: #fde8e8;
+      color: #9a2020;
+      border-radius: 8px;
+      padding: 12px 16px;
+      text-align: center;
+      margin-top: 14px;
+      font-size: 0.88rem;
+    }
+    .waiver-spinner {
+      display: none;
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.9rem;
+      margin-top: 12px;
+      padding: 10px;
+    }
+    @media (max-width: 620px) {
+      .waiver-form-row { flex-direction: column; gap: 16px; }
+      .waiver-form-wrap { padding: 22px 18px; }
+      .waiver-steps-card { padding: 20px 18px; }
+    }
 
     .btn-primary {
       background: linear-gradient(135deg, var(--rose-dark), var(--gold));
@@ -1842,25 +2128,20 @@
     <div class="joinus-intro">
       <p>
         We'd love to welcome you to our community! Whether you're a dancer, musician, artist, or simply passionate
-        about giving back — there's a place for you here. Fill out the form below and we'll be in touch. 🌸
+        about giving back — there's a place for you here. Click the button below to open our application form. 🌸
       </p>
     </div>
 
-    <!-- Live Google Form embed — this is the club's real application form; -->
-    <!-- responses go straight into the connected Google Sheet, no site backend involved. -->
-    <div class="gform-embed-wrap">
-      <iframe
-        src="https://docs.google.com/forms/d/e/1FAIpQLSeFIpg4VIVGFLUaYcxGjVCJYHGgSQcUgkb0mhMrSW6O4_kYgg/viewform?embedded=true"
-        width="100%" height="1550" frameborder="0" marginheight="0" marginwidth="0"
-        title="The Pointe Circle — Join Us Application Form">
-        Loading…
-      </iframe>
+    <div style="text-align:center; margin: 32px 0 8px;">
+      <a class="btn-joinus-apply"
+         href="https://docs.google.com/forms/d/e/1FAIpQLSeFIpg4VIVGFLUaYcxGjVCJYHGgSQcUgkb0mhMrSW6O4_kYgg/viewform"
+         target="_blank" rel="noopener noreferrer">
+        Apply to Join →
+      </a>
     </div>
-    <p class="gform-fallback-note">
-      Form not loading?
-      <a href="https://docs.google.com/forms/d/e/1FAIpQLSeFIpg4VIVGFLUaYcxGjVCJYHGgSQcUgkb0mhMrSW6O4_kYgg/viewform"
-         target="_blank" rel="noopener noreferrer">Open it in a new tab instead →</a>
-    </p>
+
+    <!-- Waivers & Documents — rendered from content.js by renderWaivers() -->
+    <div id="waiver-section-container"></div>
 
   </div><!-- /tab-signup -->
 
@@ -2139,16 +2420,126 @@
       '</div>';
   }
 
+  /* ── Photo carousel state & controls ──
+     Each photo gallery that has 2+ photos gets a "Grid / Slideshow" toggle.
+     Switching to Slideshow starts a 4-second auto-advance with a fade
+     transition; it pauses when the visitor hovers the carousel. */
+  var _galleryPhotos = {};   // gid -> photos array
+  var _galleryState  = {};   // gid -> { index, timer, paused }
+
+  function _galSt(gid) {
+    return _galleryState[gid] || (_galleryState[gid] = { index: 0, timer: null, paused: false });
+  }
+
+  function carouselGoTo(gid, idx) {
+    var photos = _galleryPhotos[gid];
+    if (!photos || !photos.length) return;
+    var st = _galSt(gid);
+    st.index = ((idx % photos.length) + photos.length) % photos.length;
+    var img     = document.getElementById(gid + '-img');
+    var counter = document.getElementById(gid + '-counter');
+    var dotsEl  = document.getElementById(gid + '-dots');
+    if (img) {
+      img.style.opacity = '0';
+      var newIdx = st.index;
+      setTimeout(function() {
+        img.src = photos[newIdx];
+        img.alt = 'Event photo ' + (newIdx + 1) + ' of ' + photos.length;
+        img.style.opacity = '1';
+      }, 180);
+    }
+    if (counter) counter.textContent = (st.index + 1) + ' / ' + photos.length;
+    if (dotsEl) {
+      var dots = dotsEl.querySelectorAll('.carousel-dot');
+      dots.forEach(function(d, i) { d.classList.toggle('active', i === st.index); });
+    }
+  }
+
+  function carouselPrev(gid)   { carouselGoTo(gid, _galSt(gid).index - 1); }
+  function carouselNext(gid)   { carouselGoTo(gid, _galSt(gid).index + 1); }
+  function carouselPause(gid)  { _galSt(gid).paused = true;  }
+  function carouselResume(gid) { _galSt(gid).paused = false; }
+
+  function togglePhotoView(gid, view) {
+    var grid     = document.getElementById(gid + '-grid');
+    var carousel = document.getElementById(gid + '-carousel');
+    var btnGrid  = document.getElementById(gid + '-btn-grid');
+    var btnSlide = document.getElementById(gid + '-btn-slide');
+    if (!grid || !carousel) return;
+    var st = _galSt(gid);
+    if (view === 'carousel') {
+      grid.style.display = 'none';
+      carousel.style.display = 'block';
+      if (btnGrid)  btnGrid.classList.remove('active');
+      if (btnSlide) btnSlide.classList.add('active');
+      st.index = 0;
+      carouselGoTo(gid, 0);
+      if (st.timer) clearInterval(st.timer);
+      st.timer = setInterval(function() {
+        if (!st.paused) carouselNext(gid);
+      }, 4000);
+    } else {
+      carousel.style.display = 'none';
+      grid.style.display = '';
+      if (btnGrid)  btnGrid.classList.add('active');
+      if (btnSlide) btnSlide.classList.remove('active');
+      if (st.timer) { clearInterval(st.timer); st.timer = null; }
+    }
+  }
+
   /* Renders an unlimited photo gallery (2 per row, full width), a real
      responsive YouTube embed, and a flyer link/preview for any item
      that has photos/youtube/flyer fields. Returns '' if none are set. */
   function buildMediaSection(item) {
     var photos = item.photos || [];
-    var photoHtml = photos.length
-      ? '<div class="featured-photo-grid">' +
-          photos.map(function(src) { return '<img src="' + escapeHtml(src) + '" alt="Event photo">'; }).join('') +
-        '</div>'
-      : '';
+    var photoHtml = '';
+    if (photos.length) {
+      /* Derive a stable gallery ID from the event's own ID */
+      var gid = 'gal-' + String(item.id || '').replace(/[^a-zA-Z0-9]/g, '-');
+
+      /* Always build the grid view */
+      var gridHtml = '<div class="featured-photo-grid" id="' + gid + '-grid">' +
+        photos.map(function(src) { return '<img src="' + escapeHtml(src) + '" alt="Event photo">'; }).join('') +
+        '</div>';
+
+      if (photos.length >= 2) {
+        /* Register photos so carousel JS can access them by gid */
+        _galleryPhotos[gid] = photos;
+
+        /* Dot indicators */
+        var dotsHtml = photos.map(function(_, di) {
+          return '<span class="carousel-dot' + (di === 0 ? ' active' : '') +
+            '" onclick="carouselGoTo(\'' + gid + '\',' + di + ')"></span>';
+        }).join('');
+
+        var carouselHtml =
+          '<div class="photo-carousel" id="' + gid + '-carousel"' +
+          ' onmouseenter="carouselPause(\'' + gid + '\')"' +
+          ' onmouseleave="carouselResume(\'' + gid + '\')">' +
+          '<img class="carousel-main-img" id="' + gid + '-img"' +
+          ' src="' + escapeHtml(photos[0]) + '"' +
+          ' alt="Event photo 1 of ' + photos.length + '">' +
+          '<div class="carousel-controls">' +
+            '<button class="carousel-nav-btn" onclick="carouselPrev(\'' + gid + '\')">&#8249;</button>' +
+            '<span class="carousel-counter" id="' + gid + '-counter">1 / ' + photos.length + '</span>' +
+            '<button class="carousel-nav-btn" onclick="carouselNext(\'' + gid + '\')">&#8250;</button>' +
+          '</div>' +
+          '<div class="carousel-dots" id="' + gid + '-dots">' + dotsHtml + '</div>' +
+          '</div>';
+
+        var toggleHtml =
+          '<div class="photo-view-toggle">' +
+            '<button class="photo-view-btn active" id="' + gid + '-btn-grid"' +
+            ' onclick="togglePhotoView(\'' + gid + '\',\'grid\')">&#9783; Grid</button>' +
+            '<button class="photo-view-btn" id="' + gid + '-btn-slide"' +
+            ' onclick="togglePhotoView(\'' + gid + '\',\'carousel\')">&#9654; Slideshow</button>' +
+          '</div>';
+
+        photoHtml = '<div>' + toggleHtml + gridHtml + carouselHtml + '</div>';
+      } else {
+        photoHtml = gridHtml;
+      }
+    }
     var videoHtml = item.youtube
       ? '<div class="featured-video-wrap"><iframe src="https://www.youtube.com/embed/' + escapeHtml(item.youtube) + '" title="Event video" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>'
       : '';
@@ -2179,11 +2570,13 @@
   function buildEventBlock(ev, number) {
     var title = ev.title ? escapeHtml(ev.title) : '[ Event Title ]';
     var meta = metaField('📅 Date', ev.date) + metaField('📍 Location', ev.location) + metaField('📝 Notes', ev.notes);
-    var note = ev._archived ? '<p class="archived-event-note">↩️ Auto-moved here from Upcoming Events once its date passed.</p>' : '';
+    var submitPhotosBtn = ev.submitPhotosUrl
+      ? '<div class="event-block-actions"><a class="btn-submit-photos-event" href="' + escapeHtml(ev.submitPhotosUrl) + '" target="_blank" rel="noopener">📸 Share Your Photos &amp; Videos</a></div>'
+      : '';
     return '<div class="event-block">' +
       '<div class="event-block-header"><div class="event-number">' + number + '</div><h3>' + title + '</h3></div>' +
       (meta ? '<div class="event-meta">' + meta + '</div>' : '') +
-      note +
+      submitPhotosBtn +
       buildMediaSection(ev) +
       '</div>';
   }
@@ -2286,6 +2679,7 @@
     return {
       id: ev.id, title: ev.title, date: ev.dateText, location: ev.location,
       notes: ev.details, flyer: ev.flyer, photos: ev.photos, youtube: ev.youtube,
+      submitPhotosUrl: ev.submitPhotosUrl || '',
       _archived: true
     };
   }
@@ -2356,6 +2750,28 @@
       }
     });
 
+    /* ── Smart default accordion: if there are no real upcoming events,
+       automatically collapse "Upcoming Events" and expand "Past Activities"
+       so visitors don't land on an empty panel. ── */
+    var hasUpcoming = effective.upcoming.length > 0;
+    var upcomingHeader = document.getElementById('acc-header-upcoming');
+    var upcomingBody   = document.getElementById('accordion-body-upcoming');
+    var pastHeader     = document.getElementById('acc-header-past');
+    var pastBody       = document.getElementById('accordion-body-past');
+    if (!hasUpcoming) {
+      // Close upcoming, open past
+      if (upcomingHeader) { upcomingHeader.classList.remove('open'); }
+      if (upcomingBody)   { upcomingBody.classList.remove('open'); }
+      if (pastHeader)     { pastHeader.classList.add('open'); }
+      if (pastBody)       { pastBody.classList.add('open'); }
+    } else {
+      // Ensure upcoming is open (it is by default in HTML, but keep it consistent)
+      if (upcomingHeader) { upcomingHeader.classList.add('open'); }
+      if (upcomingBody)   { upcomingBody.classList.add('open'); }
+    }
+
+    renderWaivers();
+
     if (!window._gformDelegationBound) {
       document.addEventListener('click', function(e) {
         var btn = e.target.closest && e.target.closest('[data-gform-url]');
@@ -2366,6 +2782,238 @@
   }
 
   document.addEventListener('DOMContentLoaded', renderSite);
+
+  /* ════════════════════════════════════════════════════════════════
+     WAIVERS & DOCUMENTS SECTION
+     Renders document download links + a submission form inside the
+     Join Us tab. All three URLs are set via admin.html → content.js.
+     ════════════════════════════════════════════════════════════════ */
+  function renderWaivers() {
+    var container = document.getElementById('waiver-section-container');
+    if (!container) return;
+    var data = window.SITE_CONTENT || {};
+    var wv = data.waivers || {};
+    var liabilityUrl = wv.liabilityWaiverUrl || '';
+    var photoUrl     = wv.photoReleaseUrl    || '';
+    var submitUrl    = wv.submitScriptUrl    || '';
+
+    // Build the "a. Fill out the PDF: [link]" lines for each document
+    function docStepLink(name, url) {
+      if (url) {
+        return 'Download form and sign: <a href="' + escapeHtml(url) + '" target="_blank" rel="noopener">' +
+          escapeHtml(name) + '</a>';
+      }
+      return 'Download PDF and sign: <span class="waiver-steps-coming-soon">' + escapeHtml(name) + ' (coming soon)</span>';
+    }
+
+    var stepsHtml =
+      '<div class="waiver-steps-card">' +
+        '<p class="waiver-steps-heading">Before continuing, please complete the following steps:</p>' +
+        '<ol class="waiver-steps-ol">' +
+          '<li>Complete the required forms' +
+            '<ol>' +
+              '<li>' + docStepLink('Liability & Injury Waiver', liabilityUrl) + '</li>' +
+              '<li>' + docStepLink('Photo Release & Usage Protocol', photoUrl) + '</li>' +
+            '</ol>' +
+          '</li>' +
+          '<li>Submit your forms online (under development)' +
+            '<ol>' +
+              '<li>Complete all fields below</li>' +
+              '<li>Upload your finished PDF from step 1</li>' +
+              '<li>Submit</li>' +
+            '</ol>' +
+          '</li>' +
+        '</ol>' +
+      '</div>';
+
+    // SVG circle-download icon matching the image
+    var uploadIcon = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="8 12 12 16 16 12"/><line x1="12" y1="8" x2="12" y2="16"/></svg>';
+
+    var formHtml;
+    if (!submitUrl) {
+      formHtml =
+        '<div class="waiver-no-url">' +
+          '<p>📬 <strong>To submit your signed waiver</strong>, please email it to ' +
+          '<a href="mailto:thepointecircle@gmail.com" style="color:var(--rose-dark);font-weight:bold;">thepointecircle@gmail.com</a> ' +
+          'with your child\'s name in the subject line.</p>' +
+          '<p style="font-size:0.8rem;color:var(--muted);margin-top:8px;">' +
+          // 'Officers: add a submission script URL in admin.html to enable online submissions.</p>' +
+        '</div>';
+    } else {
+      formHtml =
+        '<div class="waiver-form-wrap">' +
+          '<form id="waiver-submit-form" onsubmit="submitWaiverForm(event)">' +
+
+            /* Row 1: Participant name */
+            '<div class="waiver-form-row">' +
+              '<div class="waiver-field">' +
+                '<label>Participant First Name<span class="req">*</span></label>' +
+                '<input type="text" id*="wv-p-first" required>' +
+              '</div>' +
+              '<div class="waiver-field">' +
+                '<label>Participant Last Name<span class="req">*</span></label>' +
+                '<input type="text" id="wv-p-last" required>' +
+              '</div>' +
+            '</div>' +
+
+            /* Row 2: Upload */
+            '<div class="waiver-field">' +
+              '<label>Upload PDF Below<span class="req">*</span></label>' +
+            '</div>' +
+            '<div class="waiver-upload-zone" id="wv-drop-zone">' +
+              '<input type="file" id="wv-file" accept=".pdf,application/pdf" required ' +
+                'onchange="waiverFileChosen(this)" ondragover="waiverDragOver(event)" ondragleave="waiverDragLeave(event)" ondrop="waiverDrop(event)">' +
+              '<div class="waiver-upload-zone-inner">' + uploadIcon + ' Drop files here or click to browse</div>' +
+              '<div class="waiver-upload-chosen" id="wv-chosen"></div>' +
+            '</div>' +
+
+            /* Row 3: Submitter name + relationship */
+            '<div class="waiver-form-row">' +
+              '<div class="waiver-field">' +
+                '<label>Who is submitting this form? Full Name<span class="req">*</span></label>' +
+                '<input type="text" id="wv-s-name" required>' +
+              '</div>' +
+              '<div class="waiver-field">' +
+                '<label>Relationship to Participant<span class="req">*</span></label>' +
+                '<select id="wv-rel" required>' +
+                  '<option value="">— Select —</option>' +
+                  '<option>Parent / Guardian</option>' +
+                  '<option>Participant (self)</option>' +
+                  '<option>Other</option>' +
+                '</select>' +
+              '</div>' +
+            '</div>' +
+
+            /* Status messages */
+            '<div class="waiver-spinner" id="wv-spinner">⏳ Uploading your form…</div>' +
+            '<div class="success-msg" id="wv-success">✅ Your signed waiver has been received. Thank you!</div>' +
+            '<div class="waiver-error-msg" id="wv-error"></div>' +
+
+            /* Actions row */
+            '<div class="waiver-form-actions">' +
+              '<button type="button" class="btn-waiver-clear" onclick="clearWaiverForm()">' +
+                '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.5"/></svg>' +
+                ' Clear form' +
+              '</button>' +
+              '<button type="submit" class="btn-waiver-submit" id="wv-submit-btn">Submit</button>' +
+            '</div>' +
+
+          '</form>' +
+        '</div>';
+    }
+
+    container.innerHTML =
+      '<div class="waiver-section">' +
+        '<h3 class="waiver-section-title">📑 Waivers &amp; Documents</h3>' +
+        stepsHtml +
+        formHtml +
+      '</div>';
+  }
+
+  function waiverFileChosen(input) {
+    var chosen = document.getElementById('wv-chosen');
+    if (!chosen) return;
+    if (input.files && input.files[0]) {
+      chosen.textContent = '✔ ' + input.files[0].name;
+      chosen.style.display = 'block';
+    } else {
+      chosen.textContent = '';
+      chosen.style.display = 'none';
+    }
+  }
+
+  function waiverDragOver(e) {
+    e.preventDefault();
+    var zone = document.getElementById('wv-drop-zone');
+    if (zone) zone.classList.add('drag-over');
+  }
+  function waiverDragLeave(e) {
+    var zone = document.getElementById('wv-drop-zone');
+    if (zone) zone.classList.remove('drag-over');
+  }
+  function waiverDrop(e) {
+    e.preventDefault();
+    var zone = document.getElementById('wv-drop-zone');
+    if (zone) zone.classList.remove('drag-over');
+    var input = document.getElementById('wv-file');
+    if (!input || !e.dataTransfer.files.length) return;
+    // Transfer the dropped file into the hidden file input
+    var dt = new DataTransfer();
+    dt.items.add(e.dataTransfer.files[0]);
+    input.files = dt.files;
+    waiverFileChosen(input);
+  }
+
+  function clearWaiverForm() {
+    var form = document.getElementById('waiver-submit-form');
+    if (form) form.reset();
+    var chosen = document.getElementById('wv-chosen');
+    if (chosen) { chosen.textContent = ''; chosen.style.display = 'none'; }
+    var err = document.getElementById('wv-error');
+    if (err) err.style.display = 'none';
+    var succ = document.getElementById('wv-success');
+    if (succ) succ.style.display = 'none';
+  }
+
+  function submitWaiverForm(e) {
+    e.preventDefault();
+    var data = window.SITE_CONTENT || {};
+    var submitUrl = (data.waivers || {}).submitScriptUrl || '';
+    if (!submitUrl) return;
+
+    var fileInput = document.getElementById('wv-file');
+    var file = fileInput && fileInput.files[0];
+    if (!file) { showWvError('Please choose a PDF file to upload.'); return; }
+    if (file.size > 10 * 1024 * 1024) { showWvError('File is too large (max 10 MB). Please compress your PDF and try again.'); return; }
+
+    var btn     = document.getElementById('wv-submit-btn');
+    var spinner = document.getElementById('wv-spinner');
+    var successEl = document.getElementById('wv-success');
+    var errorEl   = document.getElementById('wv-error');
+    btn.style.display = 'none';
+    spinner.style.display = 'block';
+    if (errorEl)   { errorEl.style.display   = 'none'; }
+    if (successEl) { successEl.style.display = 'none'; }
+
+    var reader = new FileReader();
+    reader.onload = function() {
+      var base64 = reader.result.split(',')[1];
+      fetch(submitUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          participantFirst: (document.getElementById('wv-p-first').value || '').trim(),
+          participantLast:  (document.getElementById('wv-p-last').value  || '').trim(),
+          submitterName:    (document.getElementById('wv-s-name').value  || '').trim(),
+          relationship:     (document.getElementById('wv-rel').value     || '').trim(),
+          fileName: file.name,
+          fileBase64: base64
+        })
+      })
+      .then(function(r) { return r.json(); })
+      .then(function(resp) {
+        spinner.style.display = 'none';
+        if (resp.status === 'ok') {
+          successEl.style.display = 'block';
+          clearWaiverForm();
+        } else {
+          btn.style.display = '';
+          showWvError(resp.message || 'Something went wrong. Please try again or email us directly.');
+        }
+      })
+      .catch(function() {
+        spinner.style.display = 'none';
+        btn.style.display = '';
+        showWvError('Network error. Please check your connection and try again.');
+      });
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function showWvError(msg) {
+    var el = document.getElementById('wv-error');
+    if (el) { el.textContent = msg; el.style.display = 'block'; }
+  }
 
   /* ── Google Form Modal — opened via data-gform-url click delegation
      set up inside renderSite() above ── */

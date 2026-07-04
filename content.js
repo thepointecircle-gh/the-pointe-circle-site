@@ -8,7 +8,7 @@
    Open admin.html (in this same folder) instead — it gives you simple
    forms and upload buttons, and it writes this file for you.
 
-   Last saved by admin.html: 6/28/2026, 9:53:42 PM
+   Last saved by admin.html: 7/4/2026, 11:33:45 AM
    ════════════════════════════════════════════════════════════════════ */
 window.SITE_CONTENT = {
   "leadership": [
@@ -137,7 +137,11 @@ window.SITE_CONTENT = {
       "gformUrl": "",
       "musicFormUrl": "https://docs.google.com/forms/d/e/1FAIpQLSf07bNxWpxYuR5h9siPGpPe8KbGitOK_V639V8OWvbqrOSmvA/viewform",
       "flyer": "flyers/upcoming-2-flyer.pdf",
-      "photos": [],
+      "photos": [
+        "images/upcoming-2-photo-1.jpg",
+        "images/upcoming-2-photo-2.jpg",
+        "images/upcoming-2-photo-3.jpg"
+      ],
       "youtube": "",
       "archiveDate": "2026-06-30",
       "eventTime": "17:30",
@@ -275,5 +279,10 @@ window.SITE_CONTENT = {
       "description": "Every child deserves access to the arts and the joy of reading and play. We organize community collection drives to gather gently used dancewear, books, and toys for children in need. Donated items are distributed to local shelters, underfunded schools, and community programs.",
       "events": []
     }
+  },
+  "waivers": {
+    "liabilityWaiverUrl": "https://docs.google.com/document/d/18u1wCBvOchntUn8px6vjBnhTJp-A8xi8EXOIeeK7bPY/edit?usp=sharing",
+    "photoReleaseUrl": "https://docs.google.com/document/d/1yVXDZfUtn1q9HZYnoNwDPrPsnJD0pvOEdelkVqXQzzI/edit?usp=sharing",
+    "submitScriptUrl": ""
   }
 };

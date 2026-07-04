@@ -107,9 +107,28 @@
   .field-row label { flex: 1; min-width: 180px; }
   .field-note { font-size: .8rem; color: #4a8a5e; background: #eaf6ee; border: 1px solid #cdeada;
     border-radius: 8px; padding: 8px 12px; margin: 0; }
+  .field-hint { display: block; font-size: .75rem; color: var(--muted); font-weight: 400;
+    margin: 2px 0 4px; line-height: 1.4; }
   .checkbox-label { display: flex; align-items: center; gap: 8px; font-weight: 600;
     color: #3a2c2c; cursor: pointer; }
   .checkbox-label input[type="checkbox"] { width: auto; margin: 0; flex-shrink: 0; }
+
+  /* Archived upcoming event cards — the event date has passed so it now
+     shows in Past Events on the live site, but the data still lives here
+     so officers can add post-event photos and video. */
+  .admin-card.is-archived {
+    border-color: #b8a0cc;
+    background: #faf6ff;
+  }
+  .archived-event-banner {
+    display: flex; align-items: flex-start; gap: 10px;
+    background: #ede4f7; border: 1px solid #c9aaeb; border-radius: 8px;
+    padding: 10px 14px; font-size: .82rem; color: #4a2d72; font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .archived-event-banner .arc-icon { font-size: 1.3rem; flex-shrink: 0; margin-top: 1px; }
+  .archived-event-banner strong { display: block; font-size: .88rem; margin-bottom: 2px; }
+  .archived-event-banner span { font-weight: 400; color: #5a3d7a; }
 
   label { display: block; font-size: .8rem; color: var(--muted); font-weight: 600; }
   input[type="text"], input[type="url"], input[type="date"], textarea, select {
@@ -227,6 +246,31 @@
       <button class="btn secondary add-btn" onclick="addEvent('upcoming')">+ Add Upcoming Event</button>
     </details>
 
+    <details class="admin-section" id="waivers-section">
+      <summary>📑 Waivers &amp; Documents</summary>
+      <p class="hint">
+        Paste the links to your waiver PDFs and (optionally) your submission script below.
+        Visitors will see download buttons for each document and a form to upload their signed copy.
+      </p>
+      <div class="admin-card-fields full">
+        <label>Liability &amp; Injury Waiver PDF link
+          <span class="field-hint">Google Drive "Anyone with link can view" share URL, or a direct file link</span>
+          <input type="url" id="wv-liability-url" placeholder="https://drive.google.com/file/d/…"
+            oninput="updateWaivers('liabilityWaiverUrl', this.value)">
+        </label>
+        <label>Photo Release &amp; Usage Protocol PDF link
+          <span class="field-hint">Same as above — share the PDF so parents can download it</span>
+          <input type="url" id="wv-photo-url" placeholder="https://drive.google.com/file/d/…"
+            oninput="updateWaivers('photoReleaseUrl', this.value)">
+        </label>
+        <label>Waiver Submission Script URL <span style="font-weight:normal;color:var(--muted)">(optional)</span>
+          <span class="field-hint">Google Apps Script Web App URL from waiver-submit-script.gs — leave blank to use the email fallback instead</span>
+          <input type="url" id="wv-submit-url" placeholder="https://script.google.com/macros/s/…/exec"
+            oninput="updateWaivers('submitScriptUrl', this.value)">
+        </label>
+      </div>
+    </details>
+
     <div id="activities-root"></div>
 
   </div>
@@ -293,6 +337,15 @@ const MUSIC_FORM_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby3a1xZXJ
 const MUSIC_FORM_SHARED_SECRET = 'UfzvZhI4JaAUS5u7E-Yzj-OlTjuh_rFC';
 
 /* ── Blank starting content (used by "Start Brand-New Content") ── */
+/* Ensure any keys added after a site was originally set up are present
+   so older content.js files load cleanly into the new admin. */
+function normalizeSite(site) {
+  if (!site.waivers) {
+    site.waivers = { liabilityWaiverUrl: '', photoReleaseUrl: '', submitScriptUrl: '' };
+  }
+  return site;
+}
+
 function blankSite() {
   const blankActivities = {};
   Object.keys(ACTIVITY_META).forEach(key => {
@@ -306,7 +359,8 @@ function blankSite() {
     leadership: [],
     members: [],
     upcomingEvents: [],
-    pastActivities: blankActivities
+    pastActivities: blankActivities,
+    waivers: { liabilityWaiverUrl: '', photoReleaseUrl: '', submitScriptUrl: '' }
   };
 }
 
@@ -321,10 +375,10 @@ function blankPerson(listName) {
 function blankEvent(scope) {
   if (scope === 'upcoming') {
     return { id: 'upcoming-' + Date.now(), title: '', dateText: '', location: '', details: '',
-      gformUrl: '', musicFormUrl: '', flyer: '', photos: [], youtube: '', archiveDate: '', eventTime: '', eventEndTime: '', archiveCategory: '' };
+      gformUrl: '', musicFormUrl: '', flyer: '', photos: [], youtube: '', archiveDate: '', eventTime: '', eventEndTime: '', archiveCategory: '', submitPhotosUrl: '' };
   }
   return { id: scope + '-ev-' + Date.now(), title: '', date: '', location: '', notes: '',
-    flyer: '', photos: [], youtube: '' };
+    flyer: '', photos: [], youtube: '', submitPhotosUrl: '' };
 }
 
 /* ── Helpers ── */
@@ -422,7 +476,7 @@ async function connectFolder() {
       text = await (await fh.getFile()).text();
     } catch (e) { /* no content.js yet in this folder — that's OK */ }
     if (text) {
-      SITE = parseContentJs(text);
+      SITE = normalizeSite(parseContentJs(text));
       setConnectStatus('✅ Connected to "' + dirHandle.name + '" — loaded your existing content.', true);
     } else {
       SITE = blankSite();
@@ -440,7 +494,7 @@ function handleManualUpload(input) {
   const reader = new FileReader();
   reader.onload = function (e) {
     try {
-      SITE = parseContentJs(e.target.result);
+      SITE = normalizeSite(parseContentJs(e.target.result));
       dirHandle = null;
       setConnectStatus('📤 Loaded "' + file.name + '" for editing. Since no folder is connected, ' +
         '"Save All Changes" will download an update package for you to install manually.', true);
@@ -479,6 +533,7 @@ function renderAll() {
     renderActivityMeta(key);
     renderActivityEvents(key);
   });
+  renderWaiverAdmin();
 }
 
 /* ── Leadership & Members (identical shape, shared renderer) ── */
@@ -572,9 +627,23 @@ function photoThumbsHtml(scope, i, ev) {
 }
 function eventCardHtml(scope, i, ev) {
   const isUpcoming = scope === 'upcoming';
+  // An archived upcoming event is one whose date has already passed — it now
+  // shows in Past Events on the live site, but the data stays here so officers
+  // can still add post-event photos and a video link.
+  const today = new Date(); today.setHours(0,0,0,0);
+  const isArchived = isUpcoming && ev.archiveDate &&
+    new Date(ev.archiveDate + 'T00:00:00').getTime() < today.getTime();
   return `
-    <div class="admin-card">
+    <div class="admin-card${isArchived ? ' is-archived' : ''}">
       <div class="admin-card-fields full">
+        ${isArchived ? `
+        <div class="archived-event-banner">
+          <span class="arc-icon">📦</span>
+          <div>
+            <strong>This event has already happened — it's now showing in Past Events on the site.</strong>
+            <span>You can still edit it here. Add your post-event 📷 photos and 🎬 video link below — they'll appear in the Past Events section automatically.</span>
+          </div>
+        </div>` : ''}
         <label>Event Title
           <input type="text" value="${escapeHtml(ev.title)}" placeholder="e.g. Spring Storytime at Lincoln Library"
             oninput="updateEvent('${scope}',${i},'title',this.value)">
@@ -641,6 +710,31 @@ function eventCardHtml(scope, i, ev) {
             ${activityOptions(ev.archiveCategory)}
           </select>
         </label>` : ''}
+        ${(!isUpcoming || isArchived) ? `
+        <label>📸 "Share Your Photos" Link (optional)
+          <span class="field-hint">Create a Google Form with a file-upload question, paste its link here, and a "Share Your Photos &amp; Videos" button will appear on the past event card on the site — so parents can submit their photos directly to your Drive.</span>
+          <input type="url" value="${escapeHtml(ev.submitPhotosUrl || '')}" placeholder="e.g. https://forms.gle/..."
+            oninput="updateEvent('${scope}',${i},'submitPhotosUrl',this.value)">
+        </label>
+        ` : ''}
+        ${isArchived ? `
+        <div class="upload-row">
+          <label class="small-upload-btn">📷 Add Post-Event Photos
+            <input type="file" accept="image/*" multiple onchange="addPhotos('${scope}',${i},this)">
+          </label>
+          ${photoThumbsHtml(scope, i, ev)}
+        </div>
+        <label>🎬 YouTube Video Link (optional)
+          <input type="text" value="${escapeHtml(ev.youtube)}" placeholder="Paste the full YouTube URL or just the video ID"
+            oninput="updateEventYoutube('${scope}',${i},this.value)">
+        </label>
+        <div class="upload-row">
+          <label class="small-upload-btn">📎 Flyer (PDF or image)
+            <input type="file" accept="application/pdf,image/*" onchange="setFlyer('${scope}',${i},this)">
+          </label>
+          ${flyerPreviewHtml(scope, i, ev)}
+        </div>
+        ` : `
         <label>YouTube Video Link (optional)
           <input type="text" value="${escapeHtml(ev.youtube)}" placeholder="Paste the full YouTube URL or just the video ID"
             oninput="updateEventYoutube('${scope}',${i},this.value)">
@@ -657,6 +751,7 @@ function eventCardHtml(scope, i, ev) {
           </label>
           ${photoThumbsHtml(scope, i, ev)}
         </div>
+        `}
       </div>
       <button class="remove-btn" onclick="removeEvent('${scope}',${i})">🗑 Remove Event</button>
     </div>`;
@@ -681,6 +776,21 @@ function renderActivityMeta(key) {
   if (descEl) descEl.value = a.description || '';
 }
 function updateActivityMeta(key, field, value) { SITE.pastActivities[key][field] = value; }
+
+function renderWaiverAdmin() {
+  if (!SITE) return;
+  const wv = SITE.waivers || {};
+  const liabilityEl = document.getElementById('wv-liability-url');
+  const photoEl     = document.getElementById('wv-photo-url');
+  const submitEl    = document.getElementById('wv-submit-url');
+  if (liabilityEl) liabilityEl.value = wv.liabilityWaiverUrl || '';
+  if (photoEl)     photoEl.value     = wv.photoReleaseUrl    || '';
+  if (submitEl)    submitEl.value    = wv.submitScriptUrl    || '';
+}
+function updateWaivers(field, value) {
+  if (!SITE.waivers) SITE.waivers = {};
+  SITE.waivers[field] = value;
+}
 
 function renderScope(scope) {
   if (scope === 'upcoming') renderUpcoming(); else renderActivityEvents(scope);
