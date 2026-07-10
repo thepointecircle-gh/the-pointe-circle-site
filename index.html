@@ -698,27 +698,73 @@
     }
     .yt-player.playing { cursor: default; }
     .yt-player.playing .yt-play-overlay { display: none; }
+    /* Title bar shown on the thumbnail before the user clicks play.
+       Fades from black at the top to transparent, matching MSN/news-site style.
+       Hidden automatically once the iframe replaces the thumbnail. */
+    .yt-top-bar {
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      padding: 14px 16px 36px;
+      background: linear-gradient(to bottom, rgba(0,0,0,0.75) 0%, transparent 100%);
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      z-index: 2;
+      pointer-events: none; /* let clicks fall through to the play handler */
+    }
+    .yt-video-title {
+      color: #fff;
+      font-size: 0.95rem;
+      font-weight: 700;
+      line-height: 1.4;
+      text-shadow: 0 1px 4px rgba(0,0,0,0.6);
+      flex: 1;
+    }
+    .yt-watch-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: rgba(255,255,255,0.92);
+      color: #111;
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 5px 10px;
+      border-radius: 4px;
+      white-space: nowrap;
+      text-decoration: none;
+      flex-shrink: 0;
+      pointer-events: all; /* clickable even though parent has pointer-events:none */
+      letter-spacing: 0.01em;
+      transition: background 0.15s;
+    }
+    .yt-watch-link:hover { background: #fff; }
     .yt-player iframe {
       position: absolute;
       top: -8%; left: 0;
       width: 100%; height: 116%;
       border: 0;
     }
-    /* Featured photo gallery — full-width single column, 16:9 per image,
-       matching the clean edge-to-edge style of major news site article media. */
+    /* Featured photo gallery — unlimited photos, always 2 per row, full
+       width of the main column. Each photo auto-fits a consistent frame
+       (object-fit: cover) regardless of its original size/orientation. */
     .featured-photo-grid {
       display: grid;
-      grid-template-columns: 1fr;
-      gap: 12px;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
       width: 100%;
       margin: 0 auto 14px;
     }
     .featured-photo-grid img {
       width: 100%;
-      aspect-ratio: 16 / 9;
+      aspect-ratio: 4 / 3;
       object-fit: cover;
-      border-radius: 0;
+      border-radius: 10px;
+      box-shadow: var(--shadow);
       display: block;
+    }
+    @media (max-width: 600px) {
+      .featured-photo-grid { grid-template-columns: 1fr; }
     }
 
     /* ─── Upcoming Event Cards ─── */
@@ -1015,10 +1061,9 @@
       display: block;
       width: 100%;
       max-width: 600px;
-      /* US Letter portrait ratio — explicit px height for Safari <15 which
-         may not support aspect-ratio on replaced elements */
+      /* US Letter portrait ratio. Do NOT also set height — it overrides
+         aspect-ratio and makes the object too short, causing a scrollbar. */
       aspect-ratio: 8.5 / 11;
-      height: 706px; /* fallback: 600 * (11/8.5) ≈ 776 → use 706 for 540px wide */
       border: none;
       border-radius: 10px;
       box-shadow: var(--shadow);
@@ -2623,12 +2668,25 @@
     var _ytId = extractYouTubeId(item.youtube || '');
     var videoHtml = '';
     if (_ytId) {
-      var _ytEmbed  = 'https://www.youtube.com/embed/' + escapeHtml(_ytId) + '?autoplay=1&mute=1&rel=0';
-      var _ytThumb  = 'https://img.youtube.com/vi/' + escapeHtml(_ytId) + '/hqdefault.jpg';
+      var _ytEmbed = 'https://www.youtube.com/embed/' + escapeHtml(_ytId) + '?autoplay=1&mute=0&rel=0&controls=1&playsinline=1';
+      var _ytThumb = 'https://img.youtube.com/vi/' + escapeHtml(_ytId) + '/hqdefault.jpg';
+      var _ytWatch = 'https://www.youtube.com/watch?v=' + encodeURIComponent(_ytId);
+      var _ytTitle = item.title ? escapeHtml(item.title) : '';
       videoHtml =
         '<div class="yt-player" data-yturl="' + _ytEmbed + '"' +
         ' style="background-image:url(' + _ytThumb + ')"' +
         ' onclick="loadYtPlayer(this)">' +
+          '<div class="yt-top-bar">' +
+            (_ytTitle ? '<span class="yt-video-title">' + _ytTitle + '</span>' : '<span></span>') +
+            '<a class="yt-watch-link" href="' + escapeHtml(_ytWatch) + '" target="_blank" rel="noopener"' +
+            ' onclick="event.stopPropagation()">' +
+              '<svg width="14" height="10" viewBox="0 0 14 10" fill="none">' +
+                '<path d="M13.7 1.56A1.76 1.76 0 0 0 12.46.3C11.37 0 7 0 7 0S2.63 0 1.54.3A1.76 1.76 0 0 0 .3 1.56C0 2.66 0 5 0 5s0 2.34.3 3.44A1.76 1.76 0 0 0 1.54 9.7C2.63 10 7 10 7 10s4.37 0 5.46-.3a1.76 1.76 0 0 0 1.24-1.26C14 7.34 14 5 14 5s0-2.34-.3-3.44Z" fill="#FF0000"/>' +
+                '<path d="M5.6 7.14 9.23 5 5.6 2.86v4.28Z" fill="white"/>' +
+              '</svg>' +
+              ' Watch on YouTube' +
+            '</a>' +
+          '</div>' +
           '<div class="yt-play-overlay"><div class="yt-play-btn"></div></div>' +
         '</div>';
     }
@@ -2643,7 +2701,7 @@
       var flyerEmbed = isImg
         ? '<img class="flyer-preview-img" src="' + flyerSrc + '" alt="Event flyer">'
         : isPdf
-          ? '<object class="flyer-preview-pdf" data="' + flyerSrc + '" type="application/pdf">' +
+          ? '<object class="flyer-preview-pdf" data="' + flyerSrc + '#toolbar=0&view=FitH" type="application/pdf">' +
               '<div class="flyer-pdf-fallback">' +
                 '<p>PDF preview is not available in this browser.</p>' +
                 '<a href="' + flyerSrc + '" target="_blank" rel="noopener">📄 Open Flyer</a>' +
