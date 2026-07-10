@@ -655,7 +655,7 @@
     .featured-video-wrap {
       position: relative;
       width: 100%;
-      max-width: 560px;
+      max-width: 720px;
       margin: 0 auto;
       padding-top: 56.25%; /* 16:9 */
       border-radius: 10px;
@@ -1118,6 +1118,18 @@
     .activity-panel.active { display: block; }
 
     /* ─── Event Blocks ─── */
+    .event-category-badge {
+      display: inline-block;
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--rose-dark);
+      background: var(--cream);
+      border: 1.5px solid var(--blush);
+      border-radius: 20px;
+      padding: 3px 11px;
+      margin-bottom: 12px;
+      letter-spacing: 0.02em;
+    }
     .event-block {
       background: var(--white);
       border-radius: 18px;
@@ -2100,39 +2112,17 @@
       </div>
       <div class="accordion-body" id="accordion-body-past">
 
-    <!-- Sub-nav (one row) -->
+    <!-- Sub-nav (one row) — "All" shows every event; category buttons filter by data-category -->
     <nav class="sub-nav" id="past-sub-nav">
-      <button class="active" onclick="showActivity('storytime', this)">📚 Ballerina | Bilingual Storytime</button>
+      <button class="active" onclick="showActivity('all', this)">All</button>
+      <button onclick="showActivity('storytime', this)">📚 Ballerina | Bilingual Storytime</button>
       <button onclick="showActivity('senior', this)">🌹 Senior House Performance</button>
       <button onclick="showActivity('ronald', this)">🏥 Ronald McDonald House</button>
       <button onclick="showActivity('drive', this)">🤲 Service Drive</button>
     </nav>
 
-    <!-- Past activity panels are rendered from content.js by renderSite() — see admin.html to edit -->
-
-    <!-- ── Activity: Ballerina Storytime ── -->
-    <div id="activity-storytime" class="activity-panel active">
-      <div class="activity-header" id="activity-storytime-header"></div>
-      <div id="activity-storytime-events"></div>
-    </div>
-
-    <!-- ── Activity: Senior House Performance ── -->
-    <div id="activity-senior" class="activity-panel">
-      <div class="activity-header" id="activity-senior-header"></div>
-      <div id="activity-senior-events"></div>
-    </div>
-
-    <!-- ── Activity: Ronald McDonald House ── -->
-    <div id="activity-ronald" class="activity-panel">
-      <div class="activity-header" id="activity-ronald-header"></div>
-      <div id="activity-ronald-events"></div>
-    </div>
-
-    <!-- ── Activity: Drive for Dancewear, Books & Toys ── -->
-    <div id="activity-drive" class="activity-panel">
-      <div class="activity-header" id="activity-drive-header"></div>
-      <div id="activity-drive-events"></div>
-    </div>
+    <!-- All past events merged into one list; rendered from content.js by renderSite() -->
+    <div id="all-past-events"></div>
 
       </div><!-- /accordion-body-past -->
     </div><!-- /accordion-section past -->
@@ -2526,6 +2516,27 @@
   /* Renders an unlimited photo gallery (2 per row, full width), a real
      responsive YouTube embed, and a flyer link/preview for any item
      that has photos/youtube/flyer fields. Returns '' if none are set. */
+
+  /* Accepts any YouTube URL format or a bare video ID and returns just the ID.
+     Handles: bare ID "dQw4w9WgXcQ", watch URLs, youtu.be short links, embed
+     URLs, and Shorts URLs. Returns '' if nothing recognizable is found. */
+  function extractYouTubeId(raw) {
+    if (!raw) return '';
+    var s = raw.trim();
+    // Already a bare ID (11 chars, no slashes or dots)
+    if (/^[A-Za-z0-9_\-]{11}$/.test(s)) return s;
+    // youtube.com/watch?v=ID or youtube.com/watch?...&v=ID
+    var m = s.match(/[?&]v=([A-Za-z0-9_\-]{11})/);
+    if (m) return m[1];
+    // youtu.be/ID
+    m = s.match(/youtu\.be\/([A-Za-z0-9_\-]{11})/);
+    if (m) return m[1];
+    // youtube.com/embed/ID or /shorts/ID
+    m = s.match(/youtube\.com\/(?:embed|shorts)\/([A-Za-z0-9_\-]{11})/);
+    if (m) return m[1];
+    return '';
+  }
+
   function buildMediaSection(item) {
     var photos = item.photos || [];
     var photoHtml = '';
@@ -2576,8 +2587,9 @@
         photoHtml = gridHtml;
       }
     }
-    var videoHtml = item.youtube
-      ? '<div class="featured-video-wrap"><iframe src="https://www.youtube.com/embed/' + escapeHtml(item.youtube) + '" title="Event video" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>'
+    var _ytId = extractYouTubeId(item.youtube || '');
+    var videoHtml = _ytId
+      ? '<div class="featured-video-wrap"><iframe src="https://www.youtube.com/embed/' + escapeHtml(_ytId) + '?autoplay=1&mute=1&rel=0" title="Event video" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>'
       : '';
     var flyerHtml = '';
     if (item.flyer) {
@@ -2663,13 +2675,18 @@
     return '<div class="event-meta-field"><label>' + label + '</label><div class="editable-field">' + escapeHtml(value) + '</div></div>';
   }
 
-  function buildEventBlock(ev, number) {
+  function buildEventBlock(ev, number, categoryKey, categoryLabel) {
     var title = ev.title ? escapeHtml(ev.title) : '[ Event Title ]';
     var meta = metaField('📅 Date', ev.date) + metaField('📍 Location', ev.location) + metaField('📝 Notes', ev.notes);
     var submitPhotosBtn = ev.submitPhotosUrl
       ? '<div class="event-block-actions"><a class="btn-submit-photos-event" href="' + escapeHtml(ev.submitPhotosUrl) + '" target="_blank" rel="noopener">📸 Share Your Photos &amp; Videos</a></div>'
       : '';
-    return '<div class="event-block">' +
+    var catBadge = categoryLabel
+      ? '<div class="event-category-badge">' + escapeHtml(categoryLabel) + '</div>'
+      : '';
+    var catAttr = categoryKey ? ' data-category="' + escapeHtml(categoryKey) + '"' : '';
+    return '<div class="event-block"' + catAttr + '>' +
+      catBadge +
       '<div class="event-block-header"><div class="event-number">' + number + '</div><h3>' + title + '</h3></div>' +
       (meta ? '<div class="event-meta">' + meta + '</div>' : '') +
       submitPhotosBtn +
@@ -2833,24 +2850,32 @@
         : '<p class="no-events-msg">No upcoming events scheduled right now — check back soon!</p>';
     }
 
+    // ── Merged past events: collect every event from every category, sort
+    //    all together by date descending, then render into one unified list.
+    //    Each card carries a data-category attribute and a category badge so
+    //    the sub-nav filter buttons can show/hide individual cards by category.
     var activities = data.pastActivities || {};
+    var allPastEvents = [];
     Object.keys(activities).forEach(function(key) {
       var activity = activities[key];
-      var headerEl = document.getElementById('activity-' + key + '-header');
-      if (headerEl) {
-        headerEl.innerHTML = '<h2>' + escapeHtml(activity.label || '') + '</h2><p>' + escapeHtml(activity.description || '') + '</p>';
-      }
-      var eventsEl = document.getElementById('activity-' + key + '-events');
-      if (eventsEl) {
-        var events = (activity.events || []).concat(effective.archivedByCategory[key] || []);
-        events = events.slice().sort(function(a, b) {
-          return eventSortDate(b).localeCompare(eventSortDate(a));
-        });
-        eventsEl.innerHTML = events.length
-          ? events.map(function(ev, i) { return buildEventBlock(ev, i + 1); }).join('')
-          : '<p class="no-events-msg">No events added yet.</p>';
-      }
+      var events = (activity.events || []).concat(effective.archivedByCategory[key] || []);
+      events.forEach(function(ev) {
+        if (ev.title && ev.title.trim().length > 0) {
+          allPastEvents.push({ ev: ev, categoryKey: key, categoryLabel: activity.label || '' });
+        }
+      });
     });
+    allPastEvents.sort(function(a, b) {
+      return eventSortDate(b.ev).localeCompare(eventSortDate(a.ev));
+    });
+    var allPastEl = document.getElementById('all-past-events');
+    if (allPastEl) {
+      allPastEl.innerHTML = allPastEvents.length
+        ? allPastEvents.map(function(item, i) {
+            return buildEventBlock(item.ev, i + 1, item.categoryKey, item.categoryLabel);
+          }).join('')
+        : '<p class="no-events-msg">No past events added yet.</p>';
+    }
 
     /* ── Smart default accordion: if there are no real upcoming events,
        automatically collapse "Upcoming Events" and expand "Past Activities"
@@ -3158,12 +3183,17 @@
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  /* ── Activity Sub-tab Navigation (scoped to Past Events) ── */
+  /* ── Activity Sub-tab Navigation (scoped to Past Events) ──
+     Clicking a category button shows only cards whose data-category matches;
+     clicking "All" shows every card. No page-switch needed — cards are
+     hidden/shown with display:none on individual .event-block elements. */
   function showActivity(actName, btn) {
-    document.querySelectorAll('.activity-panel').forEach(p => p.classList.remove('active'));
-    document.querySelectorAll('#past-sub-nav button').forEach(b => b.classList.remove('active'));
-    document.getElementById('activity-' + actName).classList.add('active');
+    document.querySelectorAll('#past-sub-nav button').forEach(function(b) { b.classList.remove('active'); });
     btn.classList.add('active');
+    var cards = document.querySelectorAll('#all-past-events .event-block');
+    cards.forEach(function(card) {
+      card.style.display = (actName === 'all' || card.getAttribute('data-category') === actName) ? '' : 'none';
+    });
   }
 
   /* ── Sign Up Form ── */

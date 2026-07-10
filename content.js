@@ -8,7 +8,7 @@
    Open admin.html (in this same folder) instead — it gives you simple
    forms and upload buttons, and it writes this file for you.
 
-   Last saved by admin.html: 7/4/2026, 11:33:45 AM
+   Last saved by admin.html: 7/9/2026, 11:12:14 PM
    ════════════════════════════════════════════════════════════════════ */
 window.SITE_CONTENT = {
   "leadership": [
@@ -244,13 +244,14 @@ window.SITE_CONTENT = {
       "events": [
         {
           "id": "rm-ev1",
-          "title": "",
-          "date": "",
-          "location": "",
+          "title": "Summer Concert #1 Ronald McDonald House on June 7th, 2026",
+          "date": "June, 7th",
+          "location": "Ronald McDonald House San Diego",
           "notes": "",
-          "flyer": "",
+          "flyer": "flyers/rm-ev1-flyer.pdf",
           "photos": [],
-          "youtube": ""
+          "youtube": "72JACam0l5I",
+          "submitPhotosUrl": ""
         },
         {
           "id": "rm-ev2",
