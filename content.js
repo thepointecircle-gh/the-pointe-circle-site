@@ -8,7 +8,7 @@
    Open admin.html (in this same folder) instead — it gives you simple
    forms and upload buttons, and it writes this file for you.
 
-   Last saved by admin.html: 7/9/2026, 11:12:14 PM
+   Last saved by admin.html: 7/12/2026, 8:56:52 AM
    ════════════════════════════════════════════════════════════════════ */
 window.SITE_CONTENT = {
   "leadership": [
@@ -142,7 +142,7 @@ window.SITE_CONTENT = {
         "images/upcoming-2-photo-2.jpg",
         "images/upcoming-2-photo-3.jpg"
       ],
-      "youtube": "",
+      "youtube": "ZAo245zrFY8",
       "archiveDate": "2026-06-30",
       "eventTime": "17:30",
       "eventEndTime": "18:45",
