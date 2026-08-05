@@ -8,7 +8,7 @@
    Open admin.html (in this same folder) instead — it gives you simple
    forms and upload buttons, and it writes this file for you.
 
-   Last saved by admin.html: 7/12/2026, 8:56:52 AM
+   Last saved by admin.html: 8/5/2026, 11:12:04 AM
    ════════════════════════════════════════════════════════════════════ */
 window.SITE_CONTENT = {
   "leadership": [
@@ -121,7 +121,14 @@ window.SITE_CONTENT = {
       "gformUrl": "",
       "musicFormUrl": "",
       "flyer": "flyers/upcoming-1-flyer.png",
-      "photos": [],
+      "photos": [
+        "images/upcoming-1-photo-1.jpg",
+        "images/upcoming-1-photo-2.jpg",
+        "images/upcoming-1-photo-3.jpg",
+        "images/upcoming-1-photo-4.jpg",
+        "images/upcoming-1-photo-5.jpg",
+        "images/upcoming-1-photo-6.jpg"
+      ],
       "youtube": "",
       "archiveDate": "2026-06-27",
       "eventTime": "15:00",
