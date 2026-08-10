@@ -8,7 +8,7 @@
    Open admin.html (in this same folder) instead — it gives you simple
    forms and upload buttons, and it writes this file for you.
 
-   Last saved by admin.html: 8/5/2026, 11:18:30 AM
+   Last saved by admin.html: 8/11/2026, 12:48:32 AM
    ════════════════════════════════════════════════════════════════════ */
 window.SITE_CONTENT = {
   "leadership": [
@@ -171,6 +171,57 @@ window.SITE_CONTENT = {
       "eventTime": "",
       "eventEndTime": "",
       "archiveCategory": ""
+    },
+    {
+      "id": "upcoming-1786402869623",
+      "title": "Rancho Santa Fe Library Ballerina Storytime",
+      "dateText": "August 12, 2026 · 10:00 - 11:00 AM",
+      "location": "Rancho Santa Fe Library  - 17040 Avenida de Acacias Rancho Santa Fe CA 92067",
+      "details": "Join us for a special Ballet Storytime presented by the Pointe Circle, a local nonprofit. Enjoy a session of storytelling, a live ballet demonstration, interactive dance steps, and a fun craft activity. ",
+      "gformUrl": "",
+      "musicFormUrl": "",
+      "flyer": "",
+      "photos": [],
+      "youtube": "",
+      "archiveDate": "2026-08-12",
+      "eventTime": "10:00",
+      "eventEndTime": "11:00",
+      "archiveCategory": "storytime",
+      "submitPhotosUrl": ""
+    },
+    {
+      "id": "upcoming-1786403828492",
+      "title": "Wimbledon Library Ballet Storytime ",
+      "dateText": "August 14, 2026 · 3:30 - 4:00 PM",
+      "location": "Wimbledon Library - 35 Wimbledon Hill Rd, London SW19 7NB, UK",
+      "details": "Event Description\nCome and join us at Wimbledon Library for a magical ballet storytime with dance, tales and fun!\n\nBooking is not required to attend, but as we expect this to be a busy session we will be operating on a first come first served basis.\n\nThe session is suitable for children of any age under 10, but would most benefit 3-6 year olds",
+      "gformUrl": "",
+      "musicFormUrl": "",
+      "flyer": "flyers/upcoming-1786403828492-flyer.png",
+      "photos": [],
+      "youtube": "",
+      "archiveDate": "2026-08-14",
+      "eventTime": "15:30",
+      "eventEndTime": "16:00",
+      "archiveCategory": "storytime",
+      "submitPhotosUrl": ""
+    },
+    {
+      "id": "upcoming-1786404251115",
+      "title": "Pacific Highlands Ranch (PHR) Library Ballerina Storytime",
+      "dateText": "August 15, 2026 · 3:00 - 4:00 PM",
+      "location": "San Diego Public Library - Pacific Highlands Ranch 12911 Pacific Pl, San Diego, CA 92130, USA",
+      "details": "",
+      "gformUrl": "",
+      "musicFormUrl": "",
+      "flyer": "flyers/upcoming-1786404251115-flyer.pdf",
+      "photos": [],
+      "youtube": "",
+      "archiveDate": "2026-08-15",
+      "eventTime": "15:00",
+      "eventEndTime": "16:00",
+      "archiveCategory": "storytime",
+      "submitPhotosUrl": ""
     }
   ],
   "pastActivities": {
