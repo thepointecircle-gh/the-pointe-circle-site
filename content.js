@@ -8,7 +8,7 @@
    Open admin.html (in this same folder) instead — it gives you simple
    forms and upload buttons, and it writes this file for you.
 
-   Last saved by admin.html: 8/11/2026, 12:48:32 AM
+   Last saved by admin.html: 8/27/2026, 1:16:56 AM
    ════════════════════════════════════════════════════════════════════ */
 window.SITE_CONTENT = {
   "leadership": [
@@ -29,22 +29,6 @@ window.SITE_CONTENT = {
       "emoji": "🌸"
     },
     {
-      "id": "secretary",
-      "name": "Angela Shen",
-      "role": "Director of Outreach & Partnership",
-      "bio": "",
-      "photo": "images/secretary-photo.jpg",
-      "emoji": "📋"
-    },
-    {
-      "id": "treasurer",
-      "name": "Charlotte Zheng",
-      "role": "Director of Event Coordinator",
-      "bio": "",
-      "photo": "images/treasurer-photo.jpg",
-      "emoji": "💰"
-    },
-    {
       "id": "officer-1",
       "name": "Nicole Ni",
       "role": "Director of Event Coordinator",
@@ -54,6 +38,22 @@ window.SITE_CONTENT = {
     },
     {
       "id": "officer-2",
+      "name": "Charlotte Zheng",
+      "role": "Director of Event Coordinator",
+      "bio": "",
+      "photo": "images/treasurer-photo.jpg",
+      "emoji": "💰"
+    },
+    {
+      "id": "officer-2",
+      "name": "Angela Shen",
+      "role": "Director of Outreach & Partnership",
+      "bio": "",
+      "photo": "images/secretary-photo.jpg",
+      "emoji": "📋"
+    },
+    {
+      "id": "officer-3",
       "name": "Emma Peng",
       "role": "Director of Communication",
       "bio": "",
@@ -64,18 +64,18 @@ window.SITE_CONTENT = {
   "members": [
     {
       "id": "m1",
-      "name": "",
+      "name": "Jinmo Zhao",
       "role": "Member",
       "bio": "",
-      "photo": "",
+      "photo": "images/m1-photo.jpg",
       "emoji": "🩰"
     },
     {
       "id": "m2",
-      "name": "",
+      "name": "Madison Dong",
       "role": "Member",
       "bio": "",
-      "photo": "",
+      "photo": "images/m2-photo.jpg",
       "emoji": "🩰"
     },
     {
