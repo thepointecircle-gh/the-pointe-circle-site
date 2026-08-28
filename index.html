@@ -264,36 +264,42 @@
       header .hero-photo-nav { width: 34px; height: 34px; right: 12px; bottom: 12px; font-size: 1.1rem; }
     }
 
-    /* ─── Top Nav ─── */
+    /* ─── Top Nav — fixed upper-right corner, overlays the header photo.
+         Frosted-glass pill; all 4 buttons always visible, no hamburger.
+         Works on Chrome, Safari (desktop + iOS), Firefox, Android. ─── */
     nav.top-nav {
-      display: flex;
-      justify-content: center;
-      background: var(--white);
-      border-bottom: 2px solid var(--blush);
-      flex-wrap: wrap;
-      box-shadow: var(--shadow);
-      position: sticky;
+      position: fixed;
       top: 0;
-      z-index: 100;
+      left: 50%;   /* first menu item aligns at the viewport midpoint */
+      right: 0;
+      z-index: 200;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-start; /* buttons start from the left edge of the box */
+      background: transparent;
+      border-bottom-left-radius: 0;
+      padding: 0 4px;
     }
     nav.top-nav button {
       background: none;
       border: none;
-      padding: 16px 28px;
-      font-size: 0.95rem;
+      padding: 14px 20px;
+      font-size: 0.88rem;
       font-family: 'Georgia', serif;
-      color: var(--muted);
+      color: #fff;
+      font-weight: bold;
       cursor: pointer;
       letter-spacing: 1px;
       text-transform: uppercase;
-      border-bottom: 3px solid transparent;
-      transition: all 0.2s;
+      border-bottom: 2px solid transparent;
+      text-shadow: 0 1px 4px rgba(0,0,0,0.6);
+      transition: opacity 0.2s, border-color 0.2s;
+      white-space: nowrap;
     }
-    nav.top-nav button:hover { color: var(--rose-dark); }
+    nav.top-nav button:hover { opacity: 0.8; }
     nav.top-nav button.active {
-      color: var(--rose-dark);
-      border-bottom: 3px solid var(--rose-dark);
-      font-weight: bold;
+      color: #fff;
+      border-bottom: 2px solid var(--gold-bright);
     }
 
     /* ─── Main Content ─── */
@@ -2079,7 +2085,8 @@
 
     /* ─── Responsive ─── */
     @media (max-width: 600px) {
-      nav.top-nav button { padding: 12px 14px; font-size: 0.8rem; }
+      nav.top-nav { left: 0; border-bottom-left-radius: 0; padding: 0 2px; justify-content: space-evenly; }
+      nav.top-nav button { padding: 10px 11px; font-size: 0.76rem; letter-spacing: 0.5px; }
       main { padding: 24px 14px 48px; }
       .form-card, .donate-form { padding: 24px 16px; }
     }
@@ -2116,15 +2123,16 @@
     </div>
     <span class="hero-badge">© 2024 · 501(c)(3) nonprofit student organization (99-4280240) </span>
   </div>
-</header>
 
-<!-- ═══════════════════════════ TOP NAV ══════════════════════════ -->
-<nav class="top-nav" id="topNav">
-  <button class="active" onclick="showTab('about', this)">About Us</button>
-  <button onclick="showTab('activities', this)">Activities</button>
-  <button onclick="showTab('signup', this)">Join Us</button>
-  <button onclick="showTab('donate', this)">Donate</button>
-</nav>
+  <!-- Nav lives inside the header so it's semantically grouped with the site branding;
+       CSS positions it fixed in the upper-right corner of the viewport. -->
+  <nav class="top-nav" id="topNav">
+    <button class="active" onclick="showTab('about', this)">About Us</button>
+    <button onclick="showTab('activities', this)">Activities</button>
+    <button onclick="showTab('signup', this)">Join Us</button>
+    <button onclick="showTab('donate', this)">Donate</button>
+  </nav>
+</header>
 
 <!-- ═══════════════════════════ MAIN ═════════════════════════════ -->
 <main>
