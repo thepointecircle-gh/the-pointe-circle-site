@@ -424,6 +424,9 @@
       vid.querySelector('source').src = ps.teamHeaderVideo;
       vid.load();
       vid.style.display = '';
+      // load() interrupts native autoplay in Edge/Chromium — restart playback explicitly
+      var p = vid.play();
+      if (p && p.catch) { p.catch(function(){}); }
     } else if (ps && ps.teamHeaderImage && vid) {
       // Image header: swap video for an img
       vid.style.display = 'none';
