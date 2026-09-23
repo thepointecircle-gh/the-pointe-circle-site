@@ -264,43 +264,104 @@
       header .hero-photo-nav { width: 34px; height: 34px; right: 12px; bottom: 12px; font-size: 1.1rem; }
     }
 
-    /* ─── Top Nav — fixed upper-right corner, overlays the header photo.
-         Frosted-glass pill; all 4 buttons always visible, no hamburger.
-         Works on Chrome, Safari (desktop + iOS), Firefox, Android. ─── */
+    /* ─── Top Nav ─── */
     nav.top-nav {
       position: fixed;
-      top: 0;
-      left: 50%;   /* first menu item aligns at the viewport midpoint */
-      right: 0;
+      top: 0; left: 0; right: 0;
       z-index: 200;
       display: flex;
       flex-wrap: wrap;
-      justify-content: flex-start; /* buttons start from the left edge of the box */
+      align-items: center;
+      justify-content: center;
       background: transparent;
-      border-bottom-left-radius: 0;
       padding: 0 4px;
+      transition: background 0.3s, box-shadow 0.3s;
     }
-    nav.top-nav button {
-      background: none;
-      border: none;
-      padding: 14px 20px;
-      font-size: 0.88rem;
-      font-family: 'Georgia', serif;
-      color: #fff;
-      font-weight: bold;
-      cursor: pointer;
-      letter-spacing: 1px;
-      text-transform: uppercase;
+    nav.top-nav.scrolled {
+      background: rgba(90, 20, 42, 0.97);
+      box-shadow: 0 2px 14px rgba(0,0,0,0.3);
+      backdrop-filter: blur(6px);
+    }
+    /* Shared style for all direct nav children */
+    nav.top-nav > .nav-item,
+    nav.top-nav > a,
+    nav.top-nav > button { display: inline-flex; align-items: center; }
+    /* Tab-switching buttons */
+    nav.top-nav button.nav-trigger,
+    nav.top-nav button:not(.nav-caret-btn) {
+      background: none; border: none;
       border-bottom: 2px solid transparent;
+      color: #fff; font-weight: bold;
+      font-size: 0.82rem; padding: 14px 4px 14px 13px;
+      cursor: pointer; letter-spacing: 0.5px; text-transform: none;
       text-shadow: 0 1px 4px rgba(0,0,0,0.6);
       transition: opacity 0.2s, border-color 0.2s;
-      white-space: nowrap;
+      white-space: nowrap; font-family: Georgia, serif;
     }
-    nav.top-nav button:hover { opacity: 0.8; }
-    nav.top-nav button.active {
+    nav.top-nav button.nav-trigger:hover { opacity: 0.8; }
+    nav.top-nav button.nav-trigger.active { border-bottom: 2px solid var(--gold-bright); }
+    /* Caret toggle button */
+    nav.top-nav .nav-caret-btn {
+      background: none; border: none;
+      color: rgba(255,255,255,0.75); font-size: 0.65rem;
+      padding: 14px 10px 14px 2px; cursor: pointer;
+      transition: opacity 0.18s;
+    }
+    nav.top-nav .nav-caret-btn:hover { opacity: 0.8; }
+    /* Page-link anchors */
+    nav.top-nav > a {
+      background: none; border: none;
+      border-bottom: 2px solid transparent;
+      color: #fff; font-weight: bold;
+      font-size: 0.82rem; padding: 14px 13px;
+      cursor: pointer; text-decoration: none;
+      text-shadow: 0 1px 4px rgba(0,0,0,0.6);
+      letter-spacing: 0.5px; transition: opacity 0.2s;
+      white-space: nowrap; font-family: Georgia, serif;
+    }
+    nav.top-nav > a:hover { opacity: 0.8; }
+    /* Instagram icon — pushed to far right */
+    nav.top-nav .nav-instagram {
+      margin-left: 4px;
+      padding: 8px 10px;
+      border-bottom: none !important;
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      color: rgba(255,255,255,0.85);
+      transition: color 0.2s, background 0.2s, transform 0.2s;
+    }
+    nav.top-nav .nav-instagram:hover {
+      opacity: 1;
       color: #fff;
-      border-bottom: 2px solid var(--gold-bright);
+      background: linear-gradient(135deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+      transform: scale(1.12);
+      box-shadow: 0 2px 12px rgba(220,39,67,0.45);
     }
+    /* Dropdown wrapper */
+    nav.top-nav .nav-item {
+      position: relative;
+    }
+    .nav-dropdown {
+      display: none;
+      position: absolute;
+      top: 100%; left: 0;
+      background: rgba(100, 24, 48, 0.97);
+      border-radius: 0 0 10px 10px;
+      min-width: 170px; z-index: 300;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+      flex-direction: column; padding: 4px 0;
+    }
+    .nav-item:hover .nav-dropdown,
+    .nav-item.dropdown-open .nav-dropdown { display: flex; }
+    .nav-dropdown a {
+      color: rgba(255,255,255,0.92); text-decoration: none;
+      padding: 10px 18px; font-size: 0.82rem; font-weight: 600;
+      font-family: Georgia, serif;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      transition: background 0.15s; white-space: nowrap;
+    }
+    .nav-dropdown a:last-child { border-bottom: none; }
+    .nav-dropdown a:hover { background: rgba(255,255,255,0.14); }
 
     /* ─── Main Content ─── */
     main { max-width: 1440px; margin: 0 auto; padding: 40px 20px 60px; }
@@ -310,10 +371,20 @@
     .tab-panel.active { display: block; }
 
     /* ─── Section Heading ─── */
+    .header-logo {
+      position: absolute;
+      right: 32px;
+      top: 16px;
+      width: 126px; height: 126px;
+      border-radius: 50%;
+      object-fit: cover;
+      z-index: 10;
+    }
     .section-title {
       font-size: 1.7rem;
       color: var(--rose-dark);
       text-align: center;
+      position: relative;
       margin-bottom: 8px;
       font-style: italic;
     }
@@ -324,74 +395,251 @@
       border-radius: 2px;
     }
 
-    /* ─── About Tab — Mission ─── */
-    .mission-card {
+    /* ─── About Tab — Mission Hero (dance/stage style) ─── */
+    .mission-section-label {
+      text-align: center;
+      font-family: Georgia, serif;
+      font-size: 0.75rem;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: var(--gold);
+      opacity: 0.85;
+      margin-bottom: 6px;
+    }
+    .mission-hero {
+      margin-bottom: 60px;
+      text-align: center;
       position: relative;
-      background: var(--white);
-      border-radius: 20px;
-      border: 1px solid var(--blush);
-      box-shadow: 0 4px 24px rgba(200,96,124,0.10);
-      padding: 48px 52px 40px;
-      margin-bottom: 40px;
+      padding: 60px 130px 52px;
+      background: linear-gradient(180deg, #1e0810 0%, #2e0c18 60%, #1a0610 100%);
+      border-radius: 10px;
+      box-shadow: 0 20px 64px rgba(40,6,20,0.55), 0 0 0 1px rgba(200,157,110,0.2);
       overflow: hidden;
     }
-    /* rose left accent bar */
-    .mission-card::before {
+    /* Centre spotlight from above */
+    .mission-hero::before {
       content: '';
       position: absolute;
-      top: 0; left: 0;
-      width: 6px; height: 100%;
-      background: linear-gradient(180deg, var(--rose-dark) 0%, var(--gold) 100%);
-      border-radius: 20px 0 0 20px;
-    }
-    /* large decorative quote mark */
-    .mission-card::after {
-      content: '\201C';
-      position: absolute;
-      top: -10px; right: 28px;
-      font-size: 9rem;
-      color: var(--blush);
-      font-family: Georgia, serif;
-      line-height: 1;
+      top: -10%; left: 50%;
+      transform: translateX(-50%);
+      width: 65%; height: 120%;
+      background: radial-gradient(ellipse at top, rgba(250,220,150,0.14) 0%, transparent 65%);
       pointer-events: none;
-      user-select: none;
-    }
-    .mission-body {
-      font-size: 1.08rem;
-      line-height: 1.9;
-      color: var(--brown);
-      text-align: left;
-      position: relative;
       z-index: 1;
     }
-    .mission-body em {
-      color: var(--rose-dark);
-      font-style: italic;
+    /* Gold bottom-right star */
+    .mission-hero::after {
+      content: '✦';
+      position: absolute;
+      bottom: 16px; right: 22px;
+      font-size: 1rem; color: var(--gold-light); opacity: 0.4;
+      z-index: 5;
+    }
+
+    /* ── Curtain panels ── */
+    .curtain-panel {
+      position: absolute;
+      top: 0; bottom: 0;
+      width: 110px;
+      z-index: 2;
+      pointer-events: none;
+    }
+    .curtain-panel.curtain-l {
+      left: 0;
+      border-radius: 10px 0 0 10px;
+      /* Fabric fold lines (light-dark-light repeating) + depth fade */
+      background:
+        repeating-linear-gradient(
+          to right,
+          rgba(255,255,255,0.07)  0px,  rgba(255,255,255,0.07)  4px,
+          rgba(0,0,0,0.18)         4px,  rgba(0,0,0,0.18)        10px,
+          rgba(255,255,255,0.04)  10px, rgba(255,255,255,0.04)  14px,
+          rgba(0,0,0,0.12)        14px, rgba(0,0,0,0.12)        22px,
+          rgba(255,255,255,0.03)  22px, rgba(255,255,255,0.03)  26px,
+          rgba(0,0,0,0.10)        26px, rgba(0,0,0,0.10)        36px,
+          transparent             36px, transparent             110px
+        ),
+        linear-gradient(to right, #1a0610 0%, #6b2040 55%, rgba(74,14,32,0) 100%);
+    }
+    .curtain-panel.curtain-r {
+      right: 0;
+      border-radius: 0 10px 10px 0;
+      background:
+        repeating-linear-gradient(
+          to left,
+          rgba(255,255,255,0.07)  0px,  rgba(255,255,255,0.07)  4px,
+          rgba(0,0,0,0.18)         4px,  rgba(0,0,0,0.18)        10px,
+          rgba(255,255,255,0.04)  10px, rgba(255,255,255,0.04)  14px,
+          rgba(0,0,0,0.12)        14px, rgba(0,0,0,0.12)        22px,
+          rgba(255,255,255,0.03)  22px, rgba(255,255,255,0.03)  26px,
+          rgba(0,0,0,0.10)        26px, rgba(0,0,0,0.10)        36px,
+          transparent             36px, transparent             110px
+        ),
+        linear-gradient(to left, #1a0610 0%, #6b2040 55%, rgba(74,14,32,0) 100%);
+    }
+
+    /* ── Valance bar across the top ── */
+    .curtain-valance {
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 22px;
+      background: linear-gradient(180deg, #0e0408 0%, #1e0810 70%, transparent 100%);
+      z-index: 3;
+    }
+    /* Gold trim line along the valance bottom edge */
+    .curtain-valance::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 8%; right: 8%;
+      height: 1.5px;
+      background: linear-gradient(90deg, transparent, var(--gold) 20%, var(--gold-light) 50%, var(--gold) 80%, transparent);
+    }
+
+
+    .mission-quote-text {
+      font-family: 'Dancing Script', cursive;
+      font-size: 1.65rem;
+      line-height: 1.85;
+      color: rgba(255, 242, 225, 0.95);
+      position: relative;
+      z-index: 3;
+      margin-bottom: 32px;
+      text-shadow: 0 1px 10px rgba(0,0,0,0.5);
+    }
+    .mission-quote-text em {
+      color: var(--gold-light);
+      font-style: normal;
       font-weight: bold;
     }
-    .mission-tagline {
+    .mission-divider-row {
       display: flex;
       align-items: center;
-      gap: 12px;
-      margin-top: 28px;
-      padding-top: 22px;
-      border-top: 1.5px dashed var(--rose);
+      gap: 16px;
+      justify-content: center;
+      margin-bottom: 0;
+      position: relative;
+      z-index: 3;
     }
-    .mission-tagline-icon {
-      font-size: 1.6rem;
-      flex-shrink: 0;
+    .mission-divider-line {
+      flex: 1; max-width: 100px; height: 1px;
     }
-    .mission-tagline p {
-      font-size: 1.12rem;
-      font-style: italic;
-      color: var(--rose-dark);
+    .mission-divider-line.left  { background: linear-gradient(90deg, transparent, var(--gold)); }
+    .mission-divider-line.right { background: linear-gradient(90deg, var(--gold), transparent); }
+    .mission-tagline-text {
       font-family: Georgia, serif;
-      margin: 0;
-      line-height: 1.5;
+      font-size: 0.95rem;
+      font-style: italic;
+      color: var(--gold-light);
+      white-space: nowrap;
+      opacity: 0.9;
+    }
+
+    /* ─── Four Pillars 2×2 Grid ─── */
+    .pillars-cascade {
+      margin-bottom: 56px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
     }
     @media (max-width: 600px) {
-      .mission-card { padding: 36px 28px 28px; }
-      .mission-card::after { font-size: 6rem; right: 14px; }
+      .pillars-cascade { grid-template-columns: 1fr; }
+    }
+    .pillar-card {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      background: var(--white);
+      border-radius: 16px;
+      padding: 22px 26px;
+      box-shadow: 0 3px 16px rgba(200,96,124,0.09);
+      transition: transform 0.2s, box-shadow 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+    .pillar-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 28px rgba(200,96,124,0.18);
+    }
+    .pillar-card:nth-child(1) { border-top: 4px solid #c9607c; }
+    .pillar-card:nth-child(2) { border-top: 4px solid #d4748a; }
+    .pillar-card:nth-child(3) { border-top: 4px solid #c89d6e; }
+    .pillar-card:nth-child(4) { border-top: 4px solid #f6cf8e; }
+    .pillar-icon-big { font-size: 2rem; min-width: 40px; text-align: center; }
+    .pillar-label {
+      font-family: Georgia, serif;
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1.5;
+    }
+
+    /* ─── About Tab — Unified 1100px wrapper ─── */
+    .about-wrapper {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    /* ─── About Tab — Body paragraphs ─── */
+    .about-body {
+      margin-bottom: 52px;
+      text-align: left;
+    }
+    .about-body p {
+      font-size: 1.05rem;
+      line-height: 1.9;
+      color: var(--text);
+      font-family: Georgia, serif;
+      margin-bottom: 20px;
+    }
+
+    /* ─── About Tab — Program highlight cards ─── */
+    .program-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 24px;
+      margin-bottom: 52px;
+    }
+    /* 7th card ("More to Come") spans both columns, centered */
+    .program-grid .program-card:nth-child(7) {
+      grid-column: 1 / -1;
+      width: calc(50% - 12px);
+      margin: 0 auto;
+    }
+    @media (max-width: 680px) {
+      .program-grid { grid-template-columns: 1fr; }
+    }
+    .program-card {
+      background: var(--white);
+      border: 1px solid var(--blush);
+      border-radius: 20px;
+      box-shadow: var(--shadow);
+      padding: 36px 28px 32px;
+      text-align: center;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .program-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 36px rgba(201,96,124,0.14);
+    }
+    .program-icon {
+      font-size: 3rem;
+      margin-bottom: 16px;
+      display: block;
+    }
+    .program-card h3 {
+      font-size: 1.15rem;
+      color: var(--rose-dark);
+      font-family: Georgia, serif;
+      font-weight: 700;
+      margin-bottom: 12px;
+      line-height: 1.35;
+    }
+    .program-card p {
+      font-size: 0.95rem;
+      color: var(--muted);
+      line-height: 1.75;
+      font-family: Georgia, serif;
+      margin: 0;
     }
 
     .card-grid {
@@ -839,6 +1087,7 @@
       font-size: 0.95rem;
       color: var(--text);
       background: var(--cream);
+      white-space: pre-line;
       border: 1.5px dashed var(--blush);
       border-radius: 8px;
       padding: 7px 11px;
@@ -1214,77 +1463,184 @@
       margin-bottom: 12px;
       letter-spacing: 0.02em;
     }
+    /* ─── Event Block: clean stacked card ─── */
     .event-block {
       background: var(--white);
-      border-radius: 18px;
+      border-radius: 12px;
       border: 1px solid var(--blush);
-      box-shadow: var(--shadow);
-      padding: 28px 28px 24px;
-      margin-bottom: 32px;
+      box-shadow: 0 1px 8px rgba(200,100,120,0.07);
+      margin-bottom: 20px;
+      padding: 20px 24px 18px;
     }
-    .event-block-header {
+    /* Legacy column classes — not used in new layout, kept so old markup degrades safely */
+    .event-block-inner, .event-media-col, .event-text-col, .event-text-only { all: unset; display: contents; }
+    /* Title */
+    .event-block-header { margin-bottom: 10px; }
+    .event-number { display: none; }
+    .event-block-header h3 {
+      font-size: 1.4rem;
+      color: var(--text);
+      font-weight: 700;
+      font-family: Georgia, serif;
+      line-height: 1.3;
+    }
+    /* Date + location: one per row, icon + text */
+    .event-meta-pills {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      margin-bottom: 10px;
+    }
+    .event-meta-pill {
       display: flex;
       align-items: center;
-      gap: 12px;
-      margin-bottom: 20px;
-      padding-bottom: 16px;
-      border-bottom: 2px dashed var(--blush);
+      gap: 7px;
+      font-size: 0.92rem;
+      font-weight: 600;
+      color: var(--brown);
     }
-    .event-number {
-      width: 36px; height: 36px;
-      background: linear-gradient(135deg, var(--rose-dark), var(--gold));
-      border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      color: white;
+    /* Notes */
+    .event-notes {
       font-size: 1rem;
-      font-weight: bold;
-      flex-shrink: 0;
-    }
-    .event-block-header h3 {
-      font-size: 1.2rem;
-      color: var(--rose-dark);
-      font-style: italic;
-    }
-    .event-meta {
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap: 14px;
-      margin-bottom: 22px;
-    }
-    @media (max-width: 600px) {
-      .event-meta { grid-template-columns: 1fr; }
-    }
-    .event-meta-field label {
-      display: block;
-      font-size: 0.75rem;
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      margin-bottom: 5px;
-    }
-    .event-meta-field .editable-field {
-      font-family: 'Georgia', serif;
-      font-size: 0.95rem;
       color: var(--text);
-      background: var(--cream);
-      border: 1.5px dashed var(--blush);
-      border-radius: 8px;
-      padding: 7px 11px;
-      outline: none;
-      width: 100%;
-      transition: border-color 0.2s, background 0.2s;
+      line-height: 1.7;
+      font-family: Georgia, serif;
+      margin-bottom: 0;
+      white-space: pre-line;
+    }
+    /* ─── Event card layout ─── */
+    /* Top row: flyer (left) | info + photos at bottom (right) — both cols stretch to equal height */
+    .event-top-row {
+      display: flex;
+      gap: 20px;
+      align-items: stretch;
+    }
+    .event-flyer-col {
+      flex: 0 0 30%;
+      max-width: 30%;
+      display: flex;
+      flex-direction: column;
+    }
+    /* Flyer click-to-expand */
+    .flyer-clickable {
+      cursor: zoom-in;
+      transition: transform 0.18s, box-shadow 0.18s;
+    }
+    .flyer-clickable:hover {
+      transform: scale(1.02);
+      box-shadow: 0 6px 28px rgba(0,0,0,0.22);
+    }
+    /* Flyer hover overlay button */
+    .flyer-hover-wrap {
+      position: relative;
       display: block;
+      width: 100%;
     }
-    .event-meta-field .editable-field:focus {
-      border-color: var(--rose-dark);
-      background: var(--white);
-    }
-    .event-meta-field .editable-field:empty:before {
-      content: attr(data-placeholder);
-      color: var(--muted);
-      font-style: italic;
+    .flyer-view-btn {
+      position: absolute;
+      bottom: 14px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,0.62);
+      color: #fff;
+      border: none;
+      border-radius: 20px;
+      padding: 7px 18px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      opacity: 0;
+      transition: opacity 0.2s;
+      white-space: nowrap;
+      z-index: 10;
+      letter-spacing: 0.02em;
       pointer-events: none;
     }
+    .flyer-hover-wrap:hover .flyer-view-btn {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    /* Transparent clickable overlay for PDF flyers so hover is detected */
+    .flyer-pdf-overlay {
+      position: absolute;
+      inset: 0;
+      z-index: 5;
+      background: transparent;
+      cursor: pointer;
+    }
+
+    .event-flyer-col .flyer-preview-pdf,
+    .event-flyer-col .flyer-preview-img {
+      max-width: 100%; width: 100%;
+      border-radius: 8px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.14);
+      display: block; flex: 1;
+      object-fit: contain;
+    }
+    /* Info col: flex column so photos are pushed to the bottom */
+    .event-info-col {
+      flex: 1; min-width: 0;
+      display: flex; flex-direction: column;
+    }
+    /* Photos: bottom of row aligns with bottom of flyer embed */
+    .event-photo-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: auto;
+      padding-top: 12px;
+    }
+    .event-photo-row img {
+      width: 130px; height: 130px;
+      object-fit: cover;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+      cursor: default;
+      -webkit-user-drag: none;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    .event-photo-row img:hover { transform: scale(1.03); }
+    /* Video: full card width, standard 16:9 */
+    .event-video-wrap { margin-top: 14px; }
+    .event-video-wrap .yt-player { max-width: none; }
+    @media (max-width: 600px) {
+      .event-top-row { flex-direction: column; }
+      .event-flyer-col { flex: none; max-width: 100%; }
+      .event-photo-row { margin-top: 12px; }
+      .event-photo-row img { width: 65px; height: 65px; }
+    }
+    /* ─── Photo lightbox ─── */
+    #ev-lightbox {
+      position: fixed; inset: 0; z-index: 9999;
+      background: rgba(0,0,0,0.90);
+      display: flex; align-items: center; justify-content: center;
+      cursor: zoom-out;
+    }
+    #ev-lightbox img {
+      max-width: 90vw; max-height: 88vh;
+      border-radius: 6px;
+      box-shadow: 0 8px 48px rgba(0,0,0,0.6);
+      object-fit: contain; cursor: default;
+      display: block;
+    }
+    .lb-close {
+      position: absolute; top: 16px; right: 20px;
+      background: rgba(255,255,255,0.18); border: none;
+      color: #fff; font-size: 1.4rem;
+      width: 40px; height: 40px; border-radius: 50%;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+    }
+    .lb-nav {
+      position: absolute; top: 50%; transform: translateY(-50%);
+      background: rgba(255,255,255,0.18); border: none;
+      color: #fff; font-size: 2.2rem;
+      width: 50px; height: 50px; border-radius: 50%;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+    }
+    .lb-nav.lb-prev { left: 16px; }
+    .lb-nav.lb-next { right: 16px; }
+    .lb-close:hover, .lb-nav:hover { background: rgba(255,255,255,0.32); }
     /* "Share Your Photos & Videos" button on past event cards */
     .event-block-actions {
       margin-bottom: 18px;
@@ -1792,6 +2148,30 @@
     }
     .btn-waiver-submit:hover { background: #5a3828; transform: translateY(-1px); }
 
+    /* ─── FAQ accordion (Join Us tab) ─── */
+    .faq-item {
+      background: var(--white);
+      border: 1px solid var(--blush);
+      border-radius: 12px;
+      margin-bottom: 12px;
+      overflow: hidden;
+      box-shadow: 0 1px 6px rgba(200,100,120,0.06);
+    }
+    .faq-question {
+      width: 100%; background: none; border: none;
+      padding: 17px 22px; text-align: left;
+      font-family: Georgia, serif; font-size: 0.97rem;
+      font-weight: 700; color: var(--text);
+      cursor: pointer;
+      display: flex; justify-content: space-between; align-items: center; gap: 12px;
+      transition: background 0.18s;
+    }
+    .faq-question:hover { background: var(--blush); }
+    .faq-question .faq-arrow { font-size: 1rem; color: var(--rose-dark); transition: transform 0.22s; flex-shrink: 0; }
+    .faq-item.open .faq-arrow { transform: rotate(180deg); }
+    .faq-answer { display: none; padding: 0 22px 16px; font-size: 0.95rem; color: var(--text); line-height: 1.75; }
+    .faq-item.open .faq-answer { display: block; }
+
     .waiver-no-url {
       background: linear-gradient(135deg, var(--blush), var(--sand));
       border: 1.5px solid var(--rose);
@@ -2085,8 +2465,11 @@
 
     /* ─── Responsive ─── */
     @media (max-width: 600px) {
-      nav.top-nav { left: 0; border-bottom-left-radius: 0; padding: 0 2px; justify-content: space-evenly; }
-      nav.top-nav button { padding: 10px 11px; font-size: 0.76rem; letter-spacing: 0.5px; }
+      nav.top-nav { left: 0; padding: 0 2px; justify-content: space-evenly; }
+      nav.top-nav button.nav-trigger,
+      nav.top-nav button:not(.nav-caret-btn) { padding: 9px 6px; font-size: 0.70rem; letter-spacing: 0; }
+      nav.top-nav .nav-caret-btn { padding: 9px 4px 9px 0; }
+      nav.top-nav > a { padding: 9px 8px; font-size: 0.70rem; }
       main { padding: 24px 14px 48px; }
       .form-card, .donate-form { padding: 24px 16px; }
     }
@@ -2115,23 +2498,39 @@
   </div>
   <p class="hero-subtitle">Where Movement Meets Community</p>
   <div class="hero-bottom-group">
-    <div class="hero-cascade">
-      <span class="cascade-line line-1">Making dance accessible for everyone</span>
-      <span class="cascade-line line-2">Youth-led outreach</span>
-      <span class="cascade-line line-3">Creative service projects</span>
-      <span class="cascade-line line-4">Community connection through movement</span>
-    </div>
-    <span class="hero-badge">© 2024 · 501(c)(3) nonprofit student organization (99-4280240) </span>
+    <span class="hero-badge">© 2024–2026 The Pointe Circle · 501(c)(3) nonprofit (EIN 99-4280240) </span>
   </div>
 
   <!-- Nav lives inside the header so it's semantically grouped with the site branding;
        CSS positions it fixed in the upper-right corner of the viewport. -->
   <nav class="top-nav" id="topNav">
-    <button class="active" onclick="showTab('about', this)">About Us</button>
-    <button onclick="showTab('activities', this)">Activities</button>
-    <button onclick="showTab('signup', this)">Join Us</button>
+    <div class="nav-item">
+      <button class="nav-trigger active" onclick="showTab('about', this)">About Us</button>
+      <button class="nav-caret-btn" onclick="toggleNavDropdown(this, event)" aria-label="About Us submenu">▾</button>
+      <div class="nav-dropdown">
+        <a href="team.html">Our Team</a>
+        <a href="member-resources.html">Member Resources</a>
+      </div>
+    </div>
+    <div class="nav-item">
+      <button class="nav-trigger" onclick="showTab('activities', this); showActivitiesView('past');">Projects</button>
+      <button class="nav-caret-btn" onclick="toggleNavDropdown(this, event)" aria-label="Projects submenu">▾</button>
+      <div class="nav-dropdown">
+        <a href="#" onclick="navToActivities('upcoming', event)">Upcoming Events</a>
+        <a href="#" onclick="navToActivities('past', event)">Past Events</a>
+      </div>
+    </div>
+    <button onclick="showTab('signup', this)">Join</button>
     <button onclick="showTab('donate', this)">Donate</button>
+    <a href="gallery.html">Gallery</a>
+    <a href="news.html">News</a>
+    <a href="https://www.instagram.com/thepointecircle/" target="_blank" rel="noopener" class="nav-instagram" aria-label="Follow us on Instagram">
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+      </svg>
+    </a>
   </nav>
+  <img src="images/logo.png" class="header-logo" alt="The Pointe Circle logo">
 </header>
 
 <!-- ═══════════════════════════ MAIN ═════════════════════════════ -->
@@ -2139,36 +2538,115 @@
 
   <!-- ══════════════ TAB 1: ABOUT US ══════════════ -->
   <div id="tab-about" class="tab-panel active">
+  <div class="about-wrapper">
 
-    <h2 class="section-title">MISSION STATEMENT</h2>
-     <div class="section-divider"></div>
+    <p class="mission-section-label">✦ &nbsp; Our Purpose &nbsp; ✦</p>
+    <h2 class="section-title" style="font-family:'Dancing Script',cursive; font-size:2.6rem; font-style:normal; margin-bottom:24px;">Mission Statement</h2>
 
-    <!-- Mission -->
-    <div class="mission-card">
-      <p class="mission-body">
-        <em>The Pointe Circle</em> is a volunteer-driven non-profit organization built on our shared passion
-        for dance, our commitment to fostering a supportive community, and our dedication to meaningful service.
-        We welcome dancers of all genres, artists of other disciplines, and anyone eager to contribute through
-        volunteer work. Together, we celebrate the joy of movement while making a lasting impact through
-        performances, collaborations, and community service.
+    <!-- Mission hero quote -->
+    <div class="mission-hero">
+      <!-- Stage curtain frame -->
+      <div class="curtain-panel curtain-l"></div>
+      <div class="curtain-panel curtain-r"></div>
+      <div class="curtain-valance"></div>
+
+      <p class="mission-quote-text">
+        <em>The Pointe Circle</em> is a volunteer-driven nonprofit united by a shared passion for dance,
+        a commitment to community, and a dedication to meaningful service.
+        We welcome dancers of all styles, artists across disciplines, and anyone eager to make a difference
+        through movement and outreach. Together, we celebrate the joy of dance while creating lasting impact
+        through performances, collaborations, and community service.
       </p>
-      <div class="mission-tagline">
-        <span class="mission-tagline-icon">🫶</span>
-        <p>Let's dance, share, and inspire — together!</p>
+      <div class="mission-divider-row">
+        <span class="mission-divider-line left"></span>
+        <span class="mission-tagline-text">🫶&nbsp; Dance. Give. Inspire — together.</span>
+        <span class="mission-divider-line right"></span>
       </div>
     </div>
 
-    <!-- Leadership (rendered from content.js by renderSite() — see admin.html to edit) -->
-    <h2 class="section-title" id="leadership-heading">Leadership Team</h2>
-    <div class="section-divider"></div>
-    <div class="leadership-top" id="leadership-top-container"></div>
-    <div class="card-grid two-col-grid" id="leadership-grid-container"></div>
+    <!-- Four pillars — cascade staircase -->
+    <div class="pillars-cascade">
+      <div class="pillar-card" data-num="01">
+        <span class="pillar-icon-big">💃</span>
+        <span class="pillar-label">Making dance accessible for everyone</span>
+      </div>
+      <div class="pillar-card" data-num="02">
+        <span class="pillar-icon-big">🌱</span>
+        <span class="pillar-label">Youth-led outreach</span>
+      </div>
+      <div class="pillar-card" data-num="03">
+        <span class="pillar-icon-big">✨</span>
+        <span class="pillar-label">Creative service projects</span>
+      </div>
+      <div class="pillar-card" data-num="04">
+        <span class="pillar-icon-big">🤝</span>
+        <span class="pillar-label">Community connection through movement</span>
+      </div>
+    </div>
 
-    <!-- Club Members (rendered from content.js by renderSite() — see admin.html to edit) -->
-    <h2 class="section-title" id="members-heading">Club Members</h2>
-    <div class="section-divider"></div>
-    <div class="card-grid two-col-grid" id="members-container"></div>
+    <!-- Body paragraphs -->
+    <div class="about-body">
+      <p>
+        Dance is more than movement — it is a language that bridges generations, cultures, and communities.
+        At The Pointe Circle, we believe every performance, every outreach event, and every service project
+        has the power to uplift someone's day, spark a child's imagination, or bring comfort to a family in need.
+        Our dancers bring not just technique, but heart.
+      </p>
+      <p>
+        Founded by students determined to put their passion to greater purpose, The Pointe Circle has grown
+        into a vibrant community of artists and volunteers united by one simple belief: that the arts belong
+        to everyone. Whether we're reading stories at a library, dancing for seniors, performing at the
+        Ronald McDonald House, or collecting donations for children in need — we show up, together.
+      </p>
+    </div>
 
+    <!-- Four program highlights -->
+    <h2 class="section-title">What We Do</h2>
+    <div class="section-divider"></div>
+    <div class="program-grid">
+      <div class="program-card">
+        <span class="program-icon">📚</span>
+        <h3>Ballerina &amp; Bilingual Storytime</h3>
+        <p>We bring the magic of ballet to children through storytelling sessions at schools, libraries, and community centers — some bilingual, all enchanting — sparking imagination and a lifelong love of the arts.</p>
+      </div>
+      <div class="program-card">
+        <span class="program-icon">🌹</span>
+        <h3>Senior House Performance</h3>
+        <p>We visit senior living communities to share live ballet performances, creating joyful intergenerational connections and bringing warmth and joy to those who cherish them most.</p>
+      </div>
+      <div class="program-card">
+        <span class="program-icon">🏥</span>
+        <h3>Ronald McDonald House</h3>
+        <p>We partner with Ronald McDonald House to perform for families staying near hospitals — offering a moment of beauty and joy during a stressful time.</p>
+      </div>
+      <div class="program-card">
+        <span class="program-icon">🤲</span>
+        <h3>Service Drive</h3>
+        <p>We organize community drives to collect gently used dancewear, books, and toys, then distribute them to local shelters, schools, and programs for children in need.</p>
+      </div>
+      <div class="program-card">
+        <span class="program-icon">🤝</span>
+        <h3>Community Partnerships</h3>
+        <p>We collaborate with fellow arts groups, nonprofits, and cultural organizations to co-create performances and events — amplifying our reach and bringing dance to more corners of the community.</p>
+      </div>
+      <div class="program-card">
+        <span class="program-icon">🎭</span>
+        <h3>Community Performance</h3>
+        <p>We take our love of dance and music beyond the stage, performing at libraries, community centers, and public events to share the joy of the arts with audiences of all ages.</p>
+      </div>
+      <div class="program-card" style="border: 2px dashed var(--blush); background: transparent; box-shadow: none; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; opacity: 0.7;">
+        <span class="program-icon">🌸</span>
+        <h3 style="font-style: italic;">More to Come</h3>
+        <p style="font-style: italic; color: var(--muted);">We're always dreaming up new ways to serve our community. Stay tuned for what's next!</p>
+      </div>
+    </div>
+
+    <!-- Meet Our Team button — links to team.html -->
+    <div style="text-align:center; margin: 8px 0 52px;">
+      <a class="btn-joinus-apply" href="team.html">Meet Our Team →</a>
+    </div>
+
+  </div><!-- /about-wrapper -->
   </div><!-- /tab-about -->
 
 
@@ -2179,7 +2657,7 @@
     <div class="section-divider"></div>
 
     <!-- ── Accordion: Upcoming Events ── -->
-    <div class="accordion-section">
+    <div class="accordion-section" id="upcoming-events">
       <div class="accordion-header open" id="acc-header-upcoming" onclick="toggleAccordion('upcoming')">
         <span>🌟 Upcoming Events</span>
         <span class="accordion-chevron">▼</span>
@@ -2189,11 +2667,23 @@
       <!-- Rendered from content.js by renderSite() — see admin.html to edit -->
       <div id="upcoming-events-container"></div>
 
+      <!-- Shown when there are no upcoming events -->
+      <div id="upcoming-no-events" style="display:none; text-align:center; padding: 52px 24px 36px;">
+        <p style="color: var(--muted); font-size: 1.05rem; line-height: 1.75; max-width: 540px; margin: 0 auto 20px;">
+          🌟 Stay Tuned! — No upcoming events at the moment… Follow us on
+          <a href="https://www.instagram.com/thepointecircle/" target="_blank" rel="noopener"
+             style="color: var(--rose-dark); font-weight: bold; text-decoration: none;">@thepointecircle</a>
+        </p>
+        <button class="btn-signup-event" disabled style="opacity:0.38; cursor:not-allowed; pointer-events:none;">
+          📋 Sign Up
+        </button>
+      </div>
+
       </div><!-- /accordion-body-upcoming -->
     </div><!-- /accordion-section upcoming -->
 
     <!-- ── Accordion: Past Events ── -->
-    <div class="accordion-section">
+    <div class="accordion-section" id="past-events">
       <div class="accordion-header" id="acc-header-past" onclick="toggleAccordion('past')">
         <span>📖 Past Events</span>
         <span class="accordion-chevron">▼</span>
@@ -2204,8 +2694,10 @@
     <nav class="sub-nav" id="past-sub-nav">
       <button class="active" onclick="showActivity('all', this)">All</button>
       <button onclick="showActivity('storytime', this)">📚 Ballerina | Bilingual Storytime</button>
-      <button onclick="showActivity('senior', this)">🌹 Senior House Performance</button>
+      <button onclick="showActivity('communityPartnerships', this)">🤝 Community Partnerships</button>
+      <button onclick="showActivity('communityPerformance', this)">🎭 Community Performance</button>
       <button onclick="showActivity('ronald', this)">🏥 Ronald McDonald House</button>
+      <button onclick="showActivity('senior', this)">🌹 Senior House Performance</button>
       <button onclick="showActivity('drive', this)">🤲 Service Drive</button>
     </nav>
 
@@ -2242,20 +2734,69 @@
     <div class="joinus-intro">
       <p>
         We'd love to welcome you to our community! Whether you're a dancer, musician, artist, or simply passionate
-        about giving back — there's a place for you here. Click the button below to open our application form. 🌸
+        about giving back — there's a place for you here. Follow the three steps below to get started. 🌸
       </p>
     </div>
 
-    <div style="text-align:center; margin: 32px 0 8px;">
-      <a class="btn-joinus-apply"
-         href="https://docs.google.com/forms/d/e/1FAIpQLSeFIpg4VIVGFLUaYcxGjVCJYHGgSQcUgkb0mhMrSW6O4_kYgg/viewform"
-         target="_blank" rel="noopener noreferrer">
-        Apply to Join →
-      </a>
+    <!-- ── 3-Step Join Process ── -->
+    <div style="display:flex; flex-direction:column; gap:24px; max-width:640px; margin:0 auto 48px;">
+
+      <!-- Step 1 -->
+      <div style="background:#fff; border:1.5px solid var(--rose); border-radius:16px; padding:28px 32px; box-shadow:0 2px 12px rgba(200,100,120,0.08);">
+        <div style="display:flex; align-items:center; gap:14px; margin-bottom:12px;">
+          <div style="background:linear-gradient(135deg,var(--rose-dark),var(--gold)); color:#fff; font-weight:700; font-size:1rem; width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0;">1</div>
+          <h3 style="font-family:'Dancing Script',cursive; font-size:1.4rem; color:var(--rose-dark); margin:0;">Apply to Join</h3>
+        </div>
+        <p style="color:var(--brown); font-size:0.94rem; line-height:1.7; margin-bottom:18px;">Fill out our application form to tell us about yourself. We welcome dancers, musicians, and anyone passionate about arts and community service.</p>
+        <div style="text-align:center;">
+          <a class="btn-joinus-apply"
+             href="https://docs.google.com/forms/d/e/1FAIpQLSeFIpg4VIVGFLUaYcxGjVCJYHGgSQcUgkb0mhMrSW6O4_kYgg/viewform"
+             target="_blank" rel="noopener noreferrer">
+            Apply to Join →
+          </a>
+        </div>
+      </div>
+
+      <!-- Step 2 -->
+      <div style="background:#fff; border:1.5px solid var(--rose); border-radius:16px; padding:28px 32px; box-shadow:0 2px 12px rgba(200,100,120,0.08);">
+        <div style="display:flex; align-items:center; gap:14px; margin-bottom:12px;">
+          <div style="background:linear-gradient(135deg,var(--rose-dark),var(--gold)); color:#fff; font-weight:700; font-size:1rem; width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0;">2</div>
+          <h3 style="font-family:'Dancing Script',cursive; font-size:1.4rem; color:var(--rose-dark); margin:0;">Review Member Handbook</h3>
+        </div>
+        <p style="color:var(--brown); font-size:0.94rem; line-height:1.7; margin-bottom:18px;">Read through our Member Handbook to understand participation expectations, volunteer hour guidelines, and our community values.</p>
+        <div style="text-align:center;">
+          <a class="btn-joinus-apply"
+             href="https://docs.google.com/document/d/1C74O-Y7ug9zKwPb5gT0hldKfsEqHrYdhRSr7qyfHtAY/edit?usp=sharing"
+             target="_blank" rel="noopener noreferrer"
+             style="background:linear-gradient(135deg,#7a4f9a,#c9607c);">
+            📖 View Member Handbook →
+          </a>
+        </div>
+      </div>
+
+      <!-- Step 3 -->
+      <div style="background:#fff; border:1.5px solid var(--rose); border-radius:16px; padding:28px 32px; box-shadow:0 2px 12px rgba(200,100,120,0.08);">
+        <div style="display:flex; align-items:center; gap:14px; margin-bottom:12px;">
+          <div style="background:linear-gradient(135deg,var(--rose-dark),var(--gold)); color:#fff; font-weight:700; font-size:1rem; width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0;">3</div>
+          <h3 style="font-family:'Dancing Script',cursive; font-size:1.4rem; color:var(--rose-dark); margin:0;">Sign Waivers</h3>
+        </div>
+        <p style="color:var(--brown); font-size:0.94rem; line-height:1.7; margin-bottom:18px;">Download, sign, and submit our Liability Waiver and Photo Release. All members must complete these before participating in activities.</p>
+        <div style="text-align:center;">
+          <a class="btn-joinus-apply" href="member-resources.html" style="background:linear-gradient(135deg,var(--brown),#5a3828);">
+            📑 Go to Member Resources →
+          </a>
+        </div>
+      </div>
+
     </div>
 
-    <!-- Waivers & Documents — rendered from content.js by renderWaivers() -->
-    <div id="waiver-section-container"></div>
+    <!-- ── FAQ ── -->
+    <div style="margin-top: 52px; padding-top: 36px; border-top: 2px solid var(--blush);">
+      <h3 style="text-align:center; font-family:'Dancing Script',cursive; font-size:clamp(1.4rem,3.5vw,1.9rem); color:var(--rose-dark); margin-bottom:6px;">FAQ</h3>
+      <div style="width:60px;height:3px;background:linear-gradient(90deg,var(--rose-dark),var(--gold));border-radius:2px;margin:0 auto 28px;"></div>
+
+      <div id="faq-list"><!-- FAQs rendered from content.js --></div>
+    </div><!-- end FAQ -->
 
   </div><!-- /tab-signup -->
 
@@ -2382,10 +2923,6 @@
        <a href="mailto:thepointecircle@gmail.com">thepointecircle@gmail.com</a>
     </div>
     <div class="footer-contact-item">
-      <span class="fci">📍</span>
-      <span>San Diego, CA</span>
-    </div>
-    <div class="footer-contact-item">
       <svg class="fci instagram-icon" viewBox="0 0 24 24" aria-hidden="true">
         <rect x="2" y="2" width="20" height="20" rx="6" ry="6" fill="none" stroke="currentColor" stroke-width="2"/>
         <circle cx="12" cy="12" r="5" fill="none" stroke="currentColor" stroke-width="2"/>
@@ -2398,7 +2935,8 @@
       <a href="https://thepointecircle.org" target="_blank">thepointecircle.org</a>
     </div>
   </div>
-  <div class="footer-copy">© 2024 · A 501(c)(3) nonprofit (99-4280240) student organization. Photos and videos may not be reproduced without permission.</div>
+  <div class="footer-copy">📍Mailing Address: 12761 Jordan Ridge Ct, San Diego, CA 92130</div>
+  <div class="footer-copy">© 2024–2026 The Pointe Circle · A 501(c)(3) nonprofit student organization (EIN 99-4280240). All photos and videos are property of The Pointe Circle and may not be reproduced without written permission.</div>
 </footer>
 
 <!-- ═══════════════════════════ SCRIPTS ══════════════════════════ -->
@@ -2428,6 +2966,17 @@
      apply it — see the load-error handling below. A manual nav button lets
      visitors step through the photos themselves at any time. */
   (function() {
+    // Inject slides from content.js when heroSlides is populated
+    var siteSlides = window.SITE_CONTENT && window.SITE_CONTENT.heroSlides;
+    if (siteSlides && siteSlides.length) {
+      var container = document.getElementById('heroSlides');
+      if (container) {
+        container.innerHTML = siteSlides.map(function(s, i) {
+          return '<div class="hero-slide' + (i === 0 ? ' active' : '') + '" data-src="' +
+            s.src.replace(/"/g, '&quot;') + '" aria-label="' + (s.label || '').replace(/"/g, '&quot;') + '"></div>';
+        }).join('');
+      }
+    }
     var slides = Array.prototype.slice.call(document.querySelectorAll('#heroSlides .hero-slide'));
     if (slides.length === 0) return;
 
@@ -2634,8 +3183,9 @@
       var gid = 'gal-' + String(item.id || '').replace(/[^a-zA-Z0-9]/g, '-');
 
       /* Always build the grid view */
+      var _altBase = item.title ? 'Photo from ' + item.title : 'Event photo';
       var gridHtml = '<div class="featured-photo-grid" id="' + gid + '-grid">' +
-        photos.map(function(src) { return '<img src="' + escapeHtml(src) + '" alt="Event photo">'; }).join('') +
+        photos.map(function(src, pi) { return '<img src="' + escapeHtml(src) + '" alt="' + escapeHtml(_altBase + (photos.length > 1 ? ' (' + (pi+1) + ' of ' + photos.length + ')' : '')) + '">'; }).join('') +
         '</div>';
 
       if (photos.length >= 2) {
@@ -2654,7 +3204,7 @@
           ' onmouseleave="carouselResume(\'' + gid + '\')">' +
           '<img class="carousel-main-img" id="' + gid + '-img"' +
           ' src="' + escapeHtml(photos[0]) + '"' +
-          ' alt="Event photo 1 of ' + photos.length + '">' +
+          ' alt="' + escapeHtml(_altBase + ' (1 of ' + photos.length + ')') + '">' +
           '<div class="carousel-controls">' +
             '<button class="carousel-nav-btn" onclick="carouselPrev(\'' + gid + '\')">&#8249;</button>' +
             '<span class="carousel-counter" id="' + gid + '-counter">1 / ' + photos.length + '</span>' +
@@ -2710,20 +3260,22 @@
       // The inner .flyer-pdf-fallback is shown only when the browser cannot
       // embed the PDF (iOS Safari, etc.) — it displays a prominent open button.
       var flyerEmbed = isImg
-        ? '<img class="flyer-preview-img" src="' + flyerSrc + '" alt="Event flyer">'
+        ? '<div class="flyer-hover-wrap"><img class="flyer-preview-img flyer-clickable" src="' + flyerSrc + '" alt="Event flyer" onclick="openFlyerLightbox(this)" title="Click to view full size" draggable="false"><button class="flyer-view-btn" onclick="openFlyerLightbox(this.parentElement.querySelector(\'img\'))">🔍 View Full Size</button></div>'
         : isPdf
-          ? '<object class="flyer-preview-pdf" data="' + flyerSrc + '#toolbar=0&view=FitH" type="application/pdf">' +
+          ? '<div class="flyer-hover-wrap"><object class="flyer-preview-pdf" data="' + flyerSrc + '#toolbar=0&view=FitH" type="application/pdf">' +
               '<div class="flyer-pdf-fallback">' +
                 '<p>PDF preview is not available in this browser.</p>' +
                 '<a href="' + flyerSrc + '" target="_blank" rel="noopener">📄 Open Flyer</a>' +
               '</div>' +
-            '</object>'
+            '</object>' +
+            '<div class="flyer-pdf-overlay" onclick="window.open(\'' + flyerSrc + '\',\'_blank\')" title="Open flyer"></div>' +
+            '<button class="flyer-view-btn" onclick="window.open(\'' + flyerSrc + '\',\'_blank\')">📄 View Full Size</button></div>'
           : '';
       flyerHtml = '<div class="evt-media-section">' +
         '<h4>📄 Event Flyer</h4>' +
         '<div class="flyer-preview-link">' +
         flyerEmbed +
-        '<div class="flyer-preview-row">📄 <a href="' + flyerSrc + '" target="_blank" rel="noopener">Open full-size flyer ↗</a></div>' +
+        (isPdf ? '<div class="flyer-preview-row">📄 <a href="' + flyerSrc + '" target="_blank" rel="noopener">Open full-size flyer ↗</a></div>' : '') +
         '</div></div>';
     }
     if (!photoHtml && !videoHtml && !flyerHtml) return '';
@@ -2754,15 +3306,15 @@
     // 1. Already YYYY-MM-DD (upcoming / auto-archived events)
     if (/^\d{4}-\d{2}-\d{2}/.test(raw)) return raw.slice(0, 10);
 
-    // 2. "June 27, 2026" or "Jun 27 2026" (most common in past event date field)
-    var m = raw.match(/([A-Za-z]+)\s+(\d{1,2}),?\s*(\d{4})/);
+    // 2. "June 27, 2026" or "Jun 27 2026" or "June 7th, 2026" (ordinal suffixes handled)
+    var m = raw.match(/([A-Za-z]+)\s+(\d{1,2})(?:st|nd|rd|th)?,?\s*(\d{4})/);
     if (m) {
       var mon = _MONTH_MAP[m[1].toLowerCase()];
       if (mon) return m[3] + '-' + _pad2(mon) + '-' + _pad2(parseInt(m[2], 10));
     }
 
     // 3. "2026 June 27" or "2026 Jun 27"
-    var m2 = raw.match(/(\d{4})\s+([A-Za-z]+)\s+(\d{1,2})/);
+    var m2 = raw.match(/(\d{4})\s+([A-Za-z]+)\s+(\d{1,2})(?:st|nd|rd|th)?/);
     if (m2) {
       var mon2 = _MONTH_MAP[m2[2].toLowerCase()];
       if (mon2) return m2[1] + '-' + _pad2(mon2) + '-' + _pad2(parseInt(m2[3], 10));
@@ -2786,22 +3338,98 @@
   }
 
   function buildEventBlock(ev, number, categoryKey, categoryLabel) {
-    var title = ev.title ? escapeHtml(ev.title) : '[ Event Title ]';
-    var meta = metaField('📅 Date', ev.date) + metaField('📍 Location', ev.location) + metaField('📝 Notes', ev.notes);
+    var title    = ev.title    ? escapeHtml(ev.title)    : '[ Event Title ]';
+    var catBadge = categoryLabel ? '<div class="event-category-badge">' + escapeHtml(categoryLabel) + '</div>' : '';
+    var catAttr  = categoryKey  ? ' data-category="' + escapeHtml(categoryKey) + '"' : '';
+
+    // ── Date + location on separate rows ──
+    var pills = '';
+    if (ev.date)     pills += '<div class="event-meta-pill">📅 ' + escapeHtml(ev.date)     + '</div>';
+    if (ev.location) pills += '<div class="event-meta-pill">📍 ' + escapeHtml(ev.location) + '</div>';
+    var metaHtml  = pills ? '<div class="event-meta-pills">' + pills + '</div>' : '';
+    var notesHtml = ev.notes ? '<p class="event-notes">' + escapeHtml(ev.notes) + '</p>' : '';
+
+    // ── Flyer (PDF or image) — no link below; image flyers are themselves clickable ──
+    var flyerColHtml = '';
+    if (ev.flyer) {
+      var _fSrc  = escapeHtml(ev.flyer);
+      var _isImg = /\.(jpe?g|png|gif|webp)$/i.test(ev.flyer);
+      var _isPdf = /\.pdf$/i.test(ev.flyer);
+      var _embed = _isImg
+        ? '<div class="flyer-hover-wrap"><img class="flyer-preview-img flyer-clickable" src="' + _fSrc + '" alt="Event flyer" onclick="openFlyerLightbox(this)" title="Click to view full size" draggable="false"><button class="flyer-view-btn" onclick="openFlyerLightbox(this.parentElement.querySelector(\'img\'))">🔍 View Full Size</button></div>'
+        : _isPdf
+          ? '<div class="flyer-hover-wrap"><object class="flyer-preview-pdf" data="' + _fSrc + '#toolbar=0&view=FitH" type="application/pdf">' +
+              '<div class="flyer-pdf-fallback"><p>PDF preview unavailable.</p>' +
+              '<a href="' + _fSrc + '" target="_blank" rel="noopener">📄 Open Flyer</a></div>' +
+            '</object>' +
+            '<div class="flyer-pdf-overlay" onclick="window.open(\'' + _fSrc + '\',\'_blank\')" title="Open flyer"></div>' +
+            '<button class="flyer-view-btn" onclick="window.open(\'' + _fSrc + '\',\'_blank\')">📄 View Full Size</button></div>'
+          : '';
+      if (_embed) {
+        flyerColHtml = '<div class="event-flyer-col">' + _embed + '</div>';
+      }
+    }
+
+    // ── Photos: thumbnails inside info col, bottom-aligned with flyer ──
+    var photoHtml = '';
+    var photos = ev.photos || [];
+    if (photos.length) {
+      photoHtml = '<div class="event-photo-row">' +
+        photos.map(function(src, idx) {
+          var _a = (ev.title ? 'Photo from ' + ev.title : 'Event photo') + (photos.length > 1 ? ' (' + (idx+1) + ' of ' + photos.length + ')' : '');
+          return '<img src="' + escapeHtml(src) + '" alt="' + escapeHtml(_a) + '" loading="lazy" draggable="false">';
+        }).join('') +
+      '</div>';
+    }
+
+    // ── Info column: title + date + location + notes + photos at bottom ──
+    var infoHtml =
+      '<div class="event-block-header"><h3>' + title + '</h3></div>' +
+      metaHtml +
+      notesHtml +
+      photoHtml;   /* margin-top:auto in CSS pushes photos to the bottom */
+
+    // Top row: flyer beside info (or info alone if no flyer)
+    var topRow = flyerColHtml
+      ? '<div class="event-top-row">' + flyerColHtml + '<div class="event-info-col">' + infoHtml + '</div></div>'
+      : infoHtml;
+
+    // ── Video: click-to-play ──
+    var videoHtml = '';
+    var _ytId = extractYouTubeId(ev.youtube || '');
+    if (_ytId) {
+      var _ytEmbed = 'https://www.youtube.com/embed/' + escapeHtml(_ytId) + '?autoplay=1&mute=0&rel=0&controls=1&playsinline=1';
+      var _ytThumb = 'https://img.youtube.com/vi/' + escapeHtml(_ytId) + '/hqdefault.jpg';
+      var _ytWatch = 'https://www.youtube.com/watch?v=' + encodeURIComponent(_ytId);
+      var _ytTitle = ev.title ? escapeHtml(ev.title) : '';
+      videoHtml = '<div class="event-video-wrap">' +
+        '<div class="yt-player" data-yturl="' + _ytEmbed + '"' +
+        ' style="background-image:url(' + _ytThumb + ')" onclick="loadYtPlayer(this)">' +
+          '<div class="yt-top-bar">' +
+            (_ytTitle ? '<span class="yt-video-title">' + _ytTitle + '</span>' : '<span></span>') +
+            '<a class="yt-watch-link" href="' + escapeHtml(_ytWatch) + '" target="_blank" rel="noopener" onclick="event.stopPropagation()">' +
+              '<svg width="14" height="10" viewBox="0 0 14 10" fill="none">' +
+                '<path d="M13.7 1.56A1.76 1.76 0 0 0 12.46.3C11.37 0 7 0 7 0S2.63 0 1.54.3A1.76 1.76 0 0 0 .3 1.56C0 2.66 0 5 0 5s0 2.34.3 3.44A1.76 1.76 0 0 0 1.54 9.7C2.63 10 7 10 7 10s4.37 0 5.46-.3a1.76 1.76 0 0 0 1.24-1.26C14 7.34 14 5 14 5s0-2.34-.3-3.44Z" fill="#FF0000"/>' +
+                '<path d="M5.6 7.14 9.23 5 5.6 2.86v4.28Z" fill="white"/>' +
+              '</svg> Watch on YouTube' +
+            '</a>' +
+          '</div>' +
+          '<div class="yt-play-overlay"><div class="yt-play-btn"></div></div>' +
+        '</div>' +
+      '</div>';
+    }
+
+    // ── Submit photos button ──
     var submitPhotosBtn = ev.submitPhotosUrl
       ? '<div class="event-block-actions"><a class="btn-submit-photos-event" href="' + escapeHtml(ev.submitPhotosUrl) + '" target="_blank" rel="noopener">📸 Share Your Photos &amp; Videos</a></div>'
       : '';
-    var catBadge = categoryLabel
-      ? '<div class="event-category-badge">' + escapeHtml(categoryLabel) + '</div>'
-      : '';
-    var catAttr = categoryKey ? ' data-category="' + escapeHtml(categoryKey) + '"' : '';
+
     return '<div class="event-block"' + catAttr + '>' +
       catBadge +
-      '<div class="event-block-header"><div class="event-number">' + number + '</div><h3>' + title + '</h3></div>' +
-      (meta ? '<div class="event-meta">' + meta + '</div>' : '') +
+      topRow +
+      videoHtml +
       submitPhotosBtn +
-      buildMediaSection(ev) +
-      '</div>';
+    '</div>';
   }
 
   function upcomingMetaField(label, value, wide) {
@@ -2874,15 +3502,20 @@
   }
 
   function buildUpcomingCard(ev) {
-    var title = ev.title ? escapeHtml(ev.title) : '[ Event Title — coming soon ]';
+    var hasTitle = !!ev.title;
+    var title = hasTitle ? escapeHtml(ev.title) : '🌟 Stay Tuned!';
     var meta = upcomingMetaField('📅 Date &amp; Time', ev.dateText) + upcomingMetaField('📍 Location', ev.location) + upcomingMetaField('📝 Details', ev.details, true);
     var gcalUrl = buildGCalLink(ev);
-    var signupUrl = buildSignupLink(ev); // required, always-on "who's coming" form — auto-filled with this event's title
+    var signupUrl = buildSignupLink(ev);
     var actions = '';
     if (gcalUrl || signupUrl || ev.gformUrl || ev.musicFormUrl) {
       actions = '<div class="upcoming-actions">' +
         (gcalUrl ? '<a class="btn-addcal-event" href="' + escapeHtml(gcalUrl) + '" target="_blank" rel="noopener">📅 Add to Calendar</a>' : '') +
-        (signupUrl ? '<button class="btn-signup-event" data-gform-url="' + escapeHtml(signupUrl) + '">📋 Sign Up</button>' : '') +
+        (signupUrl
+          ? (hasTitle
+              ? '<button class="btn-signup-event" data-gform-url="' + escapeHtml(signupUrl) + '">📋 Sign Up</button>'
+              : '<button class="btn-signup-event" disabled style="opacity:0.38;cursor:not-allowed;pointer-events:none;">📋 Sign Up</button>')
+          : '') +
         (ev.musicFormUrl ? '<button class="btn-musicform-event" data-gform-url="' + escapeHtml(ev.musicFormUrl) + '">📋 Submit Program and Music</button>' : '') +
         (ev.gformUrl ? '<button class="btn-perfform-event" data-gform-url="' + escapeHtml(ev.gformUrl) + '">🎭 Performance Form</button>' : '') +
         '</div>';
@@ -2952,12 +3585,16 @@
     var effective = getEffectiveUpcoming(data.upcomingEvents);
     var upcomingEl = document.getElementById('upcoming-events-container');
     if (upcomingEl) {
+      // Ascending: soonest event first so visitors see what's coming up next
       var sortedUpcoming = effective.upcoming.slice().sort(function(a, b) {
-        return eventSortDate(b).localeCompare(eventSortDate(a));
+        return eventSortDate(a).localeCompare(eventSortDate(b));
       });
       upcomingEl.innerHTML = sortedUpcoming.length
         ? sortedUpcoming.map(buildUpcomingCard).join('')
-        : '<p class="no-events-msg">No upcoming events scheduled right now — check back soon!</p>';
+        : '';
+      // Show/hide Stay Tuned placeholder
+      var noEventsEl = document.getElementById('upcoming-no-events');
+      if (noEventsEl) noEventsEl.style.display = sortedUpcoming.length ? 'none' : 'block';
     }
 
     // ── Merged past events: collect every event from every category, sort
@@ -3021,6 +3658,8 @@
       });
       window._gformDelegationBound = true;
     }
+
+    renderFaqList();
   }
 
   document.addEventListener('DOMContentLoaded', renderSite);
@@ -3311,9 +3950,22 @@
     document.querySelectorAll('#past-sub-nav button').forEach(function(b) { b.classList.remove('active'); });
     btn.classList.add('active');
     var cards = document.querySelectorAll('#all-past-events .event-block');
+    var visible = 0;
     cards.forEach(function(card) {
-      card.style.display = (actName === 'all' || card.getAttribute('data-category') === actName) ? '' : 'none';
+      var show = actName === 'all' || card.getAttribute('data-category') === actName;
+      card.style.display = show ? '' : 'none';
+      if (show) visible++;
     });
+    var emptyMsg = document.getElementById('past-category-empty');
+    if (!emptyMsg) {
+      emptyMsg = document.createElement('p');
+      emptyMsg.id = 'past-category-empty';
+      emptyMsg.className = 'no-events-msg';
+      emptyMsg.style.padding = '32px 0';
+      document.getElementById('all-past-events').after(emptyMsg);
+    }
+    emptyMsg.style.display = (visible === 0 && actName !== 'all') ? '' : 'none';
+    emptyMsg.textContent = 'No events yet for this category — check back soon!';
   }
 
   /* ── Sign Up Form ── */
@@ -3395,7 +4047,201 @@
       + '&body=' + encodeURIComponent(body);
     window.location.href = mailtoUrl;
   }
+
+  /* ── Activities sub-view: 'upcoming' | 'past' | 'all' ── */
+  function showActivitiesView(view) {
+    var upSec   = document.getElementById('upcoming-events');
+    var pastSec = document.getElementById('past-events');
+    if (!upSec || !pastSec) return;
+
+    if (view === 'upcoming') {
+      upSec.style.display   = '';
+      pastSec.style.display = 'none';
+      // Open upcoming accordion
+      var upHead = document.getElementById('acc-header-upcoming');
+      var upBody = document.getElementById('accordion-body-upcoming');
+      if (upHead) upHead.classList.add('open');
+      if (upBody) upBody.classList.add('open');
+      // "Stay Tuned!" placeholder visibility is already set by renderSite(); nothing to do here.
+    } else if (view === 'past') {
+      upSec.style.display   = 'none';
+      pastSec.style.display = '';
+      // Open past accordion
+      var pastHead = document.getElementById('acc-header-past');
+      var pastBody = document.getElementById('accordion-body-past');
+      if (pastHead) pastHead.classList.add('open');
+      if (pastBody) pastBody.classList.add('open');
+    } else {
+      // 'all' — show both (default Activities tab state)
+      upSec.style.display   = '';
+      pastSec.style.display = '';
+    }
+  }
+
+  /* ── navToActivities: called by dropdown items while already on index.html ── */
+  function navToActivities(view, e) {
+    if (e) e.preventDefault();
+    // Activate Projects tab button
+    var projectsBtn = null;
+    document.querySelectorAll('nav.top-nav .nav-trigger').forEach(function(btn) {
+      var oc = btn.getAttribute('onclick') || '';
+      if (oc.indexOf("'activities'") !== -1) projectsBtn = btn;
+    });
+    if (projectsBtn) showTab('activities', projectsBtn);
+    showActivitiesView(view);
+    // Close any open dropdowns
+    document.querySelectorAll('.nav-item.dropdown-open').forEach(function(el) { el.classList.remove('dropdown-open'); });
+  }
+
+  /* ── URL ?tab= parameter: lets other pages open a specific tab + sub-view.
+     Usage: index.html?tab=activities&view=past  (also: upcoming, all) ── */
+  (function () {
+    var params   = new URLSearchParams(window.location.search);
+    var tabParam = params.get('tab');
+    var viewParam = params.get('view');
+    if (!tabParam) return;
+    var tabMap = { about: 0, activities: 1, signup: 2, donate: 3 };
+    var idx = tabMap[tabParam.toLowerCase()];
+    if (idx === undefined) return;
+    var btns = document.querySelectorAll('nav.top-nav .nav-trigger');
+    if (btns[idx]) showTab(tabParam.toLowerCase(), btns[idx]);
+    // Apply sub-view after renderSite has run (renderSite is also on DOMContentLoaded)
+    if (tabParam.toLowerCase() === 'activities' && viewParam) {
+      document.addEventListener('DOMContentLoaded', function() {
+        showActivitiesView(viewParam);
+      });
+    }
+  })();
+
+  /* ── FAQ accordion (Join Us tab) ── */
+  /* ── FAQ: render from content.js ── */
+  function renderFaqList() {
+    var el = document.getElementById('faq-list');
+    if (!el) return;
+    var faqs = (window.SITE_CONTENT && window.SITE_CONTENT.faqs) || [];
+    if (!faqs.length) { el.innerHTML = ''; return; }
+    el.innerHTML = faqs.map(function(f) {
+      return '<div class="faq-item">' +
+        '<button class="faq-question" onclick="toggleFaqSignup(this)">' +
+          escHtml(f.question) +
+          '<span class="faq-arrow">▾</span>' +
+        '</button>' +
+        '<div class="faq-answer">' + (f.answer || '') + '</div>' +
+      '</div>';
+    }).join('');
+  }
+  function escHtml(s) {
+    return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function toggleFaqSignup(btn) {
+    var item = btn.closest('.faq-item');
+    var isOpen = item.classList.contains('open');
+    document.querySelectorAll('#tab-signup .faq-item').forEach(function(el) { el.classList.remove('open'); });
+    if (!isOpen) item.classList.add('open');
+  }
+
+  /* ── Dropdown nav helpers ── */
+  function toggleNavDropdown(caretBtn, e) {
+    if (e) e.stopPropagation();
+    var item = caretBtn.closest('.nav-item');
+    var isOpen = item.classList.contains('dropdown-open');
+    document.querySelectorAll('.nav-item.dropdown-open').forEach(function(el) { el.classList.remove('dropdown-open'); });
+    if (!isOpen) item.classList.add('dropdown-open');
+  }
+  document.addEventListener('click', function() {
+    document.querySelectorAll('.nav-item.dropdown-open').forEach(function(el) { el.classList.remove('dropdown-open'); });
+  });
+  // Switch tab then scroll to a section within the Activities tab
+  function navToSection(tabName, sectionId, e) {
+    if (e) e.preventDefault();
+    var triggers = document.querySelectorAll('nav.top-nav .nav-trigger');
+    triggers.forEach(function(btn) {
+      if (btn.textContent.replace('▾','').trim().toLowerCase() === tabName ||
+          btn.getAttribute('onclick') && btn.getAttribute('onclick').indexOf("'" + tabName + "'") !== -1) {
+        showTab(tabName, btn);
+      }
+    });
+    setTimeout(function() {
+      var el = document.getElementById(sectionId);
+      if (el) el.scrollIntoView({behavior: 'smooth', block: 'start'});
+    }, 150);
+    document.querySelectorAll('.nav-item.dropdown-open').forEach(function(el) { el.classList.remove('dropdown-open'); });
+  }
+
+  /* ── Photo lightbox ── */
+  var _lbPhotos = [], _lbIdx = 0;
+
+  /* ── Flyer lightbox — click any image flyer to see it full-size ── */
+  function openFlyerLightbox(img) {
+    _lbPhotos = [img.getAttribute('src')];
+    _lbIdx = 0;
+    document.getElementById('ev-lb-img').src = _lbPhotos[0];
+    document.getElementById('ev-lightbox').style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+  }
+
+  function openLightboxFromEl(img) {
+    var row = img.closest('.event-photo-row');
+    var imgs = Array.prototype.slice.call(row.querySelectorAll('img'));
+    _lbPhotos = imgs.map(function(i) { return i.getAttribute('src'); });
+    _lbIdx = parseInt(img.getAttribute('data-idx'), 10) || 0;
+    document.getElementById('ev-lb-img').src = _lbPhotos[_lbIdx];
+    document.getElementById('ev-lightbox').style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeLightbox(e) {
+    if (e && e.target.id !== 'ev-lightbox') return;
+    document.getElementById('ev-lightbox').style.display = 'none';
+    document.body.style.overflow = '';
+  }
+
+  function lbPrev(e) {
+    e.stopPropagation();
+    _lbIdx = (_lbIdx - 1 + _lbPhotos.length) % _lbPhotos.length;
+    document.getElementById('ev-lb-img').src = _lbPhotos[_lbIdx];
+  }
+
+  function lbNext(e) {
+    e.stopPropagation();
+    _lbIdx = (_lbIdx + 1) % _lbPhotos.length;
+    document.getElementById('ev-lb-img').src = _lbPhotos[_lbIdx];
+  }
+
+  document.addEventListener('keydown', function(e) {
+    var lb = document.getElementById('ev-lightbox');
+    if (!lb || lb.style.display === 'none') return;
+    if (e.key === 'Escape') { lb.style.display = 'none'; document.body.style.overflow = ''; }
+    if (e.key === 'ArrowLeft')  { _lbIdx = (_lbIdx - 1 + _lbPhotos.length) % _lbPhotos.length; document.getElementById('ev-lb-img').src = _lbPhotos[_lbIdx]; }
+    if (e.key === 'ArrowRight') { _lbIdx = (_lbIdx + 1) % _lbPhotos.length; document.getElementById('ev-lb-img').src = _lbPhotos[_lbIdx]; }
+  });
+
+  /* ── Nav scroll: add dark background when scrolled past the hero header ── */
+  (function () {
+    var nav = document.getElementById('topNav');
+    if (!nav) return;
+    function syncNav() { nav.classList.toggle('scrolled', window.scrollY > 700); }
+    window.addEventListener('scroll', syncNav, { passive: true });
+    syncNav();
+  })();
+
+  /* ── Disable right-click and drag on all images (casual download deterrent) ── */
+  document.addEventListener('contextmenu', function(e) {
+    if (e.target.tagName === 'IMG') e.preventDefault();
+  });
+  document.addEventListener('dragstart', function(e) {
+    if (e.target.tagName === 'IMG') e.preventDefault();
+  });
 </script>
+
+<!-- ── Photo lightbox modal ── -->
+<div id="ev-lightbox" style="display:none" onclick="closeLightbox(event)">
+  <img id="ev-lb-img" src="" alt="Full photo">
+  <button class="lb-close" onclick="document.getElementById('ev-lightbox').style.display='none';document.body.style.overflow=''">✕</button>
+  <button class="lb-nav lb-prev" onclick="lbPrev(event)">&#8249;</button>
+  <button class="lb-nav lb-next" onclick="lbNext(event)">&#8250;</button>
+</div>
 
 </body>
 </html>

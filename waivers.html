@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Member Resources — The Pointe Circle</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+    /* ─── Design Tokens ─── */
+    :root {
+      --rose:       #e8a0b4;
+      --rose-dark:  #c9607c;
+      --blush:      #f7dde6;
+      --cream:      #fdf6f0;
+      --sand:       #f0e4d7;
+      --gold:       #c89d6e;
+      --gold-bright:#ffd84d;
+      --brown:      #7a4f3a;
+      --text:       #4a3330;
+      --muted:      #9c7b74;
+      --white:      #ffffff;
+      --shadow:     0 2px 16px rgba(200,100,120,0.10);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Georgia', serif;
+      background: var(--cream);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ─── Header ─── */
+    header {
+      position: relative;
+      background: linear-gradient(145deg, #6e1e36 0%, var(--rose-dark) 50%, #a04060 100%);
+      padding: 80px 24px 60px;
+      text-align: center;
+      border-bottom: 3px solid var(--rose);
+      overflow: hidden;
+    }
+    header::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--rose-dark), var(--gold), var(--rose-dark));
+    }
+    header h1 { font-family: 'Dancing Script', cursive; font-size: clamp(2rem, 5vw, 3.2rem); color: #fff; text-shadow: 0 2px 16px rgba(0,0,0,0.5); margin-bottom: 6px; }
+    header .page-subtitle { font-size: 1.1rem; color: rgba(255,255,255,0.88); letter-spacing: 2px; text-transform: uppercase; font-family: Georgia, serif; }
+
+    /* ─── Fixed Nav ─── */
+    nav.top-nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 200;
+      display: flex; flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      background: transparent; padding: 0 56px;
+    }
+    .header-logo {
+      position: absolute;
+      right: 32px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 126px; height: 126px;
+      border-radius: 50%;
+      object-fit: cover;
+      z-index: 10;
+    }
+    nav.top-nav > .nav-item,
+    nav.top-nav > a { display: inline-flex; align-items: center; }
+    nav.top-nav .nav-item { position: relative; }
+    nav.top-nav > a, nav.top-nav .nav-trigger {
+      background: none; border: none;
+      border-bottom: 2px solid transparent;
+      color: #fff; font-weight: bold;
+      font-size: 0.82rem; padding: 12px 4px 12px 13px;
+      cursor: pointer; text-decoration: none;
+      text-shadow: 0 1px 4px rgba(0,0,0,0.6);
+      letter-spacing: 0.5px; transition: opacity 0.18s;
+      font-family: Georgia, serif; white-space: nowrap;
+    }
+    nav.top-nav > a { padding: 12px 13px; }
+    nav.top-nav > a:hover, nav.top-nav .nav-trigger:hover { opacity: 0.8; }
+    nav.top-nav > a.active, nav.top-nav .nav-trigger.active { border-bottom: 2px solid var(--gold-bright); }
+    nav.top-nav .nav-caret-btn {
+      background: none; border: none;
+      color: rgba(255,255,255,0.75); font-size: 0.65rem;
+      padding: 12px 8px 12px 2px; cursor: pointer;
+      transition: opacity 0.18s;
+    }
+    nav.top-nav .nav-caret-btn:hover { opacity: 0.8; }
+    .nav-dropdown {
+      display: none; position: absolute;
+      top: 100%; left: 0;
+      background: rgba(100, 24, 48, 0.97);
+      border-radius: 0 0 10px 10px;
+      min-width: 180px; z-index: 300;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+      flex-direction: column; padding: 4px 0;
+    }
+    .nav-item:hover .nav-dropdown,
+    .nav-item.dropdown-open .nav-dropdown { display: flex; }
+    .nav-dropdown a {
+      color: rgba(255,255,255,0.92); text-decoration: none;
+      padding: 10px 18px; font-size: 0.82rem; font-weight: 600;
+      font-family: Georgia, serif;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      transition: background 0.15s; white-space: nowrap;
+    }
+    .nav-dropdown a:last-child { border-bottom: none; }
+    .nav-dropdown a:hover { background: rgba(255,255,255,0.14); }
+    @media (max-width: 600px) {
+      nav.top-nav { left: 0; padding: 0 2px; justify-content: space-evenly; }
+      nav.top-nav > a { padding: 9px 8px; font-size: 0.70rem; }
+      nav.top-nav .nav-trigger { padding: 9px 4px 9px 8px; font-size: 0.70rem; }
+      nav.top-nav .nav-caret-btn { padding: 9px 5px 9px 0; }
+    }
+
+    /* ─── Main ─── */
+    main { max-width: 820px; margin: 0 auto; padding: 40px 24px 72px; }
+
+    /* ─── Section heading ─── */
+    .section-title {
+      font-family: 'Dancing Script', cursive;
+      font-size: clamp(1.6rem, 4vw, 2.2rem);
+      color: var(--rose-dark);
+      text-align: center;
+      position: relative;
+      margin-bottom: 6px;
+    }
+    .section-divider { width: 60px; height: 3px; background: linear-gradient(90deg, var(--rose-dark), var(--gold)); border-radius: 2px; margin: 0 auto 32px; }
+
+    /* ─── Intro blurb ─── */
+    .waiver-intro {
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.97rem;
+      line-height: 1.7;
+      max-width: 620px;
+      margin: 0 auto 40px;
+    }
+
+    /* ─── Waivers CSS (copied from index.html) ─── */
+    .waiver-steps-card {
+      background: var(--white);
+      border: 1px solid #e0d4c8;
+      border-radius: 14px;
+      padding: 28px 32px;
+      margin-bottom: 32px;
+      box-shadow: var(--shadow);
+    }
+    .waiver-steps-heading {
+      font-size: 1rem; font-weight: bold;
+      color: var(--text); margin-bottom: 14px;
+    }
+    .waiver-steps-ol {
+      margin: 0; padding-left: 22px;
+      color: var(--text); font-size: 0.92rem; line-height: 1.9;
+    }
+    .waiver-steps-ol > li { font-weight: bold; }
+    .waiver-steps-ol > li > ol {
+      font-weight: normal; padding-left: 22px;
+      list-style-type: lower-alpha; margin-top: 2px;
+    }
+    .waiver-steps-ol a { color: var(--rose-dark); text-decoration: underline; }
+    .waiver-steps-ol a:hover { color: var(--brown); }
+    .waiver-steps-coming-soon { color: var(--muted); font-style: italic; font-size: 0.85rem; }
+
+    .waiver-form-wrap {
+      background: var(--white);
+      border: 1px solid #e0d4c8;
+      border-radius: 14px;
+      padding: 32px 36px;
+      box-shadow: var(--shadow);
+    }
+    .waiver-form-row { display: flex; gap: 24px; margin-bottom: 22px; }
+    .waiver-field { flex: 1; display: flex; flex-direction: column; gap: 7px; }
+    .waiver-field label { font-size: 0.88rem; font-weight: bold; color: var(--text); }
+    .waiver-field .req { color: #c0392b; margin-left: 2px; }
+    .waiver-field input[type="text"],
+    .waiver-field select {
+      padding: 11px 14px;
+      border: 1.5px solid #d4c4b8;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      font-family: 'Georgia', serif;
+      background: var(--white); color: var(--text);
+      outline: none; transition: border-color 0.2s; width: 100%;
+    }
+    .waiver-field input[type="text"]:focus,
+    .waiver-field select:focus { border-color: var(--rose-dark); }
+    .waiver-upload-zone {
+      border: 1.5px solid #d4c4b8; border-radius: 8px;
+      padding: 28px 20px; text-align: center;
+      cursor: pointer; background: var(--white);
+      transition: background 0.2s, border-color 0.2s;
+      position: relative; margin-bottom: 22px;
+    }
+    .waiver-upload-zone:hover,
+    .waiver-upload-zone.drag-over { background: var(--blush); border-color: var(--rose-dark); }
+    .waiver-upload-zone input[type="file"] {
+      position: absolute; inset: 0; opacity: 0;
+      width: 100%; height: 100%; cursor: pointer;
+    }
+    .waiver-upload-zone-inner {
+      display: flex; align-items: center; justify-content: center;
+      gap: 8px; color: var(--muted); font-size: 0.92rem;
+      pointer-events: none;
+    }
+    .waiver-upload-chosen { margin-top: 8px; font-size: 0.85rem; color: var(--rose-dark); font-weight: bold; display: none; }
+    .waiver-form-actions {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-top: 28px; padding-top: 20px; border-top: 1px solid #eee;
+    }
+    .btn-waiver-clear {
+      background: none; border: none; color: var(--rose-dark);
+      font-size: 0.88rem; cursor: pointer;
+      display: flex; align-items: center; gap: 5px;
+      padding: 4px 0; font-family: 'Georgia', serif;
+    }
+    .btn-waiver-clear:hover { text-decoration: underline; }
+    .btn-waiver-submit {
+      background: var(--brown); color: var(--white);
+      border: none; border-radius: 8px; padding: 12px 36px;
+      font-size: 0.95rem; font-family: 'Georgia', serif;
+      font-weight: bold; cursor: pointer; letter-spacing: 0.5px;
+      transition: background 0.2s, transform 0.15s;
+    }
+    .btn-waiver-submit:hover { background: #5a3828; transform: translateY(-1px); }
+    .waiver-no-url {
+      background: linear-gradient(135deg, var(--blush), var(--sand));
+      border: 1.5px solid var(--rose); border-radius: 14px;
+      padding: 24px 28px; text-align: center;
+      color: var(--brown); font-size: 0.9rem; line-height: 1.6;
+    }
+    .waiver-error-msg {
+      display: none; background: #fde8e8; color: #9a2020;
+      border-radius: 8px; padding: 12px 16px;
+      text-align: center; margin-top: 14px; font-size: 0.88rem;
+    }
+    .waiver-spinner {
+      display: none; text-align: center; color: var(--muted);
+      font-size: 0.9rem; margin-top: 12px; padding: 10px;
+    }
+    .success-msg {
+      display: none; text-align: center; color: #2e7d32;
+      background: #e8f5e9; border-radius: 8px;
+      padding: 12px 16px; margin-top: 14px; font-size: 0.92rem;
+    }
+    @media (max-width: 620px) {
+      .waiver-form-row { flex-direction: column; gap: 16px; }
+      .waiver-form-wrap { padding: 22px 18px; }
+      .waiver-steps-card { padding: 20px 18px; }
+    }
+
+    /* ─── Footer ─── */
+    footer { background: linear-gradient(135deg, var(--rose-dark), #8b3050); color: rgba(255,255,255,0.9); padding: 32px 20px 20px; text-align: center; }
+    .footer-contact-title { font-size: 1rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 16px; color: var(--gold-bright); }
+    .footer-contact-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 14px 32px; margin-bottom: 18px; }
+    .footer-contact-item { display: flex; align-items: center; gap: 7px; font-size: 0.9rem; }
+    .footer-contact-item a { color: rgba(255,255,255,0.9); text-decoration: none; }
+    .footer-contact-item a:hover { text-decoration: underline; }
+    .fci { font-size: 1.1rem; }
+    .instagram-icon { width: 18px; height: 18px; color: rgba(255,255,255,0.9); vertical-align: middle; }
+    .footer-copy { font-size: 0.75rem; color: rgba(255,255,255,0.55); margin-top: 12px; }
+      /* Instagram icon — pushed to far right */
+    nav.top-nav .nav-instagram {
+      margin-left: 4px;
+      padding: 8px 10px;
+      border-bottom: none !important;
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      color: rgba(255,255,255,0.85);
+      transition: color 0.2s, background 0.2s, transform 0.2s;
+    }
+    nav.top-nav .nav-instagram:hover {
+      opacity: 1;
+      color: #fff;
+      background: linear-gradient(135deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+      transform: scale(1.12);
+      box-shadow: 0 2px 12px rgba(220,39,67,0.45);
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════ HEADER ═══════════════════════════ -->
+<header>
+  <nav class="top-nav" id="topNav">
+    <div class="nav-item">
+      <a href="index.html" class="nav-trigger active">About Us</a>
+      <button class="nav-caret-btn" onclick="toggleNavDropdown(this, event)" aria-label="About Us submenu">▾</button>
+      <div class="nav-dropdown">
+        <a href="team.html">Our Team</a>
+        <a href="member-resources.html">Member Resources</a>
+      </div>
+    </div>
+    <div class="nav-item">
+      <a href="index.html?tab=activities&view=past" class="nav-trigger">Projects</a>
+      <button class="nav-caret-btn" onclick="toggleNavDropdown(this, event)" aria-label="Projects submenu">▾</button>
+      <div class="nav-dropdown">
+        <a href="index.html?tab=activities&view=upcoming">Upcoming Events</a>
+        <a href="index.html?tab=activities&view=past">Past Events</a>
+      </div>
+    </div>
+    <a href="index.html?tab=signup">Join</a>
+    <a href="index.html?tab=donate">Donate</a>
+    <a href="gallery.html">Gallery</a>
+    <a href="news.html">News</a>
+    <a href="https://www.instagram.com/thepointecircle/" target="_blank" rel="noopener" class="nav-instagram" aria-label="Follow us on Instagram">
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+      </svg>
+    </a>
+  
+  </nav>
+  <h1>The Pointe Circle</h1>
+  <p class="page-subtitle">Member Resources</p>
+  <img src="images/logo.png" class="header-logo" alt="The Pointe Circle logo">
+</header>
+
+<!-- ═══════════════════════════ MAIN ═════════════════════════════ -->
+<main>
+
+  <h2 class="section-title">Member Handbook</h2>
+  <div class="section-divider"></div>
+
+  <p class="waiver-intro">
+    New to The Pointe Circle? Start here. The Member Handbook covers participation expectations, volunteer hour guidelines, conduct, and more.
+  </p>
+  <div style="text-align:center; margin: 24px 0 48px;">
+    <a id="handbook-link" href="#" target="_blank" rel="noopener"
+      style="display:inline-block; background:var(--rose-dark); color:#fff; padding:14px 36px;
+             border-radius:32px; font-size:1rem; font-weight:600; text-decoration:none;
+             letter-spacing:0.5px; box-shadow:0 4px 16px rgba(201,96,124,0.25);">
+      📖 View Member Handbook
+    </a>
+  </div>
+
+  <h2 class="section-title">Waivers &amp; Documents</h2>
+  <div class="section-divider"></div>
+
+  <p class="waiver-intro">
+    Before participating in Pointe Circle activities, all members must complete the required forms below.
+    Download, sign, and submit them using the form on this page.
+  </p>
+
+  <!-- Rendered from content.js by renderWaivers() -->
+  <div id="waiver-section-container"></div>
+
+</main>
+
+<!-- ═══════════════════════════ FOOTER ═══════════════════════════ -->
+<footer>
+  <div class="footer-contact-title">Contact Us</div>
+  <div class="footer-contact-grid">
+    <div class="footer-contact-item">
+      <span class="fci">📧</span>
+      <a href="mailto:thepointecircle@gmail.com">thepointecircle@gmail.com</a>
+    </div>
+    <div class="footer-contact-item">
+      <span class="fci">📍</span>
+      <span>San Diego, CA</span>
+    </div>
+    <div class="footer-contact-item">
+      <svg class="fci instagram-icon" viewBox="0 0 24 24" aria-hidden="true">
+        <rect x="2" y="2" width="20" height="20" rx="6" ry="6" fill="none" stroke="currentColor" stroke-width="2"/>
+        <circle cx="12" cy="12" r="5" fill="none" stroke="currentColor" stroke-width="2"/>
+        <circle cx="18" cy="6" r="1.4" fill="currentColor"/>
+      </svg>
+      <a href="https://www.instagram.com/thepointecircle/" target="_blank">@thepointecircle</a>
+    </div>
+    <div class="footer-contact-item">
+      <span class="fci">🌐</span>
+      <a href="https://thepointecircle.org" target="_blank">thepointecircle.org</a>
+    </div>
+  </div>
+  <div class="footer-copy">© 2024–2026 The Pointe Circle · A 501(c)(3) nonprofit student organization (EIN 99-4280240). All photos and videos are property of The Pointe Circle and may not be reproduced without written permission.</div>
+</footer>
+
+<!-- ═══════════════════════════ SCRIPTS ══════════════════════════ -->
+<script src="content.js"></script>
+<script>
+  function escapeHtml(s) {
+    if (s == null) return '';
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+  }
+
+  /* ── Dropdown nav ── */
+  function toggleNavDropdown(caretBtn, e) {
+    if (e) e.stopPropagation();
+    var item = caretBtn.closest('.nav-item');
+    var isOpen = item.classList.contains('dropdown-open');
+    document.querySelectorAll('.nav-item.dropdown-open').forEach(function(el) { el.classList.remove('dropdown-open'); });
+    if (!isOpen) item.classList.add('dropdown-open');
+  }
+  document.addEventListener('click', function() {
+    document.querySelectorAll('.nav-item.dropdown-open').forEach(function(el) { el.classList.remove('dropdown-open'); });
+  });
+
+  /* ════════════════════════════════════════════════════════════════
+     WAIVERS & DOCUMENTS
+     All URLs are set via admin.html → content.js.
+     ════════════════════════════════════════════════════════════════ */
+  function renderWaivers() {
+    var container = document.getElementById('waiver-section-container');
+    if (!container) return;
+    var data = window.SITE_CONTENT;
+    if (!data) { setTimeout(renderWaivers, 80); return; }
+    var wv = data.waivers || {};
+    var liabilityUrl = wv.liabilityWaiverUrl || '';
+    var photoUrl     = wv.photoReleaseUrl    || '';
+    var submitUrl    = wv.submitScriptUrl    || '';
+
+    function docStepLink(name, url) {
+      if (url) {
+        return 'Download form and sign: <a href="' + escapeHtml(url) + '" target="_blank" rel="noopener">' + escapeHtml(name) + '</a>';
+      }
+      return 'Download PDF and sign: <span class="waiver-steps-coming-soon">' + escapeHtml(name) + ' (coming soon)</span>';
+    }
+
+    var stepsHtml =
+      '<div class="waiver-steps-card">' +
+        '<p class="waiver-steps-heading">Before continuing, please complete the following steps:</p>' +
+        '<ol class="waiver-steps-ol">' +
+          '<li>Complete the required forms' +
+            '<ol>' +
+              '<li>' + docStepLink('Liability &amp; Injury Waiver', liabilityUrl) + '</li>' +
+              '<li>' + docStepLink('Photo Release &amp; Usage Protocol', photoUrl) + '</li>' +
+            '</ol>' +
+          '</li>' +
+          '<li>Submit your forms online (under development)' +
+            '<ol>' +
+              '<li>Complete all fields below</li>' +
+              '<li>Upload your finished PDF from step 1</li>' +
+              '<li>Submit</li>' +
+            '</ol>' +
+          '</li>' +
+        '</ol>' +
+      '</div>';
+
+    var uploadIcon = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="8 12 12 16 16 12"/><line x1="12" y1="8" x2="12" y2="16"/></svg>';
+
+    var formHtml;
+    if (!submitUrl) {
+      formHtml =
+        '<div class="waiver-no-url">' +
+          '<p>📬 <strong>To submit your signed waiver</strong>, please email it to ' +
+          '<a href="mailto:thepointecircle@gmail.com" style="color:var(--rose-dark);font-weight:bold;">thepointecircle@gmail.com</a> ' +
+          'with your name in the subject line.</p>' +
+        '</div>';
+    } else {
+      formHtml =
+        '<div class="waiver-form-wrap">' +
+          '<form id="waiver-submit-form" onsubmit="submitWaiverForm(event)">' +
+            '<div class="waiver-form-row">' +
+              '<div class="waiver-field">' +
+                '<label>Participant First Name<span class="req">*</span></label>' +
+                '<input type="text" id="wv-p-first" required>' +
+              '</div>' +
+              '<div class="waiver-field">' +
+                '<label>Participant Last Name<span class="req">*</span></label>' +
+                '<input type="text" id="wv-p-last" required>' +
+              '</div>' +
+            '</div>' +
+            '<div class="waiver-field">' +
+              '<label>Upload PDF Below<span class="req">*</span></label>' +
+            '</div>' +
+            '<div class="waiver-upload-zone" id="wv-drop-zone">' +
+              '<input type="file" id="wv-file" accept=".pdf,application/pdf" required ' +
+                'onchange="waiverFileChosen(this)">' +
+              '<div class="waiver-upload-zone-inner">' + uploadIcon + ' Drop files here or click to browse</div>' +
+              '<div class="waiver-upload-chosen" id="wv-chosen"></div>' +
+            '</div>' +
+            '<div class="waiver-form-row">' +
+              '<div class="waiver-field">' +
+                '<label>Who is submitting this form? Full Name<span class="req">*</span></label>' +
+                '<input type="text" id="wv-s-name" required>' +
+              '</div>' +
+              '<div class="waiver-field">' +
+                '<label>Relationship to Participant<span class="req">*</span></label>' +
+                '<select id="wv-rel" required>' +
+                  '<option value="">— Select —</option>' +
+                  '<option>Parent / Guardian</option>' +
+                  '<option>Participant (self)</option>' +
+                  '<option>Other</option>' +
+                '</select>' +
+              '</div>' +
+            '</div>' +
+            '<div class="waiver-spinner" id="wv-spinner">⏳ Uploading your form…</div>' +
+            '<div class="success-msg" id="wv-success">✅ Your signed waiver has been received. Thank you!</div>' +
+            '<div class="waiver-error-msg" id="wv-error"></div>' +
+            '<div class="waiver-form-actions">' +
+              '<button type="button" class="btn-waiver-clear" onclick="clearWaiverForm()">↺ Clear form</button>' +
+              '<button type="submit" class="btn-waiver-submit" id="wv-submit-btn">Submit</button>' +
+            '</div>' +
+          '</form>' +
+        '</div>';
+    }
+
+    container.innerHTML = stepsHtml + formHtml;
+  }
+
+  function waiverFileChosen(input) {
+    var chosen = document.getElementById('wv-chosen');
+    if (!chosen) return;
+    if (input.files && input.files[0]) {
+      chosen.textContent = '✔ ' + input.files[0].name;
+      chosen.style.display = 'block';
+    } else {
+      chosen.textContent = '';
+      chosen.style.display = 'none';
+    }
+  }
+
+  function clearWaiverForm() {
+    var form = document.getElementById('waiver-submit-form');
+    if (form) form.reset();
+    var chosen = document.getElementById('wv-chosen');
+    if (chosen) { chosen.textContent = ''; chosen.style.display = 'none'; }
+    ['wv-error','wv-success'].forEach(function(id) {
+      var el = document.getElementById(id);
+      if (el) el.style.display = 'none';
+    });
+  }
+
+  function submitWaiverForm(e) {
+    e.preventDefault();
+    var data = window.SITE_CONTENT || {};
+    var submitUrl = (data.waivers || {}).submitScriptUrl || '';
+    if (!submitUrl) return;
+
+    var fileInput = document.getElementById('wv-file');
+    var file = fileInput && fileInput.files[0];
+    if (!file) { showWvError('Please choose a PDF file to upload.'); return; }
+    if (file.size > 10 * 1024 * 1024) { showWvError('File is too large (max 10 MB).'); return; }
+
+    var btn = document.getElementById('wv-submit-btn');
+    var spinner = document.getElementById('wv-spinner');
+    var successEl = document.getElementById('wv-success');
+    var errorEl   = document.getElementById('wv-error');
+    btn.style.display = 'none';
+    spinner.style.display = 'block';
+    if (errorEl)   errorEl.style.display   = 'none';
+    if (successEl) successEl.style.display = 'none';
+
+    var reader = new FileReader();
+    reader.onload = function() {
+      var base64 = reader.result.split(',')[1];
+      fetch(submitUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          participantFirst: (document.getElementById('wv-p-first').value || '').trim(),
+          participantLast:  (document.getElementById('wv-p-last').value  || '').trim(),
+          submitterName:    (document.getElementById('wv-s-name').value  || '').trim(),
+          relationship:     (document.getElementById('wv-rel').value     || '').trim(),
+          fileName: file.name, fileBase64: base64
+        })
+      })
+      .then(function(r) { return r.json(); })
+      .then(function(resp) {
+        spinner.style.display = 'none';
+        if (resp.status === 'ok') {
+          successEl.style.display = 'block';
+          clearWaiverForm();
+        } else {
+          btn.style.display = '';
+          showWvError(resp.message || 'Something went wrong. Please try again or email us directly.');
+        }
+      })
+      .catch(function() {
+        spinner.style.display = 'none';
+        btn.style.display = '';
+        showWvError('Network error. Please check your connection and try again.');
+      });
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function showWvError(msg) {
+    var el = document.getElementById('wv-error');
+    if (el) { el.textContent = msg; el.style.display = 'block'; }
+  }
+
+  renderWaivers();
+
+  /* ── Handbook link ── */
+  (function() {
+    function setHandbookLink() {
+      var data = window.SITE_CONTENT;
+      if (!data) { setTimeout(setHandbookLink, 80); return; }
+      var url = (data.waivers || {}).handbookUrl || '';
+      var btn = document.getElementById('handbook-link');
+      if (!btn) return;
+      if (url) {
+        btn.href = url;
+      } else {
+        btn.href = 'mailto:thepointecircle@gmail.com?subject=Member%20Handbook%20Request';
+        btn.title = 'Handbook link coming soon — click to contact us';
+      }
+    }
+    setHandbookLink();
+  })();
+</script>
+
+</body>
+</html>

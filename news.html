@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>News — The Pointe Circle</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+    /* ─── Design Tokens ─── */
+    :root {
+      --rose:       #e8a0b4;
+      --rose-dark:  #c9607c;
+      --blush:      #f7dde6;
+      --cream:      #fdf6f0;
+      --sand:       #f0e4d7;
+      --gold:       #c89d6e;
+      --gold-bright:#ffd84d;
+      --brown:      #7a4f3a;
+      --text:       #4a3330;
+      --muted:      #9c7b74;
+      --white:      #ffffff;
+      --shadow:     0 2px 16px rgba(200,100,120,0.10);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Georgia', serif;
+      background: var(--cream);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ─── Header ─── */
+    header {
+      position: relative;
+      background: linear-gradient(145deg, #6e1e36 0%, var(--rose-dark) 50%, #a04060 100%);
+      padding: 80px 24px 60px;
+      text-align: center;
+      border-bottom: 3px solid var(--rose);
+      overflow: hidden;
+    }
+    header::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--rose-dark), var(--gold), var(--rose-dark));
+    }
+    header h1 { font-family: 'Dancing Script', cursive; font-size: clamp(2rem, 5vw, 3.2rem); color: #fff; text-shadow: 0 2px 16px rgba(0,0,0,0.5); margin-bottom: 6px; }
+    header .page-subtitle { font-size: 1.1rem; color: rgba(255,255,255,0.88); letter-spacing: 2px; text-transform: uppercase; font-family: Georgia, serif; }
+
+    /* ─── Fixed Nav ─── */
+    nav.top-nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 200;
+      display: flex; flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      background: transparent; padding: 0 56px;
+    }
+    .header-logo {
+      position: absolute;
+      right: 32px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 126px; height: 126px;
+      border-radius: 50%;
+      object-fit: cover;
+      z-index: 10;
+    }
+    nav.top-nav.scrolled {
+      background: rgba(90, 20, 42, 0.97);
+      box-shadow: 0 2px 14px rgba(0,0,0,0.3);
+      backdrop-filter: blur(6px);
+    }
+    nav.top-nav > .nav-item,
+    nav.top-nav > a { display: inline-flex; align-items: center; }
+    nav.top-nav .nav-item { position: relative; }
+    nav.top-nav > a, nav.top-nav .nav-trigger {
+      background: none; border: none;
+      border-bottom: 2px solid transparent;
+      color: #fff; font-weight: bold;
+      font-size: 0.82rem; padding: 12px 4px 12px 13px;
+      cursor: pointer; text-decoration: none;
+      text-shadow: 0 1px 4px rgba(0,0,0,0.6);
+      letter-spacing: 0.5px; transition: opacity 0.18s;
+      font-family: Georgia, serif; white-space: nowrap;
+    }
+    nav.top-nav > a { padding: 12px 13px; }
+    nav.top-nav > a:hover, nav.top-nav .nav-trigger:hover { opacity: 0.8; }
+    nav.top-nav > a.active, nav.top-nav .nav-trigger.active { border-bottom: 2px solid var(--gold-bright); }
+    nav.top-nav .nav-caret-btn {
+      background: none; border: none;
+      color: rgba(255,255,255,0.75); font-size: 0.65rem;
+      padding: 12px 8px 12px 2px; cursor: pointer;
+      transition: opacity 0.18s;
+    }
+    nav.top-nav .nav-caret-btn:hover { opacity: 0.8; }
+    .nav-dropdown {
+      display: none; position: absolute;
+      top: 100%; left: 0;
+      background: rgba(100, 24, 48, 0.97);
+      border-radius: 0 0 10px 10px;
+      min-width: 170px; z-index: 300;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+      flex-direction: column; padding: 4px 0;
+    }
+    .nav-item:hover .nav-dropdown,
+    .nav-item.dropdown-open .nav-dropdown { display: flex; }
+    .nav-dropdown a {
+      color: rgba(255,255,255,0.92); text-decoration: none;
+      padding: 10px 18px; font-size: 0.82rem; font-weight: 600;
+      font-family: Georgia, serif;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      transition: background 0.15s; white-space: nowrap;
+    }
+    .nav-dropdown a:last-child { border-bottom: none; }
+    .nav-dropdown a:hover { background: rgba(255,255,255,0.14); }
+    @media (max-width: 600px) {
+      nav.top-nav { left: 0; padding: 0 2px; justify-content: space-evenly; }
+      nav.top-nav > a { padding: 9px 8px; font-size: 0.70rem; }
+      nav.top-nav .nav-trigger { padding: 9px 4px 9px 8px; font-size: 0.70rem; }
+      nav.top-nav .nav-caret-btn { padding: 9px 5px 9px 0; }
+    }
+
+    /* ─── Main ─── */
+    main { max-width: 860px; margin: 0 auto; padding: 40px 24px 72px; }
+
+    /* ─── Section heading ─── */
+    .section-title {
+      font-family: 'Dancing Script', cursive;
+      font-size: clamp(1.6rem, 4vw, 2.2rem);
+      color: var(--rose-dark);
+      text-align: center;
+      position: relative;
+      margin-bottom: 6px;
+    }
+    .section-divider { width: 60px; height: 3px; background: linear-gradient(90deg, var(--rose-dark), var(--gold)); border-radius: 2px; margin: 0 auto 36px; }
+
+    /* ─── Filter bar ─── */
+    .filter-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      margin-bottom: 36px;
+    }
+    .filter-btn {
+      padding: 7px 18px;
+      border-radius: 20px;
+      border: 1.5px solid var(--rose);
+      background: var(--white);
+      color: var(--brown);
+      font-size: 0.86rem;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: Georgia, serif;
+      transition: background 0.18s, color 0.18s, border-color 0.18s;
+    }
+    .filter-btn:hover { background: var(--blush); }
+    .filter-btn.active { background: var(--rose-dark); color: var(--white); border-color: var(--rose-dark); }
+
+    /* ─── News Card ─── */
+    .news-card {
+      background: var(--white);
+      border-radius: 14px;
+      border: 1px solid var(--blush);
+      box-shadow: var(--shadow);
+      margin-bottom: 24px;
+      overflow: hidden;
+      transition: transform 0.18s, box-shadow 0.18s;
+    }
+    .news-card:hover { transform: translateY(-3px); box-shadow: 0 6px 24px rgba(200,96,124,0.14); }
+    .news-card .card-image {
+      width: 100%;
+      max-height: 280px;
+      object-fit: cover;
+      display: block;
+    }
+    .news-card .card-body { padding: 22px 26px 20px; }
+    .card-meta {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+    }
+    .card-date {
+      font-size: 0.82rem;
+      color: var(--muted);
+      font-weight: 600;
+    }
+    .card-category {
+      display: inline-block;
+      padding: 3px 12px;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+    .cat-announcement { background: #fff0f4; color: #c9607c; border: 1px solid #e8a0b4; }
+    .cat-recap        { background: #eef6ff; color: #2060a0; border: 1px solid #90c0e8; }
+    .cat-thankYou     { background: #fffbe6; color: #8a6200; border: 1px solid #e8c870; }
+
+    .card-headline {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1.35;
+      margin-bottom: 10px;
+      font-family: Georgia, serif;
+    }
+    .card-body-text {
+      font-size: 0.97rem;
+      color: var(--text);
+      line-height: 1.75;
+      white-space: pre-line;
+      margin-bottom: 14px;
+    }
+    .card-link {
+      display: inline-block;
+      padding: 8px 22px;
+      background: linear-gradient(135deg, var(--rose), var(--rose-dark));
+      color: var(--white);
+      font-size: 0.83rem;
+      font-weight: bold;
+      border-radius: 20px;
+      text-decoration: none;
+      letter-spacing: 0.5px;
+      transition: transform 0.18s, box-shadow 0.18s;
+      box-shadow: 0 2px 8px rgba(200,96,124,0.25);
+    }
+    .card-link:hover { transform: translateY(-2px); box-shadow: 0 5px 14px rgba(200,96,124,0.35); }
+
+    /* ─── Empty state ─── */
+    .empty-state { text-align: center; padding: 60px 24px; color: var(--muted); }
+    .empty-state .empty-icon { font-size: 3rem; margin-bottom: 14px; }
+    .empty-state p { font-size: 1rem; }
+
+    /* ─── Footer ─── */
+    footer { background: linear-gradient(135deg, var(--rose-dark), #8b3050); color: rgba(255,255,255,0.9); padding: 32px 20px 20px; text-align: center; }
+    .footer-contact-title { font-size: 1rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 16px; color: var(--gold-bright); }
+    .footer-contact-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 14px 32px; margin-bottom: 18px; }
+    .footer-contact-item { display: flex; align-items: center; gap: 7px; font-size: 0.9rem; }
+    .footer-contact-item a { color: rgba(255,255,255,0.9); text-decoration: none; }
+    .footer-contact-item a:hover { text-decoration: underline; }
+    .fci { font-size: 1.1rem; }
+    .instagram-icon { width: 18px; height: 18px; color: rgba(255,255,255,0.9); vertical-align: middle; }
+    .footer-copy { font-size: 0.75rem; color: rgba(255,255,255,0.55); margin-top: 12px; }
+      /* Instagram icon — pushed to far right */
+    nav.top-nav .nav-instagram {
+      margin-left: 4px;
+      padding: 8px 10px;
+      border-bottom: none !important;
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      color: rgba(255,255,255,0.85);
+      transition: color 0.2s, background 0.2s, transform 0.2s;
+    }
+    nav.top-nav .nav-instagram:hover {
+      opacity: 1;
+      color: #fff;
+      background: linear-gradient(135deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+      transform: scale(1.12);
+      box-shadow: 0 2px 12px rgba(220,39,67,0.45);
+    }
+  </style>
+<script src="content.js"></script>
+</head>
+<body>
+
+<!-- ═══════════════════════════ HEADER ═══════════════════════════ -->
+<header>
+  <nav class="top-nav" id="topNav">
+    <div class="nav-item">
+      <a href="index.html" class="nav-trigger">About Us</a>
+      <button class="nav-caret-btn" onclick="toggleNavDropdown(this, event)" aria-label="About Us submenu">▾</button>
+      <div class="nav-dropdown">
+        <a href="team.html">Our Team</a>
+        <a href="member-resources.html">Member Resources</a>
+      </div>
+    </div>
+    <div class="nav-item">
+      <a href="index.html?tab=activities&view=past" class="nav-trigger">Projects</a>
+      <button class="nav-caret-btn" onclick="toggleNavDropdown(this, event)" aria-label="Projects submenu">▾</button>
+      <div class="nav-dropdown">
+        <a href="index.html?tab=activities&view=upcoming">Upcoming Events</a>
+        <a href="index.html?tab=activities&view=past">Past Events</a>
+      </div>
+    </div>
+    <a href="index.html?tab=signup">Join</a>
+    <a href="index.html?tab=donate">Donate</a>
+    <a href="gallery.html">Gallery</a>
+    <a href="news.html" class="active">News</a>
+    <a href="https://www.instagram.com/thepointecircle/" target="_blank" rel="noopener" class="nav-instagram" aria-label="Follow us on Instagram">
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+      </svg>
+    </a>
+  
+  </nav>
+  <h1>The Pointe Circle</h1>
+  <p class="page-subtitle">News &amp; Updates</p>
+  <img src="images/logo.png" class="header-logo" alt="The Pointe Circle logo">
+</header>
+
+<!-- ═══════════════════════════ MAIN ═════════════════════════════ -->
+<main>
+  <h2 class="section-title">News &amp; Updates</h2>
+  <div class="section-divider"></div>
+
+  <div class="filter-bar" id="filter-bar">
+    <button class="filter-btn active" onclick="filterNews('all', this)">All</button>
+    <button class="filter-btn" onclick="filterNews('announcement', this)">Announcements</button>
+    <button class="filter-btn" onclick="filterNews('recap', this)">Season Recaps</button>
+    <button class="filter-btn" onclick="filterNews('thankYou', this)">🙏 Thank You</button>
+  </div>
+
+  <div id="news-container"></div>
+</main>
+
+<!-- ═══════════════════════════ FOOTER ═══════════════════════════ -->
+<footer>
+  <div class="footer-contact-title">Contact Us</div>
+  <div class="footer-contact-grid">
+    <div class="footer-contact-item">
+      <span class="fci">📧</span>
+      <a href="mailto:thepointecircle@gmail.com">thepointecircle@gmail.com</a>
+    </div>
+    <div class="footer-contact-item">
+      <svg class="fci instagram-icon" viewBox="0 0 24 24" aria-hidden="true">
+        <rect x="2" y="2" width="20" height="20" rx="6" ry="6" fill="none" stroke="currentColor" stroke-width="2"/>
+        <circle cx="12" cy="12" r="5" fill="none" stroke="currentColor" stroke-width="2"/>
+        <circle cx="18" cy="6" r="1.4" fill="currentColor"/>
+      </svg>
+      <a href="https://www.instagram.com/thepointecircle/" target="_blank">@thepointecircle</a>
+    </div>
+    <div class="footer-contact-item">
+      <span class="fci">🌐</span>
+      <a href="https://thepointecircle.org" target="_blank">thepointecircle.org</a>
+    </div>
+  </div>
+  <div class="footer-copy">📍 Mailing Address: 12761 Jordan Ridge Ct, San Diego, CA 92130</div>
+  <div class="footer-copy">© 2024–2026 The Pointe Circle · A 501(c)(3) nonprofit student organization (EIN 99-4280240). All photos and videos are property of The Pointe Circle and may not be reproduced without written permission.</div>
+</footer>
+
+<!-- ═══════════════════════════ SCRIPTS ══════════════════════════ -->
+<script>
+/* ══════════════════════════════════════════════════════════════════
+   NEWS DATA — managed via content.js and the Admin panel (admin.html).
+   To add, edit, or remove news items, open admin.html in your browser.
+   ══════════════════════════════════════════════════════════════════ */
+var NEWS_ITEMS = (window.SITE_CONTENT && window.SITE_CONTENT.newsItems) ? window.SITE_CONTENT.newsItems : [];
+
+/* ── Helpers ── */
+function escapeHtml(s) {
+  if (s == null) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+var CAT_LABELS = { announcement: 'Announcement', recap: 'Season Recap', thankYou: 'Thank You' };
+var CAT_CSS    = { announcement: 'cat-announcement', recap: 'cat-recap', thankYou: 'cat-thankYou' };
+
+function buildNewsCard(item) {
+  var catLabel = CAT_LABELS[item.category] || item.category;
+  var catClass = CAT_CSS[item.category]    || 'cat-announcement';
+  var imageHtml = item.image
+    ? '<img class="card-image" src="' + escapeHtml(item.image) + '" alt="' + escapeHtml(item.headline) + '">'
+    : '';
+  var linkHtml = (item.link && item.linkText)
+    ? '<a class="card-link" href="' + escapeHtml(item.link) + '" target="_blank" rel="noopener">' + escapeHtml(item.linkText) + '</a>'
+    : '';
+  return '<div class="news-card" data-cat="' + escapeHtml(item.category) + '">' +
+    imageHtml +
+    '<div class="card-body">' +
+      '<div class="card-meta">' +
+        '<span class="card-date">' + escapeHtml(item.date) + '</span>' +
+        '<span class="card-category ' + catClass + '">' + escapeHtml(catLabel) + '</span>' +
+      '</div>' +
+      '<h2 class="card-headline">' + escapeHtml(item.headline) + '</h2>' +
+      '<p class="card-body-text">' + escapeHtml(item.body) + '</p>' +
+      linkHtml +
+    '</div>' +
+  '</div>';
+}
+
+function filterNews(cat, btn) {
+  var btns = document.querySelectorAll('.filter-btn');
+  btns.forEach(function(b) { b.classList.remove('active'); });
+  if (btn) btn.classList.add('active');
+  var cards = document.querySelectorAll('.news-card');
+  cards.forEach(function(el) {
+    el.style.display = (cat === 'all' || el.getAttribute('data-cat') === cat) ? '' : 'none';
+  });
+}
+
+function renderNews() {
+  var container = document.getElementById('news-container');
+  if (NEWS_ITEMS.length === 0) {
+    container.innerHTML = '<div class="empty-state"><div class="empty-icon">📰</div><p>No news yet — check back soon!</p></div>';
+    return;
+  }
+  container.innerHTML = NEWS_ITEMS.map(buildNewsCard).join('');
+}
+
+renderNews();
+
+/* ── Dropdown nav ── */
+function toggleNavDropdown(caretBtn, e) {
+  if (e) e.stopPropagation();
+  var item = caretBtn.closest('.nav-item');
+  var isOpen = item.classList.contains('dropdown-open');
+  document.querySelectorAll('.nav-item.dropdown-open').forEach(function(el) { el.classList.remove('dropdown-open'); });
+  if (!isOpen) item.classList.add('dropdown-open');
+}
+document.addEventListener('click', function() {
+  document.querySelectorAll('.nav-item.dropdown-open').forEach(function(el) { el.classList.remove('dropdown-open'); });
+});
+
+/* ── Nav scroll: darken background when scrolled past header ── */
+(function() {
+  var nav = document.getElementById('topNav');
+  function syncNav() { nav.classList.toggle('scrolled', window.scrollY > 80); }
+  window.addEventListener('scroll', syncNav, { passive: true });
+  syncNav();
+})();
+</script>
+
+</body>
+</html>
